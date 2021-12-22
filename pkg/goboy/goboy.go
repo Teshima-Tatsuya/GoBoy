@@ -8,6 +8,7 @@ import (
 
 type GoBoy struct {
 	RomData []byte
+	GB      *gb.GB
 }
 
 func New(romData []byte) *GoBoy {
@@ -15,11 +16,11 @@ func New(romData []byte) *GoBoy {
 	ebiten.SetWindowTitle("60fps")
 	ebiten.SetWindowSize(160*4, 144*4)
 
+	gb := gb.NewGB(romData)
 	g := &GoBoy{
 		RomData: romData,
+		GB:      gb,
 	}
-
-	gb.NewGB(romData)
 
 	return g
 }
@@ -34,6 +35,6 @@ func (gb *GoBoy) Update() error {
 }
 
 func (gb *GoBoy) Draw(screen *ebiten.Image) {
-	ebitenutil.DebugPrint(screen, "Hello, World!")
-
+	ebitenutil.DebugPrint(screen, string(gb.GB.Cartridge.NintendoLogo))
+	screen.ReplacePixels(nil)
 }
