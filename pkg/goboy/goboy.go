@@ -3,7 +3,6 @@ package goboy
 import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type GoBoy struct {
@@ -35,6 +34,5 @@ func (gb *GoBoy) Update() error {
 }
 
 func (gb *GoBoy) Draw(screen *ebiten.Image) {
-	ebitenutil.DebugPrint(screen, string(gb.GB.Cartridge.NintendoLogo))
-	screen.ReplacePixels(nil)
+	screen.ReplacePixels(gb.GB.Draw())
 }

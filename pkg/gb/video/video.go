@@ -1,5 +1,11 @@
 package video
 
+import (
+	"image"
+	"image/color"
+	"math/rand"
+)
+
 type Color uint16
 
 type Video struct {
@@ -19,4 +25,17 @@ func New() *Video {
 	return &Video{
 		Palette: palette,
 	}
+}
+
+func (g *Video) Display() *image.RGBA {
+	i := image.NewRGBA(image.Rect(0, 0, 160, 144))
+	for y := 0; y < 144; y++ {
+		for x := 0; x < 160; x++ {
+			//			p := g.Renderer.outputBuffer[y*160+x]
+			//			red, green, blue := byte((p&0b11111)*8), byte(((p>>5)&0b11111)*8), byte(((p>>10)&0b11111)*8)
+
+			i.SetRGBA(x, y, color.RGBA{uint8(rand.Intn(255)), uint8(rand.Intn(255)), uint8(rand.Intn(255)), 0xff})
+		}
+	}
+	return i
 }

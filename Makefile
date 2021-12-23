@@ -13,4 +13,4 @@ clean:
 
 test:
 	make build
-	$(BINDIR)/darwin-amd64/$(NAME) ./roms/01-registers.gb
+	$(BINDIR)/darwin-amd64/$(NAME) ./roms/hello.gb

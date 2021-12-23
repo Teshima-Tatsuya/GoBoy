@@ -1,9 +1,8 @@
 package gb
 
 import (
-	"github.com/DisgoOrg/log"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/cartridge"
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/video"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/video"
 )
 
 type GB struct {
@@ -12,16 +11,13 @@ type GB struct {
 }
 
 func NewGB(romData []byte) *GB {
-	c := cartridge.New(romData)
-	log.Info(c.Title)
-
 	gb := &GB{
-		Cartridge: c,
+		Cartridge: cartridge.New(romData),
 	}
 
 	return gb
 }
 
 func (gb *GB) Draw() []byte {
-	return gb.Video
+	return gb.Video.Display().Pix
 }
