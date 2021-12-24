@@ -9,7 +9,7 @@ type LCDC struct {
 	Data byte
 }
 
-func (l *LCDC) New(data byte) *LCDC {
+func NewLCDC(data byte) *LCDC {
 	return &LCDC{
 		Data: data,
 	}
