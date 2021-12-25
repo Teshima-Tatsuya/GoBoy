@@ -1,5 +1,8 @@
 package video
 
 type VRAM struct {
+	// 0x8000-0x97FF
 	TileData []byte
+	// 0x9800-0x9BFF, 0x9C00-0x9CFF
+	BGMap []byte
 }

@@ -1,7 +1,7 @@
 package gb
 
 import (
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/cartridge"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/video"
 )
 

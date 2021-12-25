@@ -29,6 +29,7 @@ type Cartridge struct {
 	Type    byte
 	ROMSize byte
 	RAMSize int
+	ROMData []byte
 }
 
 func New(romData []byte) *Cartridge {
@@ -45,6 +46,7 @@ func New(romData []byte) *Cartridge {
 		SGBFlag:      sgbflag,
 		ROMSize:      romData[0x0148],
 		RAMSize:      getRamSize(romData[0x0149]),
+		ROMData:      romData,
 	}
 }
 
@@ -62,4 +64,8 @@ func getRamSize(size byte) int {
 		return 64 * (2 << 10)
 	}
 	return 0
+}
+
+func (c *Cartridge) ReadByte(addr uint16) byte {
+	return c.ROMData[addr]
 }
