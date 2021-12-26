@@ -2,14 +2,15 @@ package cpu
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/interfaces/bus"
 	"github.com/apex/log"
 )
 
 type CPU struct {
-	PC  uint16
+	// Program Counter
+	PC uint16
+	// Stack Pointer
 	SP  uint16
 	Reg Registers
 	Bus bus.IO
@@ -33,17 +34,36 @@ func New(bus bus.IO) *CPU {
 }
 
 func (c *CPU) Step() int {
-	opcode := c.Bus.ReadByte(c.PC)
+	opcode := c.fetch()
 
-	switch opcode {
-	case 0x00:
-		c.PC++
-		return 1
-	default:
-		log.Info(fmt.Sprintf("Unsupported opcode 0x%02x at 0x%04x\n\n\n", opcode, c.PC))
-		os.Exit(-1)
-		c.PC++
+	var op *OpCode
+	if opcode == 0xCB {
+		// Prefix Ope
+		c.fetch()
+		op = opCodes[opcode]
+	} else {
+		op = opCodes[opcode]
 	}
 
+	opereands := c.fetchOperands(op.Size)
+
+	log.Info(fmt.Sprintf("opcode 0x%02x at 0x%04x\n\n\n", opcode, c.PC))
+	op.Handler(c, opereands)
+
 	return 0
+}
+
+func (c *CPU) fetch() byte {
+	d := c.Bus.ReadByte(c.PC)
+	c.PC++
+	return d
+}
+
+func (c *CPU) fetchOperands(size uint8) []byte {
+	ops := []byte{}
+	for i := 0; i < int(size); i++ {
+		ops = append(ops, c.fetch())
+	}
+
+	return ops
 }
