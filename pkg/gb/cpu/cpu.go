@@ -12,25 +12,18 @@ type CPU struct {
 	PC uint16
 	// Stack Pointer
 	SP  uint16
-	Reg Registers
+	Reg Register
 	Bus bus.IO
 }
 
 func New(bus bus.IO) *CPU {
-	return &CPU{
-		PC: 0x100, // Gameboy Start Addr
-		Reg: Registers{
-			A: 0x01,
-			B: 0x00,
-			C: 0x00,
-			D: 0xFF,
-			E: 0x56,
-			F: 0x80,
-			H: 0x00,
-			L: 0x0D,
-		},
+	c := &CPU{
 		Bus: bus,
 	}
+
+	c.Reg.reset()
+
+	return c
 }
 
 func (c *CPU) Step() int {
@@ -48,14 +41,14 @@ func (c *CPU) Step() int {
 	opereands := c.fetchOperands(op.Size)
 
 	log.Info(fmt.Sprintf("opcode 0x%02x at 0x%04x\n\n\n", opcode, c.PC))
-	op.Handler(c, opereands)
+	op.Handler(c, op.R1, op.R2, opereands)
 
 	return 0
 }
 
 func (c *CPU) fetch() byte {
-	d := c.Bus.ReadByte(c.PC)
-	c.PC++
+	d := c.Bus.ReadByte(c.Reg.PC)
+	c.Reg.PC++
 	return d
 }
 

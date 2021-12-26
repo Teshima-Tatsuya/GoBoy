@@ -10,8 +10,8 @@ import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
 )
 
-func setup() *bus.Bus {
-	file := "../../../test/blargg-gb-tests/cpu_instrs/individual/01-special.gb"
+func setup(file string) *bus.Bus {
+	log.Printf("load file %s", file)
 	romData, err := ioutil.ReadFile(file)
 
 	if err != nil {
@@ -25,8 +25,19 @@ func setup() *bus.Bus {
 	return bus
 }
 
-func Test(t *testing.T) {
-	bus := setup()
+func Test01(t *testing.T) {
+	file := "../../../test/blargg-gb-tests/cpu_instrs/individual/01-special.gb"
+	bus := setup(file)
+	cpu := New(bus)
+
+	for {
+		cpu.Step()
+	}
+}
+
+func Test06(t *testing.T) {
+	file := "../../../test/blargg-gb-tests/cpu_instrs/individual/06-ld r,r.gb"
+	bus := setup(file)
 	cpu := New(bus)
 
 	for {

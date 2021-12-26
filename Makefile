@@ -14,3 +14,6 @@ clean:
 test:
 	make build
 	$(BINDIR)/darwin-amd64/$(NAME) ./roms/hello.gb
+
+test_cpu:
+	go test ./pkg/gb/cpu
