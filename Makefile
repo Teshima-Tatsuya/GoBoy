@@ -17,3 +17,7 @@ test:
 
 test_cpu:
 	go test ./pkg/gb/cpu
+
+test_register:
+	go test -run Register ./pkg/gb/cpu -cover -coverprofile=cover_register.out
+

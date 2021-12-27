@@ -69,7 +69,10 @@ func (r *Register) R16(i int) types.Addr {
 		hl := r.HL()
 		r.setHL(hl + 1)
 		return hl
-
+	case SP:
+		return r.SP
+	case PC:
+		return r.PC
 	default:
 		panic("Invalid Register!")
 	}
@@ -152,16 +155,17 @@ func (r *Register) clearFlag(flag byte) {
 	}
 }
 
-func (r *Register) isSet(flag byte) {
+func (r *Register) isSet(flag byte) bool {
 	switch flag {
 	case flagZ:
-		r.R[F] = r.R[F] & ^byte((uint(1 << uint(flagZ))))
+		return r.R[F]&byte(1<<uint(flagZ)) == 1<<uint(flagZ)
 	case flagN:
-		r.R[F] = r.R[F] & ^byte((uint(1 << uint(flagN))))
+		return r.R[F]&byte(1<<uint(flagN)) == 1<<uint(flagN)
 	case flagH:
-		r.R[F] = r.R[F] & ^byte((uint(1 << uint(flagH))))
+		return r.R[F]&byte(1<<uint(flagH)) == 1<<uint(flagH)
 	case flagC:
-		r.R[F] = r.R[F] & ^byte((uint(1 << uint(flagC))))
+		return r.R[F]&byte(1<<uint(flagC)) == 1<<uint(flagC)
+	default:
+		panic("Unknown Flag")
 	}
-
 }
