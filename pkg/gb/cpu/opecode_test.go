@@ -223,7 +223,7 @@ func TestOpeCode_ldrr(t *testing.T) {
 			c.regreset()
 			op := opCodes[tt.args.opcode]
 			want := c.Reg.R[tt.args.r2]
-			ldrr(c, byte(tt.args.r1), byte(tt.args.r2), []byte{})
+			ldrr(c, byte(tt.args.r1), byte(tt.args.r2))
 
 			assert.Equal(t, op.R1, tt.args.r1)
 			assert.Equal(t, op.R2, tt.args.r2)

@@ -11,7 +11,7 @@ type OpCode struct {
 	R1, R2  byte
 	Size    uint8
 	Cycles  uint8
-	Handler func(*CPU, byte, byte, []byte)
+	Handler func(*CPU, byte, byte)
 }
 
 var opCodes = []*OpCode{
@@ -273,30 +273,41 @@ var opCodes = []*OpCode{
 	{0xFF, 0, 0, 0, 1, notimplementd},
 }
 
-func nop(c *CPU, _ byte, _ byte, ope []byte) {}
+func nop(c *CPU, _ byte, _ byte) {}
 
-// LD r1, r2
-// Write r2 into r1
-func ldrr(c *CPU, R1 byte, R2 byte, ope []byte) {
+// -----LD----
+// r   is Register Single
+// r16 is Register Comprex
+// m   is Read From Register Single
+// m16 is Read From Register Complex
+// ex:
+//    ldrr   is LD r8, r8
+//    ldrr16 is LD r8, r16
+//    ldrm   is LD r8, Read(r8)
+//    ldrm16 is LD r8, Read(r16)
+
+// LD R1, R2
+// Write R2 into R1
+func ldrr(c *CPU, R1 byte, R2 byte) {
 	c.Reg.R[R1] = c.Reg.R[R2]
 }
 
-// LD r1, r1r2
-// Write r2 value into r1
-func ldrm(c *CPU, R1 byte, R2 byte, ope []byte) {
-	c.Reg.R[R1] = c.Bus.ReadByte(c.Reg.R16(int(R2)))
-}
-
 // LD (r1), r2
-func ldr16r(c *CPU, R1 byte, R2 byte, _ []byte) {
+func ldr16r(c *CPU, R1 byte, R2 byte) {
 	switch R1 {
 	case HL:
 		c.Bus.WriteByte(c.Reg.HL(), R2)
 	}
 }
 
+// LD r1, r1r2
+// Write r2 value into r1
+func ldrm(c *CPU, R1 byte, R2 byte) {
+	c.Reg.R[R1] = c.Bus.ReadByte(c.Reg.R16(int(R2)))
+}
+
 // LD (r1), d16
-func ldr16m16(c *CPU, R1 byte, R2 byte, _ []byte) {
+func ldr16m16(c *CPU, R1 byte, R2 byte) {
 	switch R1 {
 	case HL:
 		c.Reg.R[L] = c.fetch()
@@ -305,28 +316,28 @@ func ldr16m16(c *CPU, R1 byte, R2 byte, _ []byte) {
 }
 
 // LD r1, d8
-func ldr8d8(c *CPU, r8 byte, _ byte, _ []byte) {
+func ldr8d8(c *CPU, r8 byte, _ byte) {
 	c.Reg.R[r8] = c.fetch()
 }
 
-func ldm16r8(c *CPU, R1 byte, R2 byte, _ []byte) {
+func ldm16r8(c *CPU, R1 byte, R2 byte) {
 	c.Bus.WriteByte(c.Reg.R16(int(R1)), c.Reg.R[R2])
 }
 
-func retcc(c *CPU, R1 byte, _ byte, ope []byte) {
+func retcc(c *CPU, R1 byte, _ byte) {
 	if c.Reg.R[F]&(1<<R1) != 0 {
 		c.pop2PC()
 	}
 }
 
-func retncc(c *CPU, R1 byte, _ byte, ope []byte) {
+func retncc(c *CPU, R1 byte, _ byte) {
 	if c.Reg.R[F]&(1<<R1) == 0 {
 		c.pop2PC()
 	}
 }
 
 // arithmetic
-func inc8(c *CPU, r8 byte, _ byte, _ []byte) {
+func inc8(c *CPU, r8 byte, _ byte) {
 	r := c.Reg.R[r8]
 
 	incremented := r + 1
@@ -346,30 +357,30 @@ func inc8(c *CPU, r8 byte, _ byte, _ []byte) {
 	}
 }
 
-func inc16(c *CPU, r16 byte, _ byte, _ []byte) {
+func inc16(c *CPU, r16 byte, _ byte) {
 	c.Reg.setR16(types.Addr(r16), types.Addr(c.Reg.R16(int(r16))+1))
 }
 
 // special
-func ret(c *CPU, _ byte, _ byte, _ []byte) {
+func ret(c *CPU, _ byte, _ byte) {
 	c.pop2PC()
 }
 
 // -----jp-----
-func jp(c *CPU, _ byte, _ byte, ope []byte) {
+func jp(c *CPU, _ byte, _ byte) {
 	c.Reg.PC = c.fetch16()
 }
 
-func jpcc(c *CPU, cc byte, _ byte, ope []byte) {
+func jpcc(c *CPU, cc byte, _ byte) {
 	c.Reg.PC = c.fetch16()
 
 }
 
 // -----jr-----
-func jrncc(c *CPU, cc byte, _ byte, _ []byte) {
+func jrncc(c *CPU, cc byte, _ byte) {
 
 }
 
-func notimplementd(c *CPU, _ byte, _ byte, ope []byte) {
+func notimplementd(c *CPU, _ byte, _ byte) {
 	os.Exit(-1)
 }
