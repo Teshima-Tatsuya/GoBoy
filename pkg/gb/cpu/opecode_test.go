@@ -44,6 +44,7 @@ func TestOpeCode_nop(t *testing.T) {
 
 }
 
+// test 0x40-0x6F (except 0xX6, 0xXE)
 func TestOpeCode_ldrr(t *testing.T) {
 	file := "../../../test/blargg-gb-tests/cpu_instrs/individual/01-special.gb"
 
