@@ -35,11 +35,8 @@ func (c *CPU) Step() int {
 		op = opCodes[opcode]
 	}
 
-	//	operands := c.fetchOperands(op.Size)
-	operands := []byte{}
-
 	log.Info(fmt.Sprintf("opcode 0x%02x at 0x%04x \n", opcode, c.Reg.PC-1))
-	op.Handler(c, op.R1, op.R2, operands)
+	op.Handler(c, op.R1, op.R2)
 
 	return 0
 }
