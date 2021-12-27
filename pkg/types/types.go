@@ -1,3 +1,3 @@
 package types
 
-type Word uint16
+type Addr uint16

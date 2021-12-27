@@ -1,5 +1,7 @@
 package cartridge
 
+import "github.com/Teshima-Tatsuya/GoBoy/pkg/types"
+
 type CartridgeType byte
 
 const (
@@ -66,6 +68,9 @@ func getRamSize(size byte) int {
 	return 0
 }
 
-func (c *Cartridge) ReadByte(addr uint16) byte {
+func (c *Cartridge) ReadByte(addr types.Addr) byte {
 	return c.ROMData[addr]
+}
+
+func (c *Cartridge) WriteByte(addr types.Addr, value byte) {
 }

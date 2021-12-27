@@ -4,14 +4,11 @@ import (
 	"fmt"
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/interfaces/bus"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 	"github.com/apex/log"
 )
 
 type CPU struct {
-	// Program Counter
-	PC uint16
-	// Stack Pointer
-	SP  uint16
 	Reg Register
 	Bus bus.IO
 }
@@ -38,10 +35,11 @@ func (c *CPU) Step() int {
 		op = opCodes[opcode]
 	}
 
-	opereands := c.fetchOperands(op.Size)
+	//	operands := c.fetchOperands(op.Size)
+	operands := []byte{}
 
-	log.Info(fmt.Sprintf("opcode 0x%02x at 0x%04x\n\n\n", opcode, c.PC))
-	op.Handler(c, op.R1, op.R2, opereands)
+	log.Info(fmt.Sprintf("opcode 0x%02x at 0x%04x \n", opcode, c.Reg.PC-1))
+	op.Handler(c, op.R1, op.R2, operands)
 
 	return 0
 }
@@ -52,11 +50,23 @@ func (c *CPU) fetch() byte {
 	return d
 }
 
-func (c *CPU) fetchOperands(size uint8) []byte {
-	ops := []byte{}
-	for i := 0; i < int(size); i++ {
-		ops = append(ops, c.fetch())
-	}
+func (c *CPU) fetch16() types.Addr {
+	lower := uint16(c.Bus.ReadByte(c.Reg.PC))
+	upper := uint16(c.Bus.ReadByte(c.Reg.PC + 1))
+	c.Reg.PC += 1
 
-	return ops
+	return types.Addr((upper << 8) | lower)
+}
+
+func (c *CPU) pop() byte {
+	d := c.Bus.ReadByte(c.Reg.SP)
+	c.Reg.SP++
+	return d
+}
+
+func (c *CPU) pop2PC() {
+	lower := c.pop()
+	upper := c.pop()
+
+	c.Reg.PC = (types.Addr(upper) << 8) | types.Addr(lower)
 }

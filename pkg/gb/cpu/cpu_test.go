@@ -8,6 +8,7 @@ import (
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/bus"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/ram"
 )
 
 func setup(file string) *bus.Bus {
@@ -20,7 +21,10 @@ func setup(file string) *bus.Bus {
 	}
 
 	cart := cartridge.New(romData)
-	bus := bus.New(cart)
+	vram := ram.New(0x2000)
+	wram := ram.New(0x2000)
+	hram := ram.New(0x0080)
+	bus := bus.New(cart, vram, wram, hram)
 
 	return bus
 }
@@ -42,5 +46,19 @@ func Test06(t *testing.T) {
 
 	for {
 		cpu.Step()
+	}
+}
+
+func TestLd(t *testing.T) {
+	file := "../../../test/blargg-gb-tests/cpu_instrs/individual/ld.gb"
+	bus := setup(file)
+	cpu := New(bus)
+
+	for {
+		cpu.Step()
+
+		if cpu.Bus.ReadByte(cpu.Reg.PC) == 0x0 {
+			return
+		}
 	}
 }
