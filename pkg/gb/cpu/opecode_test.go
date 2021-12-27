@@ -1,9 +1,6 @@
 package cpu
 
 import (
-	"io/ioutil"
-	"log"
-	"os"
 	"testing"
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/bus"
@@ -12,15 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setupCPU(file string) *CPU {
-	log.Printf("load file %s", file)
-	romData, err := ioutil.ReadFile(file)
-
-	if err != nil {
-		log.Fatal(err)
-		os.Exit(-1)
-	}
-
+func setupCPU() *CPU {
+	romData := make([]byte, 0x8000)
 	cart := cartridge.New(romData)
 	vram := ram.New(0x2000)
 	wram := ram.New(0x2000)
@@ -46,9 +36,7 @@ func TestOpeCode_nop(t *testing.T) {
 
 // test 0x40-0x6F (except 0xX6, 0xXE)
 func TestOpeCode_ldrr(t *testing.T) {
-	file := "../../../test/blargg-gb-tests/cpu_instrs/individual/01-special.gb"
-
-	c := setupCPU(file)
+	c := setupCPU()
 
 	type args struct {
 		opcode byte
