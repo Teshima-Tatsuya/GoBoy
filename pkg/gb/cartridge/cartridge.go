@@ -73,4 +73,5 @@ func (c *Cartridge) ReadByte(addr types.Addr) byte {
 }
 
 func (c *Cartridge) WriteByte(addr types.Addr, value byte) {
+	c.ROMData[addr] = value
 }
