@@ -39,6 +39,9 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 	}
 }
 
+func (b *Bus) ReadAddr(addr types.Addr) types.Addr {
+	return 0x0000
+}
 func (b *Bus) WriteByte(addr types.Addr, value byte) {
 	switch {
 	case addr >= 0x0000 && addr <= 0x7FFF:
