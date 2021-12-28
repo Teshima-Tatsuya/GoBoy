@@ -49,7 +49,7 @@ var opCodes = []*OpCode{
 	{0x1E, "LD E,d8", E, 0, 1, 2, ldr8d8},
 	{0x1F, "RRA", 0, 0, 0, 1, notimplemented},
 	{0x20, "JR NZ,r8", flagZ, 0, 1, 2, jpnfr8},
-	{0x21, "LD (HL),d16", HL, 0, 2, 3, ldr16d16},
+	{0x21, "LD HL,d16", HL, 0, 2, 3, ldr16d16},
 	{0x22, "LD (HL+),A", HLI, A, 0, 2, ldm16r},
 	{0x23, "INC HL", HL, 0, 0, 2, incr16},
 	{0x24, "INC H", H, 0, 0, 1, incr},
