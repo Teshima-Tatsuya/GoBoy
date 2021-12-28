@@ -25,7 +25,7 @@ var opCodes = []*OpCode{
 	{0x07, 0, 0, 0, 1, notimplemented},
 	{0x08, 0, 0, 0, 1, notimplemented},
 	{0x09, 0, 0, 0, 1, notimplemented},
-	{0x0A, 0, 0, 0, 1, notimplemented},
+	{0x0A, A, BC, 0, 2, ldrm16},
 	{0x0B, 0, 0, 0, 1, notimplemented},
 	{0x0C, C, 0, 1, 2, inc8},
 	{0x0D, 0, 0, 0, 1, notimplemented},
@@ -41,7 +41,7 @@ var opCodes = []*OpCode{
 	{0x17, 0, 0, 0, 1, notimplemented},
 	{0x18, 0, 0, 0, 1, notimplemented},
 	{0x19, 0, 0, 0, 1, notimplemented},
-	{0x1A, 0, 0, 0, 1, notimplemented},
+	{0x1A, A, DE, 0, 2, ldrm16},
 	{0x1B, 0, 0, 0, 1, notimplemented},
 	{0x1C, E, 0, 0, 1, inc8},
 	{0x1D, 0, 0, 0, 1, notimplemented},
@@ -57,7 +57,7 @@ var opCodes = []*OpCode{
 	{0x27, 0, 0, 0, 1, notimplemented},
 	{0x28, 0, 0, 0, 1, notimplemented},
 	{0x29, 0, 0, 0, 1, notimplemented},
-	{0x2A, A, HLI, 0, 2, ldrm},
+	{0x2A, A, HLI, 0, 2, ldrm16},
 	{0x2B, 0, 0, 0, 1, notimplemented},
 	{0x2C, L, 0, 0, 1, inc8},
 	{0x2D, 0, 0, 0, 1, notimplemented},
@@ -73,7 +73,7 @@ var opCodes = []*OpCode{
 	{0x37, 0, 0, 0, 1, notimplemented},
 	{0x38, 0, 0, 0, 1, notimplemented},
 	{0x39, 0, 0, 0, 1, notimplemented},
-	{0x3A, 0, 0, 0, 1, notimplemented},
+	{0x3A, A, HLD, 0, 2, ldrm16},
 	{0x3B, 0, 0, 0, 1, notimplemented},
 	{0x3C, A, 0, 0, 1, inc8},
 	{0x3D, 0, 0, 0, 1, notimplemented},
@@ -85,7 +85,7 @@ var opCodes = []*OpCode{
 	{0x43, B, E, 0, 1, ldrr},
 	{0x44, B, H, 0, 1, ldrr},
 	{0x45, B, L, 0, 1, ldrr},
-	{0x46, B, HL, 0, 2, ldrm},
+	{0x46, B, HL, 0, 2, ldrm16},
 	{0x47, B, A, 0, 1, ldrr},
 	{0x48, C, B, 0, 1, ldrr},
 	{0x49, C, C, 0, 1, ldrr},
@@ -93,7 +93,7 @@ var opCodes = []*OpCode{
 	{0x4B, C, E, 0, 1, ldrr},
 	{0x4C, C, H, 0, 1, ldrr},
 	{0x4D, C, L, 0, 1, ldrr},
-	{0x4E, C, HL, 0, 2, ldrm},
+	{0x4E, C, HL, 0, 2, ldrm16},
 	{0x4F, C, A, 0, 1, ldrr},
 	{0x50, D, B, 0, 1, ldrr},
 	{0x51, D, C, 0, 1, ldrr},
@@ -101,7 +101,7 @@ var opCodes = []*OpCode{
 	{0x53, D, E, 0, 1, ldrr},
 	{0x54, D, H, 0, 1, ldrr},
 	{0x55, D, L, 0, 1, ldrr},
-	{0x56, D, HL, 0, 2, ldrm},
+	{0x56, D, HL, 0, 2, ldrm16},
 	{0x57, D, A, 0, 1, ldrr},
 	{0x58, E, B, 0, 1, ldrr},
 	{0x59, E, C, 0, 1, ldrr},
@@ -109,7 +109,7 @@ var opCodes = []*OpCode{
 	{0x5B, E, E, 0, 1, ldrr},
 	{0x5C, E, H, 0, 1, ldrr},
 	{0x5D, E, L, 0, 1, ldrr},
-	{0x5E, E, HL, 0, 2, ldrm},
+	{0x5E, E, HL, 0, 2, ldrm16},
 	{0x5F, E, A, 0, 1, ldrr},
 	{0x60, H, B, 0, 1, ldrr},
 	{0x61, H, C, 0, 1, ldrr},
@@ -117,7 +117,7 @@ var opCodes = []*OpCode{
 	{0x63, H, E, 0, 1, ldrr},
 	{0x64, H, H, 0, 1, ldrr},
 	{0x65, H, L, 0, 1, ldrr},
-	{0x66, H, HL, 0, 2, ldrm},
+	{0x66, H, HL, 0, 2, ldrm16},
 	{0x67, H, A, 0, 1, ldrr},
 	{0x68, L, B, 0, 1, ldrr},
 	{0x69, L, C, 0, 1, ldrr},
@@ -125,7 +125,7 @@ var opCodes = []*OpCode{
 	{0x6B, L, E, 0, 1, ldrr},
 	{0x6C, L, H, 0, 1, ldrr},
 	{0x6D, L, L, 0, 1, ldrr},
-	{0x6E, L, HL, 0, 2, ldrm},
+	{0x6E, L, HL, 0, 2, ldrm16},
 	{0x6F, L, A, 0, 1, ldrr},
 	{0x70, HL, B, 0, 2, ldm16r},
 	{0x71, HL, C, 0, 2, ldm16r},
@@ -141,7 +141,7 @@ var opCodes = []*OpCode{
 	{0x7B, A, E, 0, 1, ldrr},
 	{0x7C, A, H, 0, 1, ldrr},
 	{0x7D, A, L, 0, 1, ldrr},
-	{0x7E, A, HL, 0, 2, ldrm},
+	{0x7E, A, HL, 0, 2, ldrm16},
 	{0x7F, A, A, 0, 1, ldrr},
 	{0x80, 0, 0, 0, 1, notimplemented},
 	{0x81, 0, 0, 0, 1, notimplemented},
@@ -310,9 +310,9 @@ func ldm16r(c *CPU, R1 byte, R2 byte) {
 	}
 }
 
-// LD r1, r1r2
+// LD r1, (r2)
 // Write r2 value into r1
-func ldrm(c *CPU, R1 byte, R2 byte) {
+func ldrm16(c *CPU, R1 byte, R2 byte) {
 	c.Reg.R[R1] = c.Bus.ReadByte(c.Reg.R16(int(R2)))
 }
 
