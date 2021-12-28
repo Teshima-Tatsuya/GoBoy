@@ -467,7 +467,59 @@ func TestOpeCode_jpa16(t *testing.T) {
 	}
 }
 
-func TestOpeCode_jpna16(t *testing.T) {
+func TestOpeCode_jpfa16(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		flag   int
+		value  int
+		addr   types.Addr
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "JP Z, a16 when zero",
+			args: args{0xCA, flagZ, 0, 0x0100},
+		},
+		{
+			name: "JP Z, a16 when non zero",
+			args: args{0xCA, flagZ, 1, 0x1234},
+		},
+		{
+			name: "JP C, a16 when zero",
+			args: args{0xDA, flagC, 0, 0x0100},
+		},
+		{
+			name: "JP C, a16 when non zero",
+			args: args{0xDA, flagC, 1, 0x1234},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+			want := tt.args.addr
+			c.Bus.WriteByte(c.Reg.PC, 0x34)
+			c.Bus.WriteByte(c.Reg.PC+1, 0x12)
+
+			if tt.args.value == 1 {
+				c.Reg.setFlag(byte(tt.args.flag))
+			} else {
+				c.Reg.clearFlag(byte(tt.args.flag))
+			}
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, want, c.Reg.PC)
+		})
+	}
+}
+
+func TestOpeCode_jpnfa16(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {

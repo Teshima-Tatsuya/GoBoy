@@ -209,7 +209,7 @@ var opCodes = []*OpCode{
 	{0xBF, 0, 0, 0, 1, notimplemented},
 	{0xC0, flagZ, 0, 2, 2, retncc},
 	{0xC1, 0, 0, 0, 1, notimplemented},
-	{0xC2, flagZ, 0, 2, 3, jpna16},
+	{0xC2, flagZ, 0, 2, 3, jpnfa16},
 	{0xC3, 0, 0, 2, 4, jpa16},
 	{0xC4, 0, 0, 0, 1, notimplemented},
 	{0xC5, 0, 0, 0, 1, notimplemented},
@@ -217,7 +217,7 @@ var opCodes = []*OpCode{
 	{0xC7, 0, 0, 0, 1, notimplemented},
 	{0xC8, 0, 0, 0, 1, notimplemented},
 	{0xC9, 0, 0, 0, 4, ret},
-	{0xCA, 0, 0, 0, 1, notimplemented},
+	{0xCA, flagZ, 0, 2, 3, jpfa16},
 	{0xCB, 0, 0, 0, 1, notimplemented},
 	{0xCC, 0, 0, 0, 1, notimplemented},
 	{0xCD, 0, 0, 0, 1, notimplemented},
@@ -225,7 +225,7 @@ var opCodes = []*OpCode{
 	{0xCF, 0, 0, 0, 1, notimplemented},
 	{0xD0, 0, 0, 0, 1, notimplemented},
 	{0xD1, 0, 0, 0, 1, notimplemented},
-	{0xD2, flagC, 0, 2, 3, jpna16},
+	{0xD2, flagC, 0, 2, 3, jpnfa16},
 	{0xD3, 0, 0, 0, 1, notimplemented},
 	{0xD4, 0, 0, 0, 1, notimplemented},
 	{0xD5, 0, 0, 0, 1, notimplemented},
@@ -233,7 +233,7 @@ var opCodes = []*OpCode{
 	{0xD7, 0, 0, 0, 1, notimplemented},
 	{0xD8, 0, 0, 0, 1, notimplemented},
 	{0xD9, 0, 0, 0, 1, notimplemented},
-	{0xDA, 0, 0, 0, 1, notimplemented},
+	{0xDA, flagC, 0, 2, 3, jpfa16},
 	{0xDB, 0, 0, 0, 1, notimplemented},
 	{0xDC, 0, 0, 0, 1, notimplemented},
 	{0xDD, 0, 0, 0, 1, notimplemented},
@@ -377,9 +377,17 @@ func jpcc(c *CPU, cc byte, _ byte) {
 
 }
 
+// JP flag, a16
+// jump when flag = 1
+func jpfa16(c *CPU, flag byte, _ byte) {
+	if c.Reg.isSet(flag) {
+		_jp(c, c.fetch16())
+	}
+}
+
 // JP Nflag, a16
 // jump when flag = 0
-func jpna16(c *CPU, flag byte, _ byte) {
+func jpnfa16(c *CPU, flag byte, _ byte) {
 	if !c.Reg.isSet(flag) {
 		_jp(c, c.fetch16())
 	}
