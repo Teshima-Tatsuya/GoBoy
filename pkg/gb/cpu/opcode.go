@@ -17,7 +17,7 @@ type OpCode struct {
 var opCodes = []*OpCode{
 	{0x00, 0, 0, 0, 1, nop},
 	{0x01, BC, 0, 2, 3, ldr16m16},
-	{0x02, BC, A, 0, 2, ldr16r},
+	{0x02, BC, A, 0, 2, ldm16r},
 	{0x03, BC, 0, 0, 2, inc16},
 	{0x04, B, 0, 0, 1, inc8},
 	{0x05, 0, 0, 0, 1, notimplemented},
@@ -49,7 +49,7 @@ var opCodes = []*OpCode{
 	{0x1F, 0, 0, 0, 1, notimplemented},
 	{0x20, 0, 0, 0, 1, notimplemented},
 	{0x21, HL, 0, 2, 3, ldr16m16},
-	{0x22, HLI, A, 0, 2, ldr16r},
+	{0x22, HLI, A, 0, 2, ldm16r},
 	{0x23, HL, 0, 0, 2, inc16},
 	{0x24, H, 0, 0, 1, inc8},
 	{0x25, 0, 0, 0, 1, notimplemented},
@@ -65,7 +65,7 @@ var opCodes = []*OpCode{
 	{0x2F, 0, 0, 0, 1, notimplemented},
 	{0x30, 0, 0, 0, 1, notimplemented},
 	{0x31, SP, 0, 2, 3, ldr16m16},
-	{0x32, HLD, A, 0, 2, ldr16r},
+	{0x32, HLD, A, 0, 2, ldm16r},
 	{0x33, SP, 0, 0, 2, inc16},
 	{0x34, 0, 0, 0, 1, notimplemented},
 	{0x35, 0, 0, 0, 1, notimplemented},
@@ -127,14 +127,14 @@ var opCodes = []*OpCode{
 	{0x6D, L, L, 0, 1, ldrr},
 	{0x6E, L, HL, 0, 2, ldrm},
 	{0x6F, L, A, 0, 1, ldrr},
-	{0x70, HL, B, 0, 2, ldr16r},
-	{0x71, HL, C, 0, 2, ldr16r},
-	{0x72, HL, D, 0, 2, ldr16r},
-	{0x73, HL, E, 0, 2, ldr16r},
-	{0x74, HL, H, 0, 2, ldr16r},
-	{0x75, HL, L, 0, 2, ldr16r},
+	{0x70, HL, B, 0, 2, ldm16r},
+	{0x71, HL, C, 0, 2, ldm16r},
+	{0x72, HL, D, 0, 2, ldm16r},
+	{0x73, HL, E, 0, 2, ldm16r},
+	{0x74, HL, H, 0, 2, ldm16r},
+	{0x75, HL, L, 0, 2, ldm16r},
 	{0x76, 0, 0, 0, 1, notimplemented},
-	{0x77, HL, A, 0, 2, ldr16r},
+	{0x77, HL, A, 0, 2, ldm16r},
 	{0x78, A, B, 0, 1, ldrr},
 	{0x79, A, C, 0, 1, ldrr},
 	{0x7A, A, D, 0, 1, ldrr},
@@ -293,7 +293,7 @@ func ldrr(c *CPU, R1 byte, R2 byte) {
 }
 
 // LD (r1), r2
-func ldr16r(c *CPU, R1 byte, R2 byte) {
+func ldm16r(c *CPU, R1 byte, R2 byte) {
 	switch R1 {
 	case AF:
 		c.Bus.WriteByte(c.Reg.R16(AF), c.Reg.R[R2])

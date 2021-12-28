@@ -233,7 +233,7 @@ func TestOpeCode_ldrr(t *testing.T) {
 	}
 }
 
-func TestOpeCode_ldr16r(t *testing.T) {
+func TestOpeCode_ldm16r(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
