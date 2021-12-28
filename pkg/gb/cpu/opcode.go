@@ -16,7 +16,7 @@ type OpCode struct {
 
 var opCodes = []*OpCode{
 	{0x00, 0, 0, 0, 1, nop},
-	{0x01, BC, 0, 2, 3, ldr16m16},
+	{0x01, BC, 0, 2, 3, ldr16d16},
 	{0x02, BC, A, 0, 2, ldm16r},
 	{0x03, BC, 0, 0, 2, inc16},
 	{0x04, B, 0, 0, 1, inc8},
@@ -32,7 +32,7 @@ var opCodes = []*OpCode{
 	{0x0E, C, 0, 1, 2, ldr8d8},
 	{0x0F, 0, 0, 0, 1, notimplemented},
 	{0x10, 0, 0, 0, 1, notimplemented},
-	{0x11, DE, 0, 2, 3, ldr16m16},
+	{0x11, DE, 0, 2, 3, ldr16d16},
 	{0x12, DE, A, 0, 2, ldm16r8},
 	{0x13, DE, 0, 0, 2, inc16},
 	{0x14, D, 0, 0, 1, inc8},
@@ -48,7 +48,7 @@ var opCodes = []*OpCode{
 	{0x1E, E, 0, 1, 2, ldr8d8},
 	{0x1F, 0, 0, 0, 1, notimplemented},
 	{0x20, 0, 0, 0, 1, notimplemented},
-	{0x21, HL, 0, 2, 3, ldr16m16},
+	{0x21, HL, 0, 2, 3, ldr16d16},
 	{0x22, HLI, A, 0, 2, ldm16r},
 	{0x23, HL, 0, 0, 2, inc16},
 	{0x24, H, 0, 0, 1, inc8},
@@ -64,12 +64,12 @@ var opCodes = []*OpCode{
 	{0x2E, L, 0, 0, 1, ldr8d8},
 	{0x2F, 0, 0, 0, 1, notimplemented},
 	{0x30, 0, 0, 0, 1, notimplemented},
-	{0x31, SP, 0, 2, 3, ldr16m16},
+	{0x31, SP, 0, 2, 3, ldr16d16},
 	{0x32, HLD, A, 0, 2, ldm16r},
 	{0x33, SP, 0, 0, 2, inc16},
 	{0x34, 0, 0, 0, 1, notimplemented},
 	{0x35, 0, 0, 0, 1, notimplemented},
-	{0x36, HL, 0, 1, 3, ldr16m16},
+	{0x36, HL, 0, 1, 3, ldr16d16},
 	{0x37, 0, 0, 0, 1, notimplemented},
 	{0x38, 0, 0, 0, 1, notimplemented},
 	{0x39, 0, 0, 0, 1, notimplemented},
@@ -280,6 +280,8 @@ func nop(c *CPU, _ byte, _ byte) {}
 // r16 is Register Comprex
 // m   is Read From Register Single
 // m16 is Read From Register Complex
+// d   is 8 bit data
+// d16 is 16 bit data
 // ex:
 //    ldrr   is LD r8, r8
 //    ldrr16 is LD r8, r16
@@ -294,20 +296,7 @@ func ldrr(c *CPU, R1 byte, R2 byte) {
 
 // LD (r1), r2
 func ldm16r(c *CPU, R1 byte, R2 byte) {
-	switch R1 {
-	case AF:
-		c.Bus.WriteByte(c.Reg.R16(AF), c.Reg.R[R2])
-	case BC:
-		c.Bus.WriteByte(c.Reg.R16(BC), c.Reg.R[R2])
-	case DE:
-		c.Bus.WriteByte(c.Reg.R16(DE), c.Reg.R[R2])
-	case HL:
-		c.Bus.WriteByte(c.Reg.R16(HL), c.Reg.R[R2])
-	case HLI:
-		c.Bus.WriteByte(c.Reg.R16(HLI), c.Reg.R[R2])
-	case HLD:
-		c.Bus.WriteByte(c.Reg.R16(HLD), c.Reg.R[R2])
-	}
+	c.Bus.WriteByte(c.Reg.R16(int(R1)), c.Reg.R[R2])
 }
 
 // LD r1, (r2)
@@ -316,13 +305,11 @@ func ldrm16(c *CPU, R1 byte, R2 byte) {
 	c.Reg.R[R1] = c.Bus.ReadByte(c.Reg.R16(int(R2)))
 }
 
-// LD (r1), d16
-func ldr16m16(c *CPU, R1 byte, R2 byte) {
-	switch R1 {
-	case HL:
-		c.Reg.R[L] = c.fetch()
-		c.Reg.R[H] = c.fetch()
-	}
+// LD r1, d16
+func ldr16d16(c *CPU, R1 byte, _ byte) {
+	lower := c.fetch()
+	upper := c.fetch()
+	c.Reg.setR16(types.Addr(R1), types.Addr(upper)<<8|types.Addr(lower))
 }
 
 // LD r1, d8
@@ -392,5 +379,6 @@ func jrncc(c *CPU, cc byte, _ byte) {
 }
 
 func notimplemented(c *CPU, _ byte, _ byte) {
+	c.Reg.PC--
 	panic(fmt.Sprintf("OpCode 0x%2x is not implemented", c.fetch()))
 }

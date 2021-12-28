@@ -1,11 +1,8 @@
 package cpu
 
 import (
-	"fmt"
-
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/interfaces/bus"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
-	"github.com/apex/log"
 )
 
 type CPU struct {
@@ -35,7 +32,6 @@ func (c *CPU) Step() int {
 		op = opCodes[opcode]
 	}
 
-	log.Info(fmt.Sprintf("opcode 0x%02x at 0x%04x \n", opcode, c.Reg.PC-1))
 	op.Handler(c, op.R1, op.R2)
 
 	return 0
