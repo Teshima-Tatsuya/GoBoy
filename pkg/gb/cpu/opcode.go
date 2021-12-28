@@ -248,7 +248,7 @@ var opCodes = []*OpCode{
 	{0xE6, 0, 0, 0, 1, notimplemented},
 	{0xE7, 0, 0, 0, 1, notimplemented},
 	{0xE8, 0, 0, 0, 1, notimplemented},
-	{0xE9, 0, 0, 0, 1, notimplemented},
+	{0xE9, HL, 0, 0, 1, jpm16},
 	{0xEA, 0, 0, 0, 1, notimplemented},
 	{0xEB, 0, 0, 0, 1, notimplemented},
 	{0xEC, 0, 0, 0, 1, notimplemented},
@@ -391,6 +391,11 @@ func jpnfa16(c *CPU, flag byte, _ byte) {
 	if !c.Reg.isSet(flag) {
 		_jp(c, c.fetch16())
 	}
+}
+
+// JP (r16)
+func jpm16(c *CPU, R1 byte, _ byte) {
+	_jp(c, types.Addr(c.Bus.ReadByte(c.Reg.R16(int(R1)))))
 }
 
 // -----jr-----

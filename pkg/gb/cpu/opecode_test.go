@@ -570,3 +570,36 @@ func TestOpeCode_jpnfa16(t *testing.T) {
 		})
 	}
 }
+
+func TestOpeCode_jpm16(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r16    int
+		addr   types.Addr
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "JP (HL)",
+			args: args{0xE9, HL, 0x34},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+			want := tt.args.addr
+			c.Bus.WriteByte(c.Reg.R16(tt.args.r16), 0x34)
+
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, want, c.Reg.PC)
+		})
+	}
+}
