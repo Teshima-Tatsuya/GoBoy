@@ -603,3 +603,56 @@ func TestOpeCode_jpm16(t *testing.T) {
 		})
 	}
 }
+
+// -----jr-----
+
+func TestOpeCode_jrnfr8(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		flag   int
+		value  int
+		addr   types.Addr
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "JR NZ, r8 when zero",
+			args: args{0x20, flagZ, 0, 0x0110},
+		},
+		{
+			name: "JR NZ, r8 when not zero",
+			args: args{0x20, flagZ, 1, c.Reg.PC},
+		},
+		{
+			name: "JR NC, r8 when zero",
+			args: args{0x30, flagC, 0, 0x0110},
+		},
+		{
+			name: "JR NC, r8 when not zero",
+			args: args{0x30, flagC, 1, c.Reg.PC},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+			want := tt.args.addr
+			c.Bus.WriteByte(c.Reg.PC, 0x10)
+
+			if tt.args.value == 1 {
+				c.Reg.setFlag(byte(tt.args.flag))
+			} else {
+				c.Reg.clearFlag(byte(tt.args.flag))
+			}
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, want, c.Reg.PC)
+		})
+	}
+}

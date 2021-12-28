@@ -19,7 +19,7 @@ var opCodes = []*OpCode{
 	{0x01, BC, 0, 2, 3, ldr16d16},
 	{0x02, BC, A, 0, 2, ldm16r},
 	{0x03, BC, 0, 0, 2, inc16},
-	{0x04, B, 0, 0, 1, inc8},
+	{0x04, B, 0, 0, 1, incr},
 	{0x05, 0, 0, 0, 1, notimplemented},
 	{0x06, B, 0, 1, 2, ldr8d8},
 	{0x07, 0, 0, 0, 1, notimplemented},
@@ -27,7 +27,7 @@ var opCodes = []*OpCode{
 	{0x09, 0, 0, 0, 1, notimplemented},
 	{0x0A, A, BC, 0, 2, ldrm16},
 	{0x0B, 0, 0, 0, 1, notimplemented},
-	{0x0C, C, 0, 1, 2, inc8},
+	{0x0C, C, 0, 1, 2, incr},
 	{0x0D, 0, 0, 0, 1, notimplemented},
 	{0x0E, C, 0, 1, 2, ldr8d8},
 	{0x0F, 0, 0, 0, 1, notimplemented},
@@ -35,7 +35,7 @@ var opCodes = []*OpCode{
 	{0x11, DE, 0, 2, 3, ldr16d16},
 	{0x12, DE, A, 0, 2, ldm16r8},
 	{0x13, DE, 0, 0, 2, inc16},
-	{0x14, D, 0, 0, 1, inc8},
+	{0x14, D, 0, 0, 1, incr},
 	{0x15, 0, 0, 0, 1, notimplemented},
 	{0x16, D, 0, 1, 2, ldr8d8},
 	{0x17, 0, 0, 0, 1, notimplemented},
@@ -43,15 +43,15 @@ var opCodes = []*OpCode{
 	{0x19, 0, 0, 0, 1, notimplemented},
 	{0x1A, A, DE, 0, 2, ldrm16},
 	{0x1B, 0, 0, 0, 1, notimplemented},
-	{0x1C, E, 0, 0, 1, inc8},
+	{0x1C, E, 0, 0, 1, incr},
 	{0x1D, 0, 0, 0, 1, notimplemented},
 	{0x1E, E, 0, 1, 2, ldr8d8},
 	{0x1F, 0, 0, 0, 1, notimplemented},
-	{0x20, 0, 0, 0, 1, notimplemented},
+	{0x20, flagZ, 0, 1, 2, jpnfr8},
 	{0x21, HL, 0, 2, 3, ldr16d16},
 	{0x22, HLI, A, 0, 2, ldm16r},
 	{0x23, HL, 0, 0, 2, inc16},
-	{0x24, H, 0, 0, 1, inc8},
+	{0x24, H, 0, 0, 1, incr},
 	{0x25, 0, 0, 0, 1, notimplemented},
 	{0x26, H, 0, 1, 2, ldr8d8},
 	{0x27, 0, 0, 0, 1, notimplemented},
@@ -59,11 +59,11 @@ var opCodes = []*OpCode{
 	{0x29, 0, 0, 0, 1, notimplemented},
 	{0x2A, A, HLI, 0, 2, ldrm16},
 	{0x2B, 0, 0, 0, 1, notimplemented},
-	{0x2C, L, 0, 0, 1, inc8},
+	{0x2C, L, 0, 0, 1, incr},
 	{0x2D, 0, 0, 0, 1, notimplemented},
 	{0x2E, L, 0, 0, 1, ldr8d8},
 	{0x2F, 0, 0, 0, 1, notimplemented},
-	{0x30, 0, 0, 0, 1, notimplemented},
+	{0x30, flagC, 0, 1, 2, jpnfr8},
 	{0x31, SP, 0, 2, 3, ldr16d16},
 	{0x32, HLD, A, 0, 2, ldm16r},
 	{0x33, SP, 0, 0, 2, inc16},
@@ -75,7 +75,7 @@ var opCodes = []*OpCode{
 	{0x39, 0, 0, 0, 1, notimplemented},
 	{0x3A, A, HLD, 0, 2, ldrm16},
 	{0x3B, 0, 0, 0, 1, notimplemented},
-	{0x3C, A, 0, 0, 1, inc8},
+	{0x3C, A, 0, 0, 1, incr},
 	{0x3D, 0, 0, 0, 1, notimplemented},
 	{0x3E, A, 0, 1, 2, ldr8d8},
 	{0x3F, 0, 0, 0, 1, notimplemented},
@@ -332,10 +332,10 @@ func retncc(c *CPU, R1 byte, _ byte) {
 }
 
 // arithmetic
-func inc8(c *CPU, r8 byte, _ byte) {
+func incr(c *CPU, r8 byte, _ byte) {
 	r := c.Reg.R[r8]
 
-	incremented := r + 1
+	incremented := r + 0x01
 	c.Reg.R[r8] = incremented
 	c.Reg.clearFlag(flagN) // not subtract
 	if incremented == 0 {
@@ -399,9 +399,15 @@ func jpm16(c *CPU, R1 byte, _ byte) {
 }
 
 // -----jr-----
-func jrna16(c *CPU, flag int, _ byte) {
-	if flag != 1 {
-		_jp(c, c.fetch16())
+func _jr(c *CPU, addr byte) {
+	// -1 get rid of fetch()
+	c.Reg.PC = types.Addr(int32(c.Reg.PC) + int32(addr) - 1)
+}
+
+// r8 is a signed data, which are added to PC
+func jpnfr8(c *CPU, flag byte, _ byte) {
+	if !c.Reg.isSet(flag) {
+		_jr(c, c.fetch())
 	}
 }
 

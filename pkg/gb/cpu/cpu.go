@@ -1,8 +1,11 @@
 package cpu
 
 import (
+	"fmt"
+
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/interfaces/bus"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
+	"github.com/apex/log"
 )
 
 type CPU struct {
@@ -32,6 +35,7 @@ func (c *CPU) Step() int {
 		op = opCodes[opcode]
 	}
 
+	log.Info(fmt.Sprintf("opcode 0x%2x, PC 0x%4x", op.Code, c.Reg.PC-1))
 	op.Handler(c, op.R1, op.R2)
 
 	return 0
@@ -44,9 +48,8 @@ func (c *CPU) fetch() byte {
 }
 
 func (c *CPU) fetch16() types.Addr {
-	lower := uint16(c.Bus.ReadByte(c.Reg.PC))
-	upper := uint16(c.Bus.ReadByte(c.Reg.PC + 1))
-	c.Reg.PC += 2
+	lower := uint16(c.fetch())
+	upper := uint16(c.fetch())
 
 	return types.Addr((upper << 8) | lower)
 }

@@ -20,4 +20,6 @@ test_cpu:
 
 test_register:
 	go test -run Register ./pkg/gb/cpu -cover -coverprofile=cover_register.out
+test_opcode:
+	go test -run OpCode ./pkg/gb/cpu -cover
 
