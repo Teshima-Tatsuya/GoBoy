@@ -30,7 +30,7 @@ func setup(file string) *bus.Bus {
 }
 
 func Test01(t *testing.T) {
-	file := "../../../test/blargg-gb-tests/cpu_instrs/individual/01-special.gb"
+	file := "../../../test/blargg/cpu_instrs/individual/01-special.gb"
 	bus := setup(file)
 	cpu := New(bus)
 
@@ -40,25 +40,11 @@ func Test01(t *testing.T) {
 }
 
 func Test06(t *testing.T) {
-	file := "../../../test/blargg-gb-tests/cpu_instrs/individual/06-ld r,r.gb"
+	file := "../../../test/blargg/cpu_instrs/individual/06-ld r,r.gb"
 	bus := setup(file)
 	cpu := New(bus)
 
 	for {
 		cpu.Step()
-	}
-}
-
-func TestLd(t *testing.T) {
-	file := "../../../test/blargg-gb-tests/cpu_instrs/individual/ld.gb"
-	bus := setup(file)
-	cpu := New(bus)
-
-	for {
-		cpu.Step()
-
-		if cpu.Bus.ReadByte(cpu.Reg.PC) == 0x0 {
-			return
-		}
 	}
 }
