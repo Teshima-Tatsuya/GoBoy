@@ -18,7 +18,7 @@ var opCodes = []*OpCode{
 	{0x00, 0, 0, 0, 1, nop},
 	{0x01, BC, 0, 2, 3, ldr16d16},
 	{0x02, BC, A, 0, 2, ldm16r},
-	{0x03, BC, 0, 0, 2, inc16},
+	{0x03, BC, 0, 0, 2, incr16},
 	{0x04, B, 0, 0, 1, incr},
 	{0x05, 0, 0, 0, 1, notimplemented},
 	{0x06, B, 0, 1, 2, ldr8d8},
@@ -34,7 +34,7 @@ var opCodes = []*OpCode{
 	{0x10, 0, 0, 0, 1, notimplemented},
 	{0x11, DE, 0, 2, 3, ldr16d16},
 	{0x12, DE, A, 0, 2, ldm16r8},
-	{0x13, DE, 0, 0, 2, inc16},
+	{0x13, DE, 0, 0, 2, incr16},
 	{0x14, D, 0, 0, 1, incr},
 	{0x15, 0, 0, 0, 1, notimplemented},
 	{0x16, D, 0, 1, 2, ldr8d8},
@@ -50,7 +50,7 @@ var opCodes = []*OpCode{
 	{0x20, flagZ, 0, 1, 2, jpnfr8},
 	{0x21, HL, 0, 2, 3, ldr16d16},
 	{0x22, HLI, A, 0, 2, ldm16r},
-	{0x23, HL, 0, 0, 2, inc16},
+	{0x23, HL, 0, 0, 2, incr16},
 	{0x24, H, 0, 0, 1, incr},
 	{0x25, 0, 0, 0, 1, notimplemented},
 	{0x26, H, 0, 1, 2, ldr8d8},
@@ -66,7 +66,7 @@ var opCodes = []*OpCode{
 	{0x30, flagC, 0, 1, 2, jpnfr8},
 	{0x31, SP, 0, 2, 3, ldr16d16},
 	{0x32, HLD, A, 0, 2, ldm16r},
-	{0x33, SP, 0, 0, 2, inc16},
+	{0x33, SP, 0, 0, 2, incr16},
 	{0x34, 0, 0, 0, 1, notimplemented},
 	{0x35, 0, 0, 0, 1, notimplemented},
 	{0x36, HL, 0, 1, 3, ldr16d16},
@@ -345,14 +345,14 @@ func incr(c *CPU, r8 byte, _ byte) {
 	}
 
 	// Harf Carry
-	if (incremented^0x01^r8)&0x10 == 0x10 {
+	if (incremented^0x01^c.Reg.R[r8])&0x10 == 0x10 {
 		c.Reg.setFlag(flagH)
 	} else {
 		c.Reg.clearFlag(flagH)
 	}
 }
 
-func inc16(c *CPU, r16 byte, _ byte) {
+func incr16(c *CPU, r16 byte, _ byte) {
 	c.Reg.setR16(types.Addr(r16), types.Addr(c.Reg.R16(int(r16))+1))
 }
 
@@ -406,6 +406,7 @@ func _jr(c *CPU, addr byte) {
 
 // r8 is a signed data, which are added to PC
 func jpnfr8(c *CPU, flag byte, _ byte) {
+	// flag is not set
 	if !c.Reg.isSet(flag) {
 		_jr(c, c.fetch())
 	}

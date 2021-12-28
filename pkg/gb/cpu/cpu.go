@@ -35,7 +35,8 @@ func (c *CPU) Step() int {
 		op = opCodes[opcode]
 	}
 
-	log.Info(fmt.Sprintf("opcode 0x%2x, PC 0x%4x", op.Code, c.Reg.PC-1))
+	log.Info(fmt.Sprintf("opcode 0x%2x, PC 0x%4x, Ope1 0x%2x Ope2 0x%2x", op.Code, c.Reg.PC-1, c.Bus.ReadByte(c.Reg.PC), c.Bus.ReadByte(c.Reg.PC+1)))
+	log.Info(fmt.Sprintf("  Reg %v", c.Reg))
 	op.Handler(c, op.R1, op.R2)
 
 	return 0
