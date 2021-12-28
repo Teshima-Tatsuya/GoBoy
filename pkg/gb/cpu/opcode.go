@@ -209,8 +209,8 @@ var opCodes = []*OpCode{
 	{0xBF, 0, 0, 0, 1, notimplemented},
 	{0xC0, flagZ, 0, 2, 2, retncc},
 	{0xC1, 0, 0, 0, 1, notimplemented},
-	{0xC2, 0, 0, 0, 1, notimplemented},
-	{0xC3, 0, 0, 2, 4, jp},
+	{0xC2, flagZ, 0, 2, 3, jpna16},
+	{0xC3, 0, 0, 2, 4, jpa16},
 	{0xC4, 0, 0, 0, 1, notimplemented},
 	{0xC5, 0, 0, 0, 1, notimplemented},
 	{0xC6, 0, 0, 0, 1, notimplemented},
@@ -225,7 +225,7 @@ var opCodes = []*OpCode{
 	{0xCF, 0, 0, 0, 1, notimplemented},
 	{0xD0, 0, 0, 0, 1, notimplemented},
 	{0xD1, 0, 0, 0, 1, notimplemented},
-	{0xD2, 0, 0, 0, 1, notimplemented},
+	{0xD2, flagC, 0, 2, 3, jpna16},
 	{0xD3, 0, 0, 0, 1, notimplemented},
 	{0xD4, 0, 0, 0, 1, notimplemented},
 	{0xD5, 0, 0, 0, 1, notimplemented},
@@ -363,11 +363,12 @@ func ret(c *CPU, _ byte, _ byte) {
 
 // -----jp-----
 
-// JP a16
 func _jp(c *CPU, addr types.Addr) {
 	c.Reg.PC = addr
 }
-func jp(c *CPU, _ byte, _ byte) {
+
+// JP a16
+func jpa16(c *CPU, _ byte, _ byte) {
 	_jp(c, c.fetch16())
 }
 
@@ -376,9 +377,19 @@ func jpcc(c *CPU, cc byte, _ byte) {
 
 }
 
-// -----jr-----
-func jrna16(c *CPU, cc byte, _ byte) {
+// JP Nflag, a16
+// jump when flag = 0
+func jpna16(c *CPU, flag byte, _ byte) {
+	if !c.Reg.isSet(flag) {
+		_jp(c, c.fetch16())
+	}
+}
 
+// -----jr-----
+func jrna16(c *CPU, flag int, _ byte) {
+	if flag != 1 {
+		_jp(c, c.fetch16())
+	}
 }
 
 func notimplemented(c *CPU, _ byte, _ byte) {
