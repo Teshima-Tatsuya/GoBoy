@@ -46,7 +46,7 @@ func (c *CPU) fetch() byte {
 func (c *CPU) fetch16() types.Addr {
 	lower := uint16(c.Bus.ReadByte(c.Reg.PC))
 	upper := uint16(c.Bus.ReadByte(c.Reg.PC + 1))
-	c.Reg.PC += 1
+	c.Reg.PC += 2
 
 	return types.Addr((upper << 8) | lower)
 }

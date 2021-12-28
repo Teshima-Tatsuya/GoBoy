@@ -307,9 +307,7 @@ func ldrm16(c *CPU, R1 byte, R2 byte) {
 
 // LD r1, d16
 func ldr16d16(c *CPU, R1 byte, _ byte) {
-	lower := c.fetch()
-	upper := c.fetch()
-	c.Reg.setR16(types.Addr(R1), types.Addr(upper)<<8|types.Addr(lower))
+	c.Reg.setR16(types.Addr(R1), c.fetch16())
 }
 
 // LD r1, d8
@@ -364,8 +362,13 @@ func ret(c *CPU, _ byte, _ byte) {
 }
 
 // -----jp-----
+
+// JP a16
+func _jp(c *CPU, addr types.Addr) {
+	c.Reg.PC = addr
+}
 func jp(c *CPU, _ byte, _ byte) {
-	c.Reg.PC = c.fetch16()
+	_jp(c, c.fetch16())
 }
 
 func jpcc(c *CPU, cc byte, _ byte) {
@@ -374,7 +377,7 @@ func jpcc(c *CPU, cc byte, _ byte) {
 }
 
 // -----jr-----
-func jrncc(c *CPU, cc byte, _ byte) {
+func jrna16(c *CPU, cc byte, _ byte) {
 
 }
 

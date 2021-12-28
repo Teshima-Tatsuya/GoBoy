@@ -433,3 +433,36 @@ func TestOpeCode_ldr16d16(t *testing.T) {
 		})
 	}
 }
+
+// -----jp-----
+func TestOpeCode_jp(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		addr   types.Addr
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "JP a16",
+			args: args{0xC3, 0x1234},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+			want := tt.args.addr
+			c.Bus.WriteByte(c.Reg.PC, 0x34)
+			c.Bus.WriteByte(c.Reg.PC+1, 0x12)
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, want, c.Reg.PC)
+		})
+	}
+}
