@@ -94,8 +94,8 @@ func (r *Register) HL() types.Addr {
 	return (types.Addr(r.R[H]) << 8) | types.Addr(r.R[L])
 }
 
-func (r *Register) setR16(addr types.Addr, value types.Addr) {
-	switch addr {
+func (r *Register) setR16(R int, value types.Addr) {
+	switch R {
 	case AF:
 		r.setAF(value)
 	case BC:

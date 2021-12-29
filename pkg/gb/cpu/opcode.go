@@ -77,7 +77,7 @@ var opCodes = []*OpCode{
 	{0x38, "JR C,r8", flagC, 0, 1, 2, jrfr8},
 	{0x39, "ADD HL,SP", 0, 0, 0, 1, notimplemented},
 	{0x3A, "LD A,(HL-)", A, HLD, 0, 2, ldrm16},
-	{0x3B, "DEC SP", 0, 0, 0, 1, notimplemented},
+	{0x3B, "DEC SP", SP, 0, 0, 1, decr16},
 	{0x3C, "INC A", A, 0, 0, 1, incr},
 	{0x3D, "DEC A", A, 0, 0, 1, decr},
 	{0x3E, "LD A,d8", A, 0, 1, 2, ldrd},
@@ -329,7 +329,7 @@ func ldra16(c *CPU, R1 byte, _ byte) {
 
 // LD r1, r2
 func ldr16r16(c *CPU, R1 byte, R2 byte) {
-	c.Reg.setR16(types.Addr(R1), c.Reg.R16(int(R2)))
+	c.Reg.setR16(int(R1), c.Reg.R16(int(R2)))
 }
 
 // LD r1, r2+d
@@ -337,7 +337,7 @@ func ldr16r16d(c *CPU, R1 byte, R2 byte) {
 	d := c.fetch()
 	v := int32(c.Reg.R16(SP)) + int32(d) // Cast to int32 considers carry
 	carryBits := uint32(c.Reg.R16(SP)) ^ uint32(d) ^ uint32(v)
-	c.Reg.setR16(types.Addr(R1), c.Reg.R16(int(R2)))
+	c.Reg.setR16(int(R1), c.Reg.R16(int(R2)))
 
 	c.Reg.setFlag(flagZ)
 	c.Reg.setFlag(flagN)
@@ -356,7 +356,7 @@ func ldr16r16d(c *CPU, R1 byte, R2 byte) {
 
 // LD r1, d16
 func ldr16d16(c *CPU, R1 byte, _ byte) {
-	c.Reg.setR16(types.Addr(R1), c.fetch16())
+	c.Reg.setR16(int(R1), c.fetch16())
 }
 
 // func ldm(r)
@@ -433,7 +433,7 @@ func incr(c *CPU, r8 byte, _ byte) {
 }
 
 func incr16(c *CPU, r16 byte, _ byte) {
-	c.Reg.setR16(types.Addr(r16), types.Addr(c.Reg.R16(int(r16))+1))
+	c.Reg.setR16(int(r16), types.Addr(c.Reg.R16(int(r16))+1))
 }
 
 func decr(c *CPU, r8 byte, _ byte) {
@@ -458,7 +458,7 @@ func decr(c *CPU, r8 byte, _ byte) {
 }
 
 func decr16(c *CPU, r16 byte, _ byte) {
-	c.Reg.setR16(types.Addr(r16), types.Addr(c.Reg.R16(int(r16))-1))
+	c.Reg.setR16(int(r16), types.Addr(c.Reg.R16(int(r16))-1))
 }
 
 func _and(c *CPU, buf byte) {
@@ -739,7 +739,7 @@ func pop(c *CPU, r16 byte, _ byte) {
 
 	upper := c.pop()
 
-	c.Reg.setR16(types.Addr(r16), types.Addr(int16(upper)<<8|int16(lower)))
+	c.Reg.setR16(int(r16), types.Addr(int16(upper)<<8|int16(lower)))
 }
 
 // -----call-----

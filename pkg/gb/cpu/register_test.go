@@ -17,7 +17,7 @@ func TestRegister_R16(t *testing.T) {
 	r := setupRegister()
 
 	type args struct {
-		flag  types.Addr
+		flag  int
 		lower types.Addr
 		upper types.Addr
 		value types.Addr
@@ -67,7 +67,7 @@ func TestRegister_R16_SP_PC(t *testing.T) {
 	r := setupRegister()
 
 	type args struct {
-		flag  types.Addr
+		flag  int
 		value types.Addr
 	}
 	tests := []struct {

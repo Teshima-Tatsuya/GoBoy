@@ -826,6 +826,52 @@ func TestOpeCode_incr(t *testing.T) {
 	}
 }
 
+func TestOpeCode_incr16(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "INC BC",
+			args: args{0x03, BC},
+		},
+		{
+			name: "INC DE",
+			args: args{0x13, DE},
+		},
+		{
+			name: "INC HL",
+			args: args{0x23, HL},
+		},
+		{
+			name: "INC SP",
+			args: args{0x33, SP},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			c.Reg.setR16(int(op.R1), 0x1234)
+			want := types.Addr(0x1235)
+
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, want, c.Reg.R16(int(op.R1)))
+		})
+	}
+}
+
 func TestOpeCode_decr(t *testing.T) {
 	c := setupCPU()
 
@@ -897,6 +943,52 @@ func TestOpeCode_decr(t *testing.T) {
 			assert.Equal(t, false, c.Reg.isSet(flagZ))
 			assert.Equal(t, true, c.Reg.isSet(flagN))
 			assert.Equal(t, true, c.Reg.isSet(flagH))
+		})
+	}
+}
+
+func TestOpeCode_decr16(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "DEC BC",
+			args: args{0x0B, BC},
+		},
+		{
+			name: "DEC DE",
+			args: args{0x1B, DE},
+		},
+		{
+			name: "DEC HL",
+			args: args{0x2B, HL},
+		},
+		{
+			name: "DEC SP",
+			args: args{0x3B, SP},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			c.Reg.setR16(int(op.R1), 0x1234)
+			want := types.Addr(0x1233)
+
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, want, c.Reg.R16(int(op.R1)))
 		})
 	}
 }
