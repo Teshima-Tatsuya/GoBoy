@@ -268,7 +268,7 @@ var opCodes = []*OpCode{
 	{0xF7, "RST 30H", 0x30, 0, 0, 1, rst},
 	{0xF8, "LD HL,SP+r8", 0, 0, 0, 1, notimplemented},
 	{0xF9, "LD SP,HL", 0, 0, 0, 1, notimplemented},
-	{0xFA, "LD A,(a16)", 0, 0, 0, 1, notimplemented},
+	{0xFA, "LD A,(a16)", A, 0, 2, 4, ldra16},
 	{0xFB, "EI", 0, 0, 0, 1, ei},
 	{0xFC, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xFD, "EMPTY", 0, 0, 0, 1, notimplemented},
@@ -332,6 +332,10 @@ func lda8r(c *CPU, _ byte, R2 byte) {
 
 func ldra8(c *CPU, R1 byte, _ byte) {
 	c.Reg.R[R1] = c.Bus.ReadByte(types.Addr(0xff00 | types.Addr(c.fetch())))
+}
+
+func ldra16(c *CPU, R1 byte, _ byte) {
+	c.Reg.R[R1] = c.Bus.ReadByte(c.fetch16())
 }
 
 func retcc(c *CPU, R1 byte, _ byte) {
