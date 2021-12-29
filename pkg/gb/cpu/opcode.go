@@ -260,7 +260,7 @@ var opCodes = []*OpCode{
 	{0xEF, "RST 28H", 0x28, 0, 0, 1, rst},
 	{0xF0, "LDH A,(a8)", A, 0, 1, 3, ldra8},
 	{0xF1, "POP AF", AF, 0, 0, 3, pop},
-	{0xF2, "LD A,(C)", 0, 0, 0, 1, notimplemented},
+	{0xF2, "LD A,(C)", A, C, 1, 2, ldrm},
 	{0xF3, "DI", 0, 0, 0, 1, di},
 	{0xF4, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xF5, "PUSH AF", AF, 0, 0, 1, push},
@@ -291,12 +291,18 @@ func nop(c *CPU, _ byte, _ byte) {}
 //    ldrm   is LD r8, Read(r8)
 //    ldrm16 is LD r8, Read(r16)
 // func order
-//  ldr(r, m16, d, d16, a, a16)
+//  ldr(r, m, m16, d, a, a16)
 
 // LD R1, R2
 // Write R2 into R1
 func ldrr(c *CPU, R1 byte, R2 byte) {
 	c.Reg.R[R1] = c.Reg.R[R2]
+}
+
+// LD r1, (r2)
+// Write r2 value into r1
+func ldrm(c *CPU, R1 byte, R2 byte) {
+	c.Reg.R[R1] = c.Bus.ReadByte(types.Addr(0xFF00 | types.Addr(c.Reg.R[R2])))
 }
 
 // LD r1, (r2)

@@ -242,6 +242,41 @@ func TestOpeCode_ldrr(t *testing.T) {
 	}
 }
 
+func TestOpeCode_ldrm(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     byte
+		r2     byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "LD A,(C)",
+			args: args{0xF2, A, C},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+			addr := types.Addr(0xFF03)
+			want := byte(0x12)
+			c.Bus.WriteByte(addr, want)
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, op.R1, tt.args.r1)
+			assert.Equal(t, op.R2, tt.args.r2)
+			assert.Equal(t, want, c.Reg.R[A])
+		})
+	}
+}
+
 func TestOpeCode_ldm16r(t *testing.T) {
 	c := setupCPU()
 
