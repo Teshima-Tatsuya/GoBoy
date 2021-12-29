@@ -168,8 +168,8 @@ var opCodes = []*OpCode{
 	{0x93, "SUB E", E, 0, 0, 1, subr},
 	{0x94, "SUB H", H, 0, 0, 1, subr},
 	{0x95, "SUB L", L, 0, 0, 1, subr},
-	{0x96, "SUB (HL)", HL, 0, 0, 1, notimplemented},
-	{0x97, "SUB A", A, 0, 0, 1, notimplemented},
+	{0x96, "SUB (HL)", HL, 0, 0, 2, subHL},
+	{0x97, "SUB A", A, 0, 0, 1, subr},
 	{0x98, "SBC A, B", A, B, 0, 1, notimplemented},
 	{0x99, "SBC A, C", A, C, 0, 1, notimplemented},
 	{0x9A, "SBC A, D", A, D, 0, 1, notimplemented},
@@ -210,7 +210,7 @@ var opCodes = []*OpCode{
 	{0xBD, "CP L", L, 0, 0, 1, cpr},
 	{0xBE, "CP (HL)", HL, 0, 0, 2, cpHL},
 	{0xBF, "CP A", A, 0, 0, 1, cpr},
-	{0xC0, "RET NZ", flagZ, 0, 2, 2, retncc},
+	{0xC0, "RET NZ", flagZ, 0, 2, 2, retnf},
 	{0xC1, "POP BC", BC, 0, 0, 3, pop},
 	{0xC2, "JP NZ,a16", flagZ, 0, 2, 3, jpnfa16},
 	{0xC3, "JP a16", 0, 0, 2, 4, jpa16},
@@ -218,7 +218,7 @@ var opCodes = []*OpCode{
 	{0xC5, "PUSH BC", BC, 0, 0, 4, push},
 	{0xC6, "ADD A,d8", A, 0, 1, 2, addd8},
 	{0xC7, "RST 00H", 0x00, 0, 0, 1, rst},
-	{0xC8, "RET Z", flagZ, 0, 0, 1, notimplemented},
+	{0xC8, "RET Z", flagZ, 0, 0, 2, retf},
 	{0xC9, "RET", 0, 0, 0, 4, ret},
 	{0xCA, "JP Z,a16", flagZ, 0, 2, 3, jpfa16},
 	{0xCB, "PREFIX CB", 0, 0, 0, 1, notimplemented},
@@ -234,7 +234,7 @@ var opCodes = []*OpCode{
 	{0xD5, "PUSH DE", DE, 0, 0, 1, push},
 	{0xD6, "SUB d8", 0, 0, 1, 2, subd8},
 	{0xD7, "RST 10H", 0x10, 0, 0, 1, rst},
-	{0xD8, "RET C", flagC, 0, 0, 1, notimplemented},
+	{0xD8, "RET C", flagC, 0, 0, 2, retf},
 	{0xD9, "RETI", 0, 0, 0, 1, notimplemented},
 	{0xDA, "JP C,a16", flagC, 0, 2, 3, jpfa16},
 	{0xDB, "EMPTY", 0, 0, 0, 1, notimplemented},
@@ -345,13 +345,13 @@ func ldra16(c *CPU, R1 byte, _ byte) {
 	c.Reg.R[R1] = c.Bus.ReadByte(c.fetch16())
 }
 
-func retcc(c *CPU, R1 byte, _ byte) {
+func retf(c *CPU, R1 byte, _ byte) {
 	if c.Reg.R[F]&(1<<R1) != 0 {
 		c.popPC()
 	}
 }
 
-func retncc(c *CPU, R1 byte, _ byte) {
+func retnf(c *CPU, R1 byte, _ byte) {
 	if c.Reg.R[F]&(1<<R1) == 0 {
 		c.popPC()
 	}
@@ -604,11 +604,6 @@ func _jp(c *CPU, addr types.Addr) {
 // JP a16
 func jpa16(c *CPU, _ byte, _ byte) {
 	_jp(c, c.fetch16())
-}
-
-func jpcc(c *CPU, cc byte, _ byte) {
-	c.Reg.PC = c.fetch16()
-
 }
 
 // JP flag, a16
