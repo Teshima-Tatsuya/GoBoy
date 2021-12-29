@@ -8,6 +8,7 @@ import (
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/bus"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/ram"
 )
 
@@ -25,7 +26,8 @@ func setup(file string) *bus.Bus {
 	wram := ram.New(0x2000)
 	wram2 := ram.New(0x2000)
 	hram := ram.New(0x0080)
-	bus := bus.New(cart, vram, wram, wram2, hram)
+	io := io.New(0x0080)
+	bus := bus.New(cart, vram, wram, wram2, hram, io)
 
 	return bus
 }

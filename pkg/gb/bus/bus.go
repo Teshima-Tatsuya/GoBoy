@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/ram"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
@@ -14,16 +15,17 @@ type Bus struct {
 	WRAM  *ram.RAM
 	WRAM2 *ram.RAM
 	HRAM  *ram.RAM
-	IO    *io.iO
+	IO    *io.IO
 }
 
-func New(cart *cartridge.Cartridge, vram *ram.RAM, wram *ram.RAM, wram2 *ram.RAM, hram *ram.RAM) *Bus {
+func New(cart *cartridge.Cartridge, vram *ram.RAM, wram *ram.RAM, wram2 *ram.RAM, hram *ram.RAM, io *io.IO) *Bus {
 	return &Bus{
 		Cart:  cart,
 		VRAM:  vram,
 		WRAM:  wram,
 		WRAM2: wram2,
 		HRAM:  hram,
+		IO:    io,
 	}
 }
 
@@ -37,6 +39,8 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 		return b.WRAM.Read(addr - 0xBFFF)
 	case addr >= 0xD000 && addr <= 0xDFFF:
 		return b.WRAM2.Read(addr - 0xCFFF)
+	case addr >= 0xFF00 && addr <= 0xFF7F:
+		return b.IO.Read(addr - 0xCFFF)
 	case addr >= 0xFF80 && addr <= 0xFFFE:
 		return b.HRAM.Read(addr - 0xFF7F)
 	default:
@@ -57,6 +61,8 @@ func (b *Bus) WriteByte(addr types.Addr, value byte) {
 		b.WRAM.Write(addr-0xBFFF, value)
 	case addr >= 0xD000 && addr <= 0xDFFF:
 		b.WRAM2.Write(addr-0xCFFF, value)
+	case addr >= 0xFF00 && addr <= 0xFF7F:
+		b.IO.Write(addr-0xCFFF, value)
 	case addr >= 0xFF80 && addr <= 0xFFFE:
 		b.HRAM.Write(addr-0xFF7F, value)
 	default:
