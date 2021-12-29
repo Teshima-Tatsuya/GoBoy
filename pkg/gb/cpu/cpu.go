@@ -5,6 +5,7 @@ import (
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/interfaces/bus"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/util"
 	"github.com/apex/log"
 )
 
@@ -49,10 +50,21 @@ func (c *CPU) fetch() byte {
 }
 
 func (c *CPU) fetch16() types.Addr {
-	lower := uint16(c.fetch())
-	upper := uint16(c.fetch())
+	lower := c.fetch()
+	upper := c.fetch()
 
-	return types.Addr((upper << 8) | lower)
+	return util.Byte2Addr(upper, lower)
+}
+
+func (c *CPU) push(buf byte) {
+	c.Reg.SP--
+	c.Bus.WriteByte(c.Reg.SP, buf)
+}
+
+// push PC
+func (c *CPU) pushPC() {
+	c.push(util.ExtractUpper(c.Reg.PC))
+	c.push(util.ExtractLower(c.Reg.PC))
 }
 
 func (c *CPU) pop() byte {
@@ -61,7 +73,7 @@ func (c *CPU) pop() byte {
 	return d
 }
 
-func (c *CPU) pop2PC() {
+func (c *CPU) popPC() {
 	lower := c.pop()
 	upper := c.pop()
 
