@@ -290,8 +290,8 @@ func nop(c *CPU, _ byte, _ byte) {}
 //    ldrr16 is LD r8, r16
 //    ldrm   is LD r8, Read(r8)
 //    ldrm16 is LD r8, Read(r16)
-// func order
-//  ldr(r, m, m16, d, a, a16)
+
+// func ldr(r, m, m16, d, a, a16)
 
 // LD R1, R2
 // Write R2 into R1
@@ -329,6 +329,8 @@ func ldra16(c *CPU, R1 byte, _ byte) {
 func ldm16r(c *CPU, R1 byte, R2 byte) {
 	c.Bus.WriteByte(c.Reg.R16(int(R1)), c.Reg.R[R2])
 }
+
+// func ldr16(d16)
 
 // LD r1, d16
 func ldr16d16(c *CPU, R1 byte, _ byte) {
