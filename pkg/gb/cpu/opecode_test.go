@@ -9,6 +9,7 @@ import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/ram"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -35,6 +36,7 @@ func (c *CPU) regreset() {
 	c.Reg.R[H] = 0x06
 	c.Reg.R[L] = 0x07
 	c.Reg.PC = 0x0100
+	c.Reg.SP = 0xFFFE
 }
 
 func TestOpeCode_nop(t *testing.T) {
@@ -658,6 +660,104 @@ func TestOpeCode_jrnfr8(t *testing.T) {
 			op.Handler(c, byte(op.R1), byte(op.R2))
 
 			assert.Equal(t, want, c.Reg.PC)
+		})
+	}
+}
+
+// ----push----
+func TestOpeCode_push(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		flag   int
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "PUSH BC",
+			args: args{0xC5, BC},
+		},
+		{
+			name: "PUSH DE",
+			args: args{0xD5, DE},
+		},
+		{
+			name: "PUSH HL",
+			args: args{0xE5, HL},
+		},
+		{
+			name: "PUSH AF",
+			args: args{0xF5, AF},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			upper := util.ExtractUpper(c.Reg.R16(int(op.R1)))
+			lower := util.ExtractLower(c.Reg.R16(int(op.R1)))
+			before_sp := c.Reg.SP
+
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, before_sp-2, c.Reg.SP)
+			assert.Equal(t, lower, c.Bus.ReadByte((c.Reg.SP)))
+			assert.Equal(t, upper, c.Bus.ReadByte((c.Reg.SP + 1)))
+		})
+	}
+}
+
+func TestOpeCode_pop(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		flag   int
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "POP BC",
+			args: args{0xC1, BC},
+		},
+		{
+			name: "POP DE",
+			args: args{0xD1, DE},
+		},
+		{
+			name: "POP HL",
+			args: args{0xE1, HL},
+		},
+		{
+			name: "POP AF",
+			args: args{0xF1, AF},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			c.push(0x12) // upper
+			c.push(0x34) // lower
+
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			if op.R1 != AF {
+				assert.Equal(t, types.Addr(0x1234), c.Reg.R16(int(op.R1)))
+			} else {
+				assert.Equal(t, types.Addr(0x1230), c.Reg.R16(int(op.R1)))
+			}
 		})
 	}
 }

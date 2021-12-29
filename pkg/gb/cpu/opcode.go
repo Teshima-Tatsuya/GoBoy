@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/util"
 	"github.com/apex/log"
 )
 
@@ -177,30 +178,30 @@ var opCodes = []*OpCode{
 	{0x9D, "SBC A, L", A, L, 0, 1, notimplemented},
 	{0x9E, "SBC A, (HL)", A, HL, 0, 1, notimplemented},
 	{0x9F, "SBC A, A", A, A, 0, 1, notimplemented},
-	{0xA0, "AND B", B, 0, 0, 1, notimplemented},
-	{0xA1, "AND C", C, 0, 0, 1, notimplemented},
-	{0xA2, "AND D", D, 0, 0, 1, notimplemented},
-	{0xA3, "AND E", E, 0, 0, 1, notimplemented},
-	{0xA4, "AND H", H, 0, 0, 1, notimplemented},
-	{0xA5, "AND L", L, 0, 0, 1, notimplemented},
-	{0xA6, "AND (HL)", HL, 0, 0, 1, notimplemented},
-	{0xA7, "AND A", A, 0, 0, 1, notimplemented},
-	{0xA8, "XOR B", B, 0, 0, 1, notimplemented},
-	{0xA9, "XOR C", C, 0, 0, 1, notimplemented},
-	{0xAA, "XOR D", D, 0, 0, 1, notimplemented},
-	{0xAB, "XOR E", E, 0, 0, 1, notimplemented},
-	{0xAC, "XOR H", H, 0, 0, 1, notimplemented},
-	{0xAD, "XOR L", L, 0, 0, 1, notimplemented},
-	{0xAE, "XOR (HL)", HL, 0, 0, 1, notimplemented},
-	{0xAF, "OR A", A, 0, 0, 1, notimplemented},
-	{0xB0, "OR B", B, 0, 0, 1, notimplemented},
-	{0xB1, "OR C", C, 0, 0, 1, notimplemented},
-	{0xB2, "OR D", D, 0, 0, 1, notimplemented},
-	{0xB3, "OR E", E, 0, 0, 1, notimplemented},
-	{0xB4, "OR H", H, 0, 0, 1, notimplemented},
-	{0xB5, "OR L", L, 0, 0, 1, notimplemented},
-	{0xB6, "OR (HL)", HL, 0, 0, 1, notimplemented},
-	{0xB7, "OR A", A, 0, 0, 1, notimplemented},
+	{0xA0, "AND B", B, 0, 0, 1, andr},
+	{0xA1, "AND C", C, 0, 0, 1, andr},
+	{0xA2, "AND D", D, 0, 0, 1, andr},
+	{0xA3, "AND E", E, 0, 0, 1, andr},
+	{0xA4, "AND H", H, 0, 0, 1, andr},
+	{0xA5, "AND L", L, 0, 0, 1, andr},
+	{0xA6, "AND (HL)", HL, 0, 0, 2, notimplemented},
+	{0xA7, "AND A", A, 0, 0, 1, andr},
+	{0xA8, "XOR B", B, 0, 0, 1, xorr},
+	{0xA9, "XOR C", C, 0, 0, 1, xorr},
+	{0xAA, "XOR D", D, 0, 0, 1, xorr},
+	{0xAB, "XOR E", E, 0, 0, 1, xorr},
+	{0xAC, "XOR H", H, 0, 0, 1, xorr},
+	{0xAD, "XOR L", L, 0, 0, 1, xorr},
+	{0xAE, "XOR (HL)", HL, 0, 0, 2, notimplemented},
+	{0xAF, "XOR A", A, 0, 0, 1, xorr},
+	{0xB0, "OR B", B, 0, 0, 1, orr},
+	{0xB1, "OR C", C, 0, 0, 1, orr},
+	{0xB2, "OR D", D, 0, 0, 1, orr},
+	{0xB3, "OR E", E, 0, 0, 1, orr},
+	{0xB4, "OR H", H, 0, 0, 1, orr},
+	{0xB5, "OR L", L, 0, 0, 1, orr},
+	{0xB6, "OR (HL)", HL, 0, 0, 2, orr},
+	{0xB7, "OR A", A, 0, 0, 1, orr},
 	{0xB8, "CP B", B, 0, 0, 1, notimplemented},
 	{0xB9, "CP C", C, 0, 0, 1, notimplemented},
 	{0xBA, "CP D", D, 0, 0, 1, notimplemented},
@@ -257,8 +258,8 @@ var opCodes = []*OpCode{
 	{0xED, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xEE, "XOR d8", 0, 0, 0, 1, notimplemented},
 	{0xEF, "RST 28H", 0x28, 0, 0, 1, rst},
-	{0xF0, "LDH (a8),A", 0, 0, 0, 1, notimplemented},
-	{0xF1, "POP AF", AF, 0, 0, 3, popAF},
+	{0xF0, "LDH A,(a8)", A, 0, 1, 3, ldra8},
+	{0xF1, "POP AF", AF, 0, 0, 3, pop},
 	{0xF2, "LD A,(C)", 0, 0, 0, 1, notimplemented},
 	{0xF3, "DI", 0, 0, 0, 1, di},
 	{0xF4, "EMPTY", 0, 0, 0, 1, notimplemented},
@@ -329,6 +330,10 @@ func lda8r(c *CPU, _ byte, R2 byte) {
 	c.Bus.WriteByte(types.Addr(0xff00|types.Addr(c.fetch())), c.Reg.R[R2])
 }
 
+func ldra8(c *CPU, R1 byte, _ byte) {
+	c.Reg.R[R1] = c.Bus.ReadByte(types.Addr(0xff00 | types.Addr(c.fetch())))
+}
+
 func retcc(c *CPU, R1 byte, _ byte) {
 	if c.Reg.R[F]&(1<<R1) != 0 {
 		c.popPC()
@@ -390,6 +395,45 @@ func decr(c *CPU, r8 byte, _ byte) {
 
 func decr16(c *CPU, r16 byte, _ byte) {
 	c.Reg.setR16(types.Addr(r16), types.Addr(c.Reg.R16(int(r16))-1))
+}
+
+func andr(c *CPU, r8 byte, _ byte) {
+	c.Reg.R[A] &= c.Reg.R[r8]
+
+	if c.Reg.R[A] == 0 {
+		c.Reg.setFlag(flagZ)
+	} else {
+		c.Reg.clearFlag(flagZ)
+	}
+	c.Reg.clearFlag(flagN)
+	c.Reg.setFlag(flagH)
+	c.Reg.clearFlag(flagC)
+}
+
+func orr(c *CPU, r8 byte, _ byte) {
+	c.Reg.R[A] |= c.Reg.R[r8]
+
+	if c.Reg.R[A] == 0 {
+		c.Reg.setFlag(flagZ)
+	} else {
+		c.Reg.clearFlag(flagZ)
+	}
+	c.Reg.clearFlag(flagN)
+	c.Reg.clearFlag(flagH)
+	c.Reg.clearFlag(flagC)
+}
+
+func xorr(c *CPU, r8 byte, _ byte) {
+	c.Reg.R[A] ^= c.Reg.R[r8]
+
+	if c.Reg.R[A] == 0 {
+		c.Reg.setFlag(flagZ)
+	} else {
+		c.Reg.clearFlag(flagZ)
+	}
+	c.Reg.clearFlag(flagN)
+	c.Reg.clearFlag(flagH)
+	c.Reg.clearFlag(flagC)
 }
 
 // special
@@ -475,23 +519,25 @@ func rst(c *CPU, n byte, _ byte) {
 
 // -----push-----
 func push(c *CPU, r16 byte, _ byte) {
-	buf := c.Bus.ReadByte(c.Reg.R16(int(r16)))
-	upper, lower := byte(int(buf)>>8), byte(buf)
+	buf := c.Reg.R16(int(r16))
+	upper := util.ExtractUpper(types.Addr(buf))
+	lower := util.ExtractLower(types.Addr(buf))
 	c.push(upper)
 	c.push(lower)
 }
 
 // -----pop------
 func pop(c *CPU, r16 byte, _ byte) {
-	lower := c.pop()
+	var lower byte
+	if r16 != AF {
+		lower = c.pop()
+	} else {
+		lower = c.pop() & 0xf0 // extract only flag
+	}
+
 	upper := c.pop()
 
 	c.Reg.setR16(types.Addr(r16), types.Addr(int16(upper)<<8|int16(lower)))
-}
-
-func popAF(c *CPU, r16 byte, _ byte) {
-	c.Reg.R[F] = c.pop() & 0xf0
-	c.Reg.R[A] = c.pop()
 }
 
 // -----call-----
