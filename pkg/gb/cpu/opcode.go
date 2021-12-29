@@ -184,7 +184,7 @@ var opCodes = []*OpCode{
 	{0xA3, "AND E", E, 0, 0, 1, andr},
 	{0xA4, "AND H", H, 0, 0, 1, andr},
 	{0xA5, "AND L", L, 0, 0, 1, andr},
-	{0xA6, "AND (HL)", HL, 0, 0, 2, notimplemented},
+	{0xA6, "AND (HL)", HL, 0, 0, 2, andHL},
 	{0xA7, "AND A", A, 0, 0, 1, andr},
 	{0xA8, "XOR B", B, 0, 0, 1, xorr},
 	{0xA9, "XOR C", C, 0, 0, 1, xorr},
@@ -192,7 +192,7 @@ var opCodes = []*OpCode{
 	{0xAB, "XOR E", E, 0, 0, 1, xorr},
 	{0xAC, "XOR H", H, 0, 0, 1, xorr},
 	{0xAD, "XOR L", L, 0, 0, 1, xorr},
-	{0xAE, "XOR (HL)", HL, 0, 0, 2, notimplemented},
+	{0xAE, "XOR (HL)", HL, 0, 0, 2, xorHL},
 	{0xAF, "XOR A", A, 0, 0, 1, xorr},
 	{0xB0, "OR B", B, 0, 0, 1, orr},
 	{0xB1, "OR C", C, 0, 0, 1, orr},
@@ -200,16 +200,16 @@ var opCodes = []*OpCode{
 	{0xB3, "OR E", E, 0, 0, 1, orr},
 	{0xB4, "OR H", H, 0, 0, 1, orr},
 	{0xB5, "OR L", L, 0, 0, 1, orr},
-	{0xB6, "OR (HL)", HL, 0, 0, 2, orr},
+	{0xB6, "OR (HL)", HL, 0, 0, 2, orHL},
 	{0xB7, "OR A", A, 0, 0, 1, orr},
-	{0xB8, "CP B", B, 0, 0, 1, notimplemented},
-	{0xB9, "CP C", C, 0, 0, 1, notimplemented},
-	{0xBA, "CP D", D, 0, 0, 1, notimplemented},
-	{0xBB, "CP E", E, 0, 0, 1, notimplemented},
-	{0xBC, "CP H", H, 0, 0, 1, notimplemented},
-	{0xBD, "CP L", L, 0, 0, 1, notimplemented},
-	{0xBE, "CP (HL)", HL, 0, 0, 1, notimplemented},
-	{0xBF, "CP A", A, 0, 0, 1, notimplemented},
+	{0xB8, "CP B", B, 0, 0, 1, cpr},
+	{0xB9, "CP C", C, 0, 0, 1, cpr},
+	{0xBA, "CP D", D, 0, 0, 1, cpr},
+	{0xBB, "CP E", E, 0, 0, 1, cpr},
+	{0xBC, "CP H", H, 0, 0, 1, cpr},
+	{0xBD, "CP L", L, 0, 0, 1, cpr},
+	{0xBE, "CP (HL)", HL, 0, 0, 2, cpHL},
+	{0xBF, "CP A", A, 0, 0, 1, cpr},
 	{0xC0, "RET NZ", flagZ, 0, 2, 2, retncc},
 	{0xC1, "POP BC", BC, 0, 0, 3, pop},
 	{0xC2, "JP NZ,a16", flagZ, 0, 2, 3, jpnfa16},
@@ -248,7 +248,7 @@ var opCodes = []*OpCode{
 	{0xE3, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xE4, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xE5, "PUSH HL", HL, 0, 0, 1, push},
-	{0xE6, "AND d8", 0, 0, 0, 1, notimplemented},
+	{0xE6, "AND d8", 0, 0, 1, 2, andd8},
 	{0xE7, "RST 20H", 0x20, 0, 0, 1, rst},
 	{0xE8, "ADD SP,r8", SP, 0, 0, 1, notimplemented},
 	{0xE9, "JP (HL)", HL, 0, 0, 1, jpm16},
@@ -256,7 +256,7 @@ var opCodes = []*OpCode{
 	{0xEB, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xEC, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xED, "EMPTY", 0, 0, 0, 1, notimplemented},
-	{0xEE, "XOR d8", 0, 0, 0, 1, notimplemented},
+	{0xEE, "XOR d8", 0, 0, 1, 2, xord8},
 	{0xEF, "RST 28H", 0x28, 0, 0, 1, rst},
 	{0xF0, "LDH A,(a8)", A, 0, 1, 3, ldra8},
 	{0xF1, "POP AF", AF, 0, 0, 3, pop},
@@ -264,7 +264,7 @@ var opCodes = []*OpCode{
 	{0xF3, "DI", 0, 0, 0, 1, di},
 	{0xF4, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xF5, "PUSH AF", AF, 0, 0, 1, push},
-	{0xF6, "OR d8", 0, 0, 0, 1, notimplemented},
+	{0xF6, "OR d8", 0, 0, 0, 1, ord8},
 	{0xF7, "RST 30H", 0x30, 0, 0, 1, rst},
 	{0xF8, "LD HL,SP+r8", 0, 0, 0, 1, notimplemented},
 	{0xF9, "LD SP,HL", 0, 0, 0, 1, notimplemented},
@@ -272,7 +272,7 @@ var opCodes = []*OpCode{
 	{0xFB, "EI", 0, 0, 0, 1, ei},
 	{0xFC, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xFD, "EMPTY", 0, 0, 0, 1, notimplemented},
-	{0xFE, "CP d8", 0, 0, 0, 1, notimplemented},
+	{0xFE, "CP d8", 0, 0, 1, 2, cpd8},
 	{0xFF, "RST 38H", 0x38, 0, 0, 1, rst},
 }
 
@@ -397,8 +397,8 @@ func decr16(c *CPU, r16 byte, _ byte) {
 	c.Reg.setR16(types.Addr(r16), types.Addr(c.Reg.R16(int(r16))-1))
 }
 
-func andr(c *CPU, r8 byte, _ byte) {
-	c.Reg.R[A] &= c.Reg.R[r8]
+func _and(c *CPU, buf byte) {
+	c.Reg.R[A] &= buf
 
 	if c.Reg.R[A] == 0 {
 		c.Reg.setFlag(flagZ)
@@ -410,8 +410,51 @@ func andr(c *CPU, r8 byte, _ byte) {
 	c.Reg.clearFlag(flagC)
 }
 
+func andr(c *CPU, r8 byte, _ byte) {
+	buf := c.Reg.R[r8]
+	_and(c, buf)
+}
+
+func andHL(c *CPU, r16 byte, _ byte) {
+	buf := c.Bus.ReadByte(c.Reg.R16(int(r16)))
+	_and(c, buf)
+}
+
+func andd8(c *CPU, _ byte, _ byte) {
+	buf := c.fetch()
+	_and(c, buf)
+}
+
+func _or(c *CPU, buf byte) {
+	c.Reg.R[A] |= buf
+
+	if c.Reg.R[A] == 0 {
+		c.Reg.setFlag(flagZ)
+	} else {
+		c.Reg.clearFlag(flagZ)
+	}
+	c.Reg.clearFlag(flagN)
+	c.Reg.clearFlag(flagH)
+	c.Reg.clearFlag(flagC)
+}
+
 func orr(c *CPU, r8 byte, _ byte) {
-	c.Reg.R[A] |= c.Reg.R[r8]
+	buf := c.Reg.R[r8]
+	_or(c, buf)
+}
+
+func orHL(c *CPU, r16 byte, _ byte) {
+	buf := c.Bus.ReadByte(c.Reg.R16(int(r16)))
+	_or(c, buf)
+}
+
+func ord8(c *CPU, r8 byte, _ byte) {
+	buf := c.fetch()
+	_or(c, buf)
+}
+
+func _xor(c *CPU, buf byte) {
+	c.Reg.R[A] ^= buf
 
 	if c.Reg.R[A] == 0 {
 		c.Reg.setFlag(flagZ)
@@ -424,16 +467,40 @@ func orr(c *CPU, r8 byte, _ byte) {
 }
 
 func xorr(c *CPU, r8 byte, _ byte) {
-	c.Reg.R[A] ^= c.Reg.R[r8]
+	buf := c.Reg.R[r8]
+	_xor(c, buf)
+}
 
-	if c.Reg.R[A] == 0 {
-		c.Reg.setFlag(flagZ)
-	} else {
-		c.Reg.clearFlag(flagZ)
-	}
-	c.Reg.clearFlag(flagN)
-	c.Reg.clearFlag(flagH)
-	c.Reg.clearFlag(flagC)
+func xorHL(c *CPU, r16 byte, _ byte) {
+	buf := c.Bus.ReadByte(c.Reg.R16(int(r16)))
+	_xor(c, buf)
+}
+
+func xord8(c *CPU, _ byte, _ byte) {
+	buf := c.fetch()
+	_xor(c, buf)
+}
+
+func _cp(c *CPU, v byte) {
+	c.Reg.setFlagZ(v)
+	c.Reg.setFlagC(v)
+	c.Reg.setFlagH(v)
+	c.Reg.setFlag(flagN)
+}
+
+func cpr(c *CPU, r8 byte, _ byte) {
+	v := c.Reg.R[r8]
+	_cp(c, v)
+}
+
+func cpHL(c *CPU, r16 byte, _ byte) {
+	v := c.Bus.ReadByte(c.Reg.R16(int(r16)))
+	_cp(c, v)
+}
+
+func cpd8(c *CPU, _ byte, _ byte) {
+	v := c.fetch()
+	_cp(c, v)
 }
 
 // special

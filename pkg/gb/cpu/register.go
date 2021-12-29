@@ -129,6 +129,30 @@ func (r *Register) setHL(value types.Addr) {
 	r.R[H], r.R[L] = byte(value>>8), byte(value)
 }
 
+func (r *Register) setFlagH(v byte) {
+	if r.R[A]&0x0F < v&0xF {
+		r.setFlag(flagH)
+	} else {
+		r.clearFlag(flagH)
+	}
+}
+
+func (r *Register) setFlagC(v byte) {
+	if r.R[A] < v {
+		r.setFlag(flagC)
+	} else {
+		r.clearFlag(flagC)
+	}
+}
+
+func (r *Register) setFlagZ(v byte) {
+	if v == 0 {
+		r.setFlag(flagZ)
+	} else {
+		r.clearFlag(flagZ)
+	}
+}
+
 func (r *Register) setFlag(flag byte) {
 	switch flag {
 	case flagZ:
