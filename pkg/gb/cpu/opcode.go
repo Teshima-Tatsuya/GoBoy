@@ -72,7 +72,7 @@ var opCodes = []*OpCode{
 	{0x33, "INC SP", SP, 0, 0, 2, incr16},
 	{0x34, "INC (HL)", HL, 0, 0, 1, notimplemented},
 	{0x35, "DEC (HL)", HL, 0, 0, 1, notimplemented},
-	{0x36, "LD (HL),d8", HL, 0, 1, 3, ldr16d16},
+	{0x36, "LD (HL),d8", HL, 0, 1, 3, ldm16d},
 	{0x37, "SCF", 0, 0, 0, 1, notimplemented},
 	{0x38, "JR C,r8", flagC, 0, 1, 2, jrfr8},
 	{0x39, "ADD HL,SP", 0, 0, 0, 1, notimplemented},
@@ -332,7 +332,7 @@ func ldr16d16(c *CPU, R1 byte, _ byte) {
 	c.Reg.setR16(types.Addr(R1), c.fetch16())
 }
 
-// func ldm(r, m, m16, d, a, a16)
+// func ldm(r)
 
 // LD (C), A
 func ldmr(c *CPU, R1 byte, R2 byte) {
@@ -340,12 +340,19 @@ func ldmr(c *CPU, R1 byte, R2 byte) {
 	c.Bus.WriteByte(addr, c.Reg.R[R2])
 }
 
-// func ldm(r, m, m16, d, a, a16)
+// func ldm16(r, d)
 
 // LD (r1), r2
 func ldm16r(c *CPU, R1 byte, R2 byte) {
 	c.Bus.WriteByte(c.Reg.R16(int(R1)), c.Reg.R[R2])
 }
+
+// LD (HL),d8
+func ldm16d(c *CPU, R1 byte, R2 byte) {
+	c.Bus.WriteByte(c.Reg.R16(int(R1)), c.fetch())
+}
+
+// func lda(r, m, m16, d, a, a16)
 
 func lda16r(c *CPU, _ byte, R2 byte) {
 	c.Bus.WriteByte(c.fetch16(), c.Reg.R[R2])
