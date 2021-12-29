@@ -627,19 +627,19 @@ func TestOpeCode_jrnfr8(t *testing.T) {
 	}{
 		{
 			name: "JR NZ, r8 when zero",
-			args: args{0x20, flagZ, 0, 0x0110},
+			args: args{0x20, flagZ, 0, 0x0111},
 		},
 		{
 			name: "JR NZ, r8 when not zero",
-			args: args{0x20, flagZ, 1, c.Reg.PC},
+			args: args{0x20, flagZ, 1, c.Reg.PC + 1},
 		},
 		{
 			name: "JR NC, r8 when zero",
-			args: args{0x30, flagC, 0, 0x0110},
+			args: args{0x30, flagC, 0, 0x0111},
 		},
 		{
 			name: "JR NC, r8 when not zero",
-			args: args{0x30, flagC, 1, c.Reg.PC},
+			args: args{0x30, flagC, 1, c.Reg.PC + 1},
 		},
 	}
 
