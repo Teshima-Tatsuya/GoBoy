@@ -277,81 +277,6 @@ func TestOpeCode_ldrm(t *testing.T) {
 	}
 }
 
-func TestOpeCode_ldm16r(t *testing.T) {
-	c := setupCPU()
-
-	type args struct {
-		opcode byte
-		r1     byte
-		r2     byte
-	}
-
-	tests := []struct {
-		name string
-		args args
-	}{
-		{
-			name: "LD (BC), A",
-			args: args{0x02, BC, A},
-		},
-		{
-			name: "LD (DE), A",
-			args: args{0x12, DE, A},
-		},
-		{
-			name: "LD (HL+), A",
-			args: args{0x22, HLI, A},
-		},
-		{
-			name: "LD (HL-), A",
-			args: args{0x32, HLD, A},
-		},
-		{
-			name: "LD (HL), B",
-			args: args{0x70, HL, B},
-		},
-		{
-			name: "LD (HL), C",
-			args: args{0x71, HL, C},
-		},
-		{
-			name: "LD (HL), D",
-			args: args{0x72, HL, D},
-		},
-		{
-			name: "LD (HL), E",
-			args: args{0x73, HL, E},
-		},
-		{
-			name: "LD (HL), H",
-			args: args{0x74, HL, H},
-		},
-		{
-			name: "LD (HL), L",
-			args: args{0x75, HL, L},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c.regreset()
-			op := opCodes[tt.args.opcode]
-			want := c.Reg.R[tt.args.r2]
-			op.Handler(c, byte(op.R1), byte(op.R2))
-
-			assert.Equal(t, op.R1, tt.args.r1)
-			assert.Equal(t, op.R2, tt.args.r2)
-			if op.R1 == HLI {
-				c.Reg.setHL(c.Reg.HL() - 1)
-			} else if op.R1 == HLD {
-				c.Reg.setHL(c.Reg.HL() + 1)
-			}
-			assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(tt.args.r1))))
-			assert.Equal(t, want, c.Reg.R[tt.args.r2])
-		})
-	}
-}
-
 func TestOpeCode_ldrm16(t *testing.T) {
 	c := setupCPU()
 
@@ -431,51 +356,6 @@ func TestOpeCode_ldrm16(t *testing.T) {
 	}
 }
 
-func TestOpeCode_ldr16d16(t *testing.T) {
-	c := setupCPU()
-
-	type args struct {
-		opcode byte
-		r1     byte
-	}
-
-	tests := []struct {
-		name string
-		args args
-	}{
-		{
-			name: "LD BC, d16",
-			args: args{0x01, BC},
-		},
-		{
-			name: "LD DE, d16",
-			args: args{0x11, DE},
-		},
-		{
-			name: "LD HL, d16",
-			args: args{0x21, HL},
-		},
-		{
-			name: "LD SP, d16",
-			args: args{0x31, SP},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c.regreset()
-			op := opCodes[tt.args.opcode]
-			want := byte(0x20)
-			c.Bus.WriteByte(c.Reg.PC, want)
-			c.Bus.WriteByte(c.Reg.PC+1, want+1)
-			op.Handler(c, byte(op.R1), byte(op.R2))
-
-			assert.Equal(t, op.R1, tt.args.r1)
-			assert.Equal(t, ((types.Addr(want+1) << 8) | types.Addr(want)), c.Reg.R16(int(tt.args.r1)))
-		})
-	}
-}
-
 func TestOpeCode_ldrd(t *testing.T) {
 	c := setupCPU()
 
@@ -528,6 +408,126 @@ func TestOpeCode_ldrd(t *testing.T) {
 
 			assert.Equal(t, op.R1, tt.args.r1)
 			assert.Equal(t, want, c.Reg.R[op.R1])
+		})
+	}
+}
+
+func TestOpeCode_ldm16r(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     byte
+		r2     byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "LD (BC), A",
+			args: args{0x02, BC, A},
+		},
+		{
+			name: "LD (DE), A",
+			args: args{0x12, DE, A},
+		},
+		{
+			name: "LD (HL+), A",
+			args: args{0x22, HLI, A},
+		},
+		{
+			name: "LD (HL-), A",
+			args: args{0x32, HLD, A},
+		},
+		{
+			name: "LD (HL), B",
+			args: args{0x70, HL, B},
+		},
+		{
+			name: "LD (HL), C",
+			args: args{0x71, HL, C},
+		},
+		{
+			name: "LD (HL), D",
+			args: args{0x72, HL, D},
+		},
+		{
+			name: "LD (HL), E",
+			args: args{0x73, HL, E},
+		},
+		{
+			name: "LD (HL), H",
+			args: args{0x74, HL, H},
+		},
+		{
+			name: "LD (HL), L",
+			args: args{0x75, HL, L},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+			want := c.Reg.R[tt.args.r2]
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, op.R1, tt.args.r1)
+			assert.Equal(t, op.R2, tt.args.r2)
+			if op.R1 == HLI {
+				c.Reg.setHL(c.Reg.HL() - 1)
+			} else if op.R1 == HLD {
+				c.Reg.setHL(c.Reg.HL() + 1)
+			}
+			assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(tt.args.r1))))
+			assert.Equal(t, want, c.Reg.R[tt.args.r2])
+		})
+	}
+}
+
+func TestOpeCode_ldr16d16(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "LD BC, d16",
+			args: args{0x01, BC},
+		},
+		{
+			name: "LD DE, d16",
+			args: args{0x11, DE},
+		},
+		{
+			name: "LD HL, d16",
+			args: args{0x21, HL},
+		},
+		{
+			name: "LD SP, d16",
+			args: args{0x31, SP},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+			want := byte(0x20)
+			c.Bus.WriteByte(c.Reg.PC, want)
+			c.Bus.WriteByte(c.Reg.PC+1, want+1)
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, op.R1, tt.args.r1)
+			assert.Equal(t, ((types.Addr(want+1) << 8) | types.Addr(want)), c.Reg.R16(int(tt.args.r1)))
 		})
 	}
 }

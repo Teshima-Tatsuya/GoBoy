@@ -258,7 +258,7 @@ var opCodes = []*OpCode{
 	{0xED, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xEE, "XOR d8", 0, 0, 1, 2, xord8},
 	{0xEF, "RST 28H", 0x28, 0, 0, 1, rst},
-	{0xF0, "LDH A,(a8)", A, 0, 1, 3, ldra8},
+	{0xF0, "LDH A,(a8)", A, 0, 1, 3, ldra},
 	{0xF1, "POP AF", AF, 0, 0, 3, pop},
 	{0xF2, "LD A,(C)", A, C, 1, 2, ldrm},
 	{0xF3, "DI", 0, 0, 0, 1, di},
@@ -316,6 +316,15 @@ func ldrd(c *CPU, r8 byte, _ byte) {
 	c.Reg.R[r8] = c.fetch()
 }
 
+// LDH R,(a8)
+func ldra(c *CPU, R1 byte, _ byte) {
+	c.Reg.R[R1] = c.Bus.ReadByte(types.Addr(0xff00 | types.Addr(c.fetch())))
+}
+
+func ldra16(c *CPU, R1 byte, _ byte) {
+	c.Reg.R[R1] = c.Bus.ReadByte(c.fetch16())
+}
+
 // LD (r1), r2
 func ldm16r(c *CPU, R1 byte, R2 byte) {
 	c.Bus.WriteByte(c.Reg.R16(int(R1)), c.Reg.R[R2])
@@ -339,14 +348,6 @@ func lda16r16(c *CPU, _ byte, R2 byte) {
 
 func lda8r(c *CPU, _ byte, R2 byte) {
 	c.Bus.WriteByte(types.Addr(0xff00|types.Addr(c.fetch())), c.Reg.R[R2])
-}
-
-func ldra8(c *CPU, R1 byte, _ byte) {
-	c.Reg.R[R1] = c.Bus.ReadByte(types.Addr(0xff00 | types.Addr(c.fetch())))
-}
-
-func ldra16(c *CPU, R1 byte, _ byte) {
-	c.Reg.R[R1] = c.Bus.ReadByte(c.fetch16())
 }
 
 func retf(c *CPU, R1 byte, _ byte) {
