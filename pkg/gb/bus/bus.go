@@ -38,15 +38,15 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 	case addr >= 0x0000 && addr <= 0x7FFF:
 		return b.Cart.ReadByte(addr)
 	case addr >= 0x8000 && addr <= 0x9FFF:
-		return b.VRAM.Read(addr - 0x7FFF)
+		return b.VRAM.Read(addr - 0x8000)
 	case addr >= 0xC000 && addr <= 0xCFFF:
-		return b.WRAM.Read(addr - 0xBFFF)
+		return b.WRAM.Read(addr - 0xC000)
 	case addr >= 0xD000 && addr <= 0xDFFF:
-		return b.WRAM2.Read(addr - 0xCFFF)
+		return b.WRAM2.Read(addr - 0xD000)
 	case addr >= 0xFF00 && addr <= 0xFF7F:
-		return b.IO.Read(addr - 0xFEFF)
+		return b.IO.Read(addr - 0xFF00)
 	case addr >= 0xFF80 && addr <= 0xFFFE:
-		return b.HRAM.Read(addr - 0xFF7F)
+		return b.HRAM.Read(addr - 0xFF80)
 	case addr == 0xFFFF:
 		return b.IE.Read()
 	default:
@@ -64,15 +64,15 @@ func (b *Bus) WriteByte(addr types.Addr, value byte) {
 	case addr >= 0x0000 && addr <= 0x7FFF:
 		b.Cart.WriteByte(addr, value)
 	case addr >= 0x8000 && addr <= 0x9FFF:
-		b.VRAM.Write(addr-0x7FFF, value)
+		b.VRAM.Write(addr-0x8000, value)
 	case addr >= 0xC000 && addr <= 0xCFFF:
-		b.WRAM.Write(addr-0xBFFF, value)
+		b.WRAM.Write(addr-0xC000, value)
 	case addr >= 0xD000 && addr <= 0xDFFF:
-		b.WRAM2.Write(addr-0xCFFF, value)
+		b.WRAM2.Write(addr-0xD000, value)
 	case addr >= 0xFF00 && addr <= 0xFF7F:
-		b.IO.Write(addr-0xFEFF, value)
+		b.IO.Write(addr-0xFF00, value)
 	case addr >= 0xFF80 && addr <= 0xFFFE:
-		b.HRAM.Write(addr-0xFF7F, value)
+		b.HRAM.Write(addr-0xFF80, value)
 	case addr == 0xFFFF:
 		b.IE.Write(value)
 	default:

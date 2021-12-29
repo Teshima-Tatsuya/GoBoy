@@ -79,7 +79,7 @@ var opCodes = []*OpCode{
 	{0x3A, "LD A,(HL-)", A, HLD, 0, 2, ldrm16},
 	{0x3B, "DEC SP", 0, 0, 0, 1, notimplemented},
 	{0x3C, "INC A", A, 0, 0, 1, incr},
-	{0x3D, "DEC A", A, 0, 0, 1, notimplemented},
+	{0x3D, "DEC A", A, 0, 0, 1, decr},
 	{0x3E, "LD A,d8", A, 0, 1, 2, ldrd},
 	{0x3F, "CCF", 0, 0, 0, 1, notimplemented},
 	{0x40, "LD B, B", B, B, 0, 1, ldrr},
@@ -384,6 +384,8 @@ func ldm16d(c *CPU, R1 byte, R2 byte) {
 func ldar(c *CPU, _ byte, R2 byte) {
 	c.Bus.WriteByte(util.Byte2Addr(0xFF, c.fetch()), c.Reg.R[R2])
 }
+
+// func lda16(r, r16)
 
 func lda16r(c *CPU, _ byte, R2 byte) {
 	c.Bus.WriteByte(c.fetch16(), c.Reg.R[R2])

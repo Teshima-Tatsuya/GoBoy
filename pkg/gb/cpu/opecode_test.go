@@ -749,6 +749,158 @@ func TestOpeCode_ldar(t *testing.T) {
 	}
 }
 
+// -arithmetic-
+
+func TestOpeCode_incr(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "INC B",
+			args: args{0x04, B},
+		},
+		{
+			name: "INC C",
+			args: args{0x0C, C},
+		},
+		{
+			name: "INC D",
+			args: args{0x14, D},
+		},
+		{
+			name: "INC E",
+			args: args{0x1C, E},
+		},
+		{
+			name: "INC H",
+			args: args{0x24, H},
+		},
+		{
+			name: "INC L",
+			args: args{0x2C, L},
+		},
+		{
+			name: "INC A",
+			args: args{0x3C, A},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			var want byte
+			// Not Max
+			c.Reg.R[tt.args.r1] = byte(0xF0)
+			want = byte(0xF1)
+
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, want, c.Reg.R[op.R1])
+			assert.Equal(t, false, c.Reg.isSet(flagZ))
+			assert.Equal(t, false, c.Reg.isSet(flagN))
+			assert.Equal(t, false, c.Reg.isSet(flagH))
+
+			// Max
+			c.Reg.R[tt.args.r1] = byte(0xFF)
+			want = byte(0x00)
+
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, want, c.Reg.R[op.R1])
+			assert.Equal(t, true, c.Reg.isSet(flagZ))
+			assert.Equal(t, false, c.Reg.isSet(flagN))
+			assert.Equal(t, true, c.Reg.isSet(flagH))
+		})
+	}
+}
+
+func TestOpeCode_decr(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "DEC B",
+			args: args{0x05, B},
+		},
+		{
+			name: "DEC C",
+			args: args{0x0D, C},
+		},
+		{
+			name: "DEC D",
+			args: args{0x15, D},
+		},
+		{
+			name: "DEC E",
+			args: args{0x1D, E},
+		},
+		{
+			name: "DEC H",
+			args: args{0x25, H},
+		},
+		{
+			name: "DEC L",
+			args: args{0x2D, L},
+		},
+		{
+			name: "DEC A",
+			args: args{0x3D, A},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			var want byte
+			// Not Min
+			c.Reg.R[tt.args.r1] = byte(0x01)
+			want = byte(0x00)
+
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, want, c.Reg.R[op.R1])
+			assert.Equal(t, true, c.Reg.isSet(flagZ))
+			assert.Equal(t, true, c.Reg.isSet(flagN))
+			assert.Equal(t, false, c.Reg.isSet(flagH))
+
+			// Min
+			c.Reg.R[tt.args.r1] = byte(0x00)
+			want = byte(0xFF)
+
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, want, c.Reg.R[op.R1])
+			assert.Equal(t, false, c.Reg.isSet(flagZ))
+			assert.Equal(t, true, c.Reg.isSet(flagN))
+			assert.Equal(t, true, c.Reg.isSet(flagH))
+		})
+	}
+}
+
 // -----jp-----
 func TestOpeCode_jpa16(t *testing.T) {
 	c := setupCPU()
