@@ -453,6 +453,45 @@ func TestOpeCode_ldra(t *testing.T) {
 	}
 }
 
+func TestOpeCode_ldra16(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "LD A,(a16)",
+			args: args{0xFA, A},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+			upper := byte(0x12)
+			lower := byte(0x34)
+			want := byte(0x56)
+
+			// $0100 = 0x12
+			c.Bus.WriteByte(c.Reg.PC, lower)
+			c.Bus.WriteByte(c.Reg.PC+1, upper)
+			c.Bus.WriteByte(util.Byte2Addr(upper, lower), want)
+
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, op.R1, tt.args.r1)
+			assert.Equal(t, want, c.Reg.R[A])
+		})
+	}
+}
+
 func TestOpeCode_ldm16r(t *testing.T) {
 	c := setupCPU()
 
