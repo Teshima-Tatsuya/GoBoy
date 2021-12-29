@@ -9,18 +9,21 @@ import (
 )
 
 type Bus struct {
-	Cart *cartridge.Cartridge
-	VRAM *ram.RAM
-	WRAM *ram.RAM
-	HRAM *ram.RAM
+	Cart  *cartridge.Cartridge
+	VRAM  *ram.RAM
+	WRAM  *ram.RAM
+	WRAM2 *ram.RAM
+	HRAM  *ram.RAM
+	IO    *io.iO
 }
 
-func New(cart *cartridge.Cartridge, vram *ram.RAM, wram *ram.RAM, hram *ram.RAM) *Bus {
+func New(cart *cartridge.Cartridge, vram *ram.RAM, wram *ram.RAM, wram2 *ram.RAM, hram *ram.RAM) *Bus {
 	return &Bus{
-		Cart: cart,
-		VRAM: vram,
-		WRAM: wram,
-		HRAM: hram,
+		Cart:  cart,
+		VRAM:  vram,
+		WRAM:  wram,
+		WRAM2: wram2,
+		HRAM:  hram,
 	}
 }
 
@@ -32,6 +35,8 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 		return b.VRAM.Read(addr - 0x7FFF)
 	case addr >= 0xC000 && addr <= 0xCFFF:
 		return b.WRAM.Read(addr - 0xBFFF)
+	case addr >= 0xD000 && addr <= 0xDFFF:
+		return b.WRAM2.Read(addr - 0xCFFF)
 	case addr >= 0xFF80 && addr <= 0xFFFE:
 		return b.HRAM.Read(addr - 0xFF7F)
 	default:
@@ -46,5 +51,15 @@ func (b *Bus) WriteByte(addr types.Addr, value byte) {
 	switch {
 	case addr >= 0x0000 && addr <= 0x7FFF:
 		b.Cart.WriteByte(addr, value)
+	case addr >= 0x8000 && addr <= 0x9FFF:
+		b.VRAM.Write(addr-0x7FFF, value)
+	case addr >= 0xC000 && addr <= 0xCFFF:
+		b.WRAM.Write(addr-0xBFFF, value)
+	case addr >= 0xD000 && addr <= 0xDFFF:
+		b.WRAM2.Write(addr-0xCFFF, value)
+	case addr >= 0xFF80 && addr <= 0xFFFE:
+		b.HRAM.Write(addr-0xFF7F, value)
+	default:
+		panic(fmt.Sprintf("Addr:0x%4x is not implemented", addr))
 	}
 }

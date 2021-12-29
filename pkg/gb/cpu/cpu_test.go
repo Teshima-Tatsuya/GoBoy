@@ -23,8 +23,9 @@ func setup(file string) *bus.Bus {
 	cart := cartridge.New(romData)
 	vram := ram.New(0x2000)
 	wram := ram.New(0x2000)
+	wram2 := ram.New(0x2000)
 	hram := ram.New(0x0080)
-	bus := bus.New(cart, vram, wram, hram)
+	bus := bus.New(cart, vram, wram, wram2, hram)
 
 	return bus
 }

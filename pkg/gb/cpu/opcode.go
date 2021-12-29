@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
+	"github.com/apex/log"
 )
 
 type OpCode struct {
@@ -21,31 +22,31 @@ var opCodes = []*OpCode{
 	{0x02, "LD (BC),A", BC, A, 0, 2, ldm16r},
 	{0x03, "INC BC", BC, 0, 0, 2, incr16},
 	{0x04, "INC B", B, 0, 0, 1, incr},
-	{0x05, "DEC B", 0, 0, 0, 1, notimplemented},
+	{0x05, "DEC B", B, 0, 0, 1, decr},
 	{0x06, "LD B,d8", B, 0, 1, 2, ldr8d8},
 	{0x07, "RLCA", 0, 0, 0, 1, notimplemented},
 	{0x08, "LD (a16),SP", 0, 0, 0, 1, notimplemented},
 	{0x09, "ADD HL,BC", 0, 0, 0, 1, notimplemented},
 	{0x0A, "LD A,(BC)", A, BC, 0, 2, ldrm16},
-	{0x0B, "DEC BC", 0, 0, 0, 1, notimplemented},
+	{0x0B, "DEC BC", BC, 0, 0, 2, decr16},
 	{0x0C, "INC C", C, 0, 1, 2, incr},
-	{0x0D, "DEC C", 0, 0, 0, 1, notimplemented},
+	{0x0D, "DEC C", C, 0, 0, 1, decr},
 	{0x0E, "LD C,d8", C, 0, 1, 2, ldr8d8},
 	{0x0F, "RRCA", 0, 0, 0, 1, notimplemented},
-	{0x10, "STOP 0", 0, 0, 0, 1, notimplemented},
+	{0x10, "STOP 0", 0, 0, 0, 1, stop},
 	{0x11, "LD DE,d16", DE, 0, 2, 3, ldr16d16},
 	{0x12, "LD (DE),A", DE, A, 0, 2, ldm16r8},
 	{0x13, "INC DE", DE, 0, 0, 2, incr16},
 	{0x14, "INC D", D, 0, 0, 1, incr},
-	{0x15, "DEC D", 0, 0, 0, 1, notimplemented},
+	{0x15, "DEC D", D, 0, 0, 1, decr},
 	{0x16, "LD D,d8", D, 0, 1, 2, ldr8d8},
 	{0x17, "RLA", 0, 0, 0, 1, notimplemented},
 	{0x18, "JR r8", 0, 0, 0, 1, notimplemented},
 	{0x19, "ADD HL,DE", 0, 0, 0, 1, notimplemented},
 	{0x1A, "LD A,(DE)", A, DE, 0, 2, ldrm16},
-	{0x1B, "DEC DE", 0, 0, 0, 1, notimplemented},
+	{0x1B, "DEC DE", DE, 0, 0, 2, decr16},
 	{0x1C, "INC E", E, 0, 0, 1, incr},
-	{0x1D, "DEC E", 0, 0, 0, 1, notimplemented},
+	{0x1D, "DEC E", E, 0, 0, 1, decr},
 	{0x1E, "LD E,d8", E, 0, 1, 2, ldr8d8},
 	{0x1F, "RRA", 0, 0, 0, 1, notimplemented},
 	{0x20, "JR NZ,r8", flagZ, 0, 1, 2, jpnfr8},
@@ -53,15 +54,15 @@ var opCodes = []*OpCode{
 	{0x22, "LD (HL+),A", HLI, A, 0, 2, ldm16r},
 	{0x23, "INC HL", HL, 0, 0, 2, incr16},
 	{0x24, "INC H", H, 0, 0, 1, incr},
-	{0x25, "DEC H", H, 0, 0, 1, notimplemented},
+	{0x25, "DEC H", H, 0, 0, 1, decr},
 	{0x26, "LD H,d8", H, 0, 1, 2, ldr8d8},
 	{0x27, "DAA", 0, 0, 0, 1, notimplemented},
 	{0x28, "JR Z,r8", 0, 0, 0, 1, notimplemented},
 	{0x29, "ADD HL,HL", 0, 0, 0, 1, notimplemented},
 	{0x2A, "LD A,(HL+)", A, HLI, 0, 2, ldrm16},
-	{0x2B, "DEC HL", HL, 0, 0, 1, notimplemented},
+	{0x2B, "DEC HL", HL, 0, 0, 1, decr16},
 	{0x2C, "INC L", L, 0, 0, 1, incr},
-	{0x2D, "DEC L", L, 0, 0, 1, notimplemented},
+	{0x2D, "DEC L", L, 0, 0, 1, decr},
 	{0x2E, "LD L,d8", L, 0, 0, 1, ldr8d8},
 	{0x2F, "CPL", 0, 0, 0, 1, notimplemented},
 	{0x30, "JR NC,r8", flagC, 0, 1, 2, jpnfr8},
@@ -215,7 +216,7 @@ var opCodes = []*OpCode{
 	{0xC4, "CALL NZ,a16", flagZ, 0, 0, 1, notimplemented},
 	{0xC5, "PUSH BC", BC, 0, 0, 1, notimplemented},
 	{0xC6, "ADD A,d8", A, 0, 0, 1, notimplemented},
-	{0xC7, "RST 00H", 0, 0, 0, 1, notimplemented},
+	{0xC7, "RST 00H", 0x00, 0, 0, 1, rst},
 	{0xC8, "RET Z", flagZ, 0, 0, 1, notimplemented},
 	{0xC9, "RET", 0, 0, 0, 4, ret},
 	{0xCA, "JP Z,a16", flagZ, 0, 2, 3, jpfa16},
@@ -223,7 +224,7 @@ var opCodes = []*OpCode{
 	{0xCC, "CALL Z,a16", flagZ, 0, 0, 1, notimplemented},
 	{0xCD, "CALL a16", 0, 0, 0, 1, notimplemented},
 	{0xCE, "ADC A,d8", 0, 0, 0, 1, notimplemented},
-	{0xCF, "RST 08H", 0, 0, 0, 1, notimplemented},
+	{0xCF, "RST 08H", 0x08, 0, 0, 1, rst},
 	{0xD0, "RET NC", flagC, 0, 0, 1, notimplemented},
 	{0xD1, "POP DE", DE, 0, 0, 1, notimplemented},
 	{0xD2, "JP NC,a16", flagC, 0, 2, 3, jpnfa16},
@@ -231,7 +232,7 @@ var opCodes = []*OpCode{
 	{0xD4, "CALL NC,a16", flagC, 0, 0, 1, notimplemented},
 	{0xD5, "PUSH DE", DE, 0, 0, 1, notimplemented},
 	{0xD6, "SUB d8", 0, 0, 0, 1, notimplemented},
-	{0xD7, "RST 10H", 0, 0, 0, 1, notimplemented},
+	{0xD7, "RST 10H", 0x10, 0, 0, 1, rst},
 	{0xD8, "RET C", flagC, 0, 0, 1, notimplemented},
 	{0xD9, "RETI", 0, 0, 0, 1, notimplemented},
 	{0xDA, "JP C,a16", flagC, 0, 2, 3, jpfa16},
@@ -239,39 +240,39 @@ var opCodes = []*OpCode{
 	{0xDC, "CALL C,a16", flagC, 0, 0, 1, notimplemented},
 	{0xDD, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xDE, "SBC A,d8", A, 0, 0, 1, notimplemented},
-	{0xDF, "RST 18H", 0, 0, 0, 1, notimplemented},
-	{0xE0, "LDH (a8),A", 0, 0, 0, 1, notimplemented},
+	{0xDF, "RST 18H", 0x18, 0, 0, 1, rst},
+	{0xE0, "LDH (a8),A", 0, A, 0, 1, lda8r},
 	{0xE1, "POP HL", HL, 0, 0, 1, notimplemented},
 	{0xE2, "LD (C),A", 0, 0, 0, 1, notimplemented},
 	{0xE3, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xE4, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xE5, "PUSH HL", HL, 0, 0, 1, notimplemented},
 	{0xE6, "AND d8", 0, 0, 0, 1, notimplemented},
-	{0xE7, "RST 20H", 0, 0, 0, 1, notimplemented},
+	{0xE7, "RST 20H", 0x20, 0, 0, 1, rst},
 	{0xE8, "ADD SP,r8", SP, 0, 0, 1, notimplemented},
 	{0xE9, "JP (HL)", HL, 0, 0, 1, jpm16},
-	{0xEA, "LD (a16),A", 0, 0, 0, 1, notimplemented},
+	{0xEA, "LD (a16),A", 0, A, 0, 1, lda16r},
 	{0xEB, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xEC, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xED, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xEE, "XOR d8", 0, 0, 0, 1, notimplemented},
-	{0xEF, "RST 28H", 0, 0, 0, 1, notimplemented},
+	{0xEF, "RST 28H", 0x28, 0, 0, 1, rst},
 	{0xF0, "LDH (a8),A", 0, 0, 0, 1, notimplemented},
 	{0xF1, "POP AF", AF, 0, 0, 1, notimplemented},
 	{0xF2, "LD A,(C)", 0, 0, 0, 1, notimplemented},
-	{0xF3, "DI", 0, 0, 0, 1, notimplemented},
+	{0xF3, "DI", 0, 0, 0, 1, di},
 	{0xF4, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xF5, "PUSH AF", AF, 0, 0, 1, notimplemented},
 	{0xF6, "OR d8", 0, 0, 0, 1, notimplemented},
-	{0xF7, "RST 30H", 0, 0, 0, 1, notimplemented},
+	{0xF7, "RST 30H", 0x30, 0, 0, 1, rst},
 	{0xF8, "LD HL,SP+r8", 0, 0, 0, 1, notimplemented},
 	{0xF9, "LD SP,HL", 0, 0, 0, 1, notimplemented},
 	{0xFA, "LD A,(a16)", 0, 0, 0, 1, notimplemented},
-	{0xFB, "EI", 0, 0, 0, 1, notimplemented},
+	{0xFB, "EI", 0, 0, 0, 1, ei},
 	{0xFC, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xFD, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xFE, "CP d8", 0, 0, 0, 1, notimplemented},
-	{0xFF, "RST 38H", 0, 0, 0, 1, notimplemented},
+	{0xFF, "RST 38H", 0x38, 0, 0, 1, rst},
 }
 
 func nop(c *CPU, _ byte, _ byte) {}
@@ -320,6 +321,14 @@ func ldm16r8(c *CPU, R1 byte, R2 byte) {
 	c.Bus.WriteByte(c.Reg.R16(int(R1)), c.Reg.R[R2])
 }
 
+func lda16r(c *CPU, _ byte, R2 byte) {
+	c.Bus.WriteByte(c.fetch16(), c.Reg.R[R2])
+}
+
+func lda8r(c *CPU, _ byte, R2 byte) {
+	c.Bus.WriteByte(types.Addr(0xff00|types.Addr(c.fetch())), c.Reg.R[R2])
+}
+
 func retcc(c *CPU, R1 byte, _ byte) {
 	if c.Reg.R[F]&(1<<R1) != 0 {
 		c.pop2PC()
@@ -337,7 +346,6 @@ func incr(c *CPU, r8 byte, _ byte) {
 	r := c.Reg.R[r8]
 
 	incremented := r + 0x01
-	c.Reg.R[r8] = incremented
 	c.Reg.clearFlag(flagN) // not subtract
 	if incremented == 0 {
 		c.Reg.setFlag(flagZ)
@@ -351,10 +359,37 @@ func incr(c *CPU, r8 byte, _ byte) {
 	} else {
 		c.Reg.clearFlag(flagH)
 	}
+
+	c.Reg.R[r8] = incremented
 }
 
 func incr16(c *CPU, r16 byte, _ byte) {
 	c.Reg.setR16(types.Addr(r16), types.Addr(c.Reg.R16(int(r16))+1))
+}
+
+func decr(c *CPU, r8 byte, _ byte) {
+	r := c.Reg.R[r8]
+
+	decremented := r - 0x01
+	c.Reg.setFlag(flagN) // subtract
+	if decremented == 0 {
+		c.Reg.setFlag(flagZ)
+	} else {
+		c.Reg.clearFlag(flagZ)
+	}
+
+	// Harf Carry
+	if (decremented^0x01^c.Reg.R[r8])&0x10 == 0x10 {
+		c.Reg.setFlag(flagH)
+	} else {
+		c.Reg.clearFlag(flagH)
+	}
+
+	c.Reg.R[r8] = decremented
+}
+
+func decr16(c *CPU, r16 byte, _ byte) {
+	c.Reg.setR16(types.Addr(r16), types.Addr(c.Reg.R16(int(r16))-1))
 }
 
 // special
@@ -400,17 +435,47 @@ func jpm16(c *CPU, R1 byte, _ byte) {
 }
 
 // -----jr-----
-func _jr(c *CPU, addr byte) {
-	// -1 get rid of fetch()
-	c.Reg.PC = types.Addr(int32(c.Reg.PC) + int32(addr) - 1)
+func _jr(c *CPU, addr int8) {
+	c.Reg.PC = types.Addr(int32(c.Reg.PC) + int32(addr))
 }
 
 // r8 is a signed data, which are added to PC
 func jpnfr8(c *CPU, flag byte, _ byte) {
+	n := c.fetch()
 	// flag is not set
 	if !c.Reg.isSet(flag) {
-		_jr(c, c.fetch())
+		_jr(c, int8(n))
 	}
+}
+
+// -----rst------
+
+// RST n
+// push and jump to n
+func rst(c *CPU, n byte, _ byte) {
+	log.Debug("TODO: implement")
+	c.Reg.SP--
+	c.Bus.WriteByte(c.Reg.SP, byte(c.Reg.PC>>8))
+	c.Reg.SP--
+	c.Bus.WriteByte(c.Reg.SP, byte(c.Reg.PC&0xFF))
+	c.Reg.PC = types.Addr(n)
+}
+
+// -----misc-----
+
+func stop(c *CPU, _ byte, _ byte) {
+	log.Debug("TODO: implement")
+	c.Reg.PC++
+}
+
+// desable interrupt
+func di(c *CPU, _ byte, _ byte) {
+	log.Debug("TODO: implement")
+}
+
+// enable interrupt
+func ei(c *CPU, _ byte, _ byte) {
+	log.Debug("TODO: implement")
 }
 
 func notimplemented(c *CPU, _ byte, _ byte) {
