@@ -24,7 +24,7 @@ var opCodes = []*OpCode{
 	{0x03, "INC BC", BC, 0, 0, 2, incr16},
 	{0x04, "INC B", B, 0, 0, 1, incr},
 	{0x05, "DEC B", B, 0, 0, 1, decr},
-	{0x06, "LD B,d8", B, 0, 1, 2, ldrd8},
+	{0x06, "LD B,d8", B, 0, 1, 2, ldrd},
 	{0x07, "RLCA", 0, 0, 0, 1, notimplemented},
 	{0x08, "LD (a16),SP", 0, SP, 2, 5, lda16r16},
 	{0x09, "ADD HL,BC", 0, 0, 0, 1, notimplemented},
@@ -32,15 +32,15 @@ var opCodes = []*OpCode{
 	{0x0B, "DEC BC", BC, 0, 0, 2, decr16},
 	{0x0C, "INC C", C, 0, 1, 2, incr},
 	{0x0D, "DEC C", C, 0, 0, 1, decr},
-	{0x0E, "LD C,d8", C, 0, 1, 2, ldrd8},
+	{0x0E, "LD C,d8", C, 0, 1, 2, ldrd},
 	{0x0F, "RRCA", 0, 0, 0, 1, notimplemented},
 	{0x10, "STOP 0", 0, 0, 0, 1, stop},
 	{0x11, "LD DE,d16", DE, 0, 2, 3, ldr16d16},
-	{0x12, "LD (DE),A", DE, A, 0, 2, ldm16r8},
+	{0x12, "LD (DE),A", DE, A, 0, 2, ldm16r},
 	{0x13, "INC DE", DE, 0, 0, 2, incr16},
 	{0x14, "INC D", D, 0, 0, 1, incr},
 	{0x15, "DEC D", D, 0, 0, 1, decr},
-	{0x16, "LD D,d8", D, 0, 1, 2, ldrd8},
+	{0x16, "LD D,d8", D, 0, 1, 2, ldrd},
 	{0x17, "RLA", 0, 0, 0, 1, notimplemented},
 	{0x18, "JR r8", 0, 0, 1, 3, jrr8},
 	{0x19, "ADD HL,DE", 0, 0, 0, 1, notimplemented},
@@ -48,7 +48,7 @@ var opCodes = []*OpCode{
 	{0x1B, "DEC DE", DE, 0, 0, 2, decr16},
 	{0x1C, "INC E", E, 0, 0, 1, incr},
 	{0x1D, "DEC E", E, 0, 0, 1, decr},
-	{0x1E, "LD E,d8", E, 0, 1, 2, ldrd8},
+	{0x1E, "LD E,d8", E, 0, 1, 2, ldrd},
 	{0x1F, "RRA", 0, 0, 0, 1, notimplemented},
 	{0x20, "JR NZ,r8", flagZ, 0, 1, 2, jrnfr8},
 	{0x21, "LD HL,d16", HL, 0, 2, 3, ldr16d16},
@@ -56,7 +56,7 @@ var opCodes = []*OpCode{
 	{0x23, "INC HL", HL, 0, 0, 2, incr16},
 	{0x24, "INC H", H, 0, 0, 1, incr},
 	{0x25, "DEC H", H, 0, 0, 1, decr},
-	{0x26, "LD H,d8", H, 0, 1, 2, ldrd8},
+	{0x26, "LD H,d8", H, 0, 1, 2, ldrd},
 	{0x27, "DAA", 0, 0, 0, 1, notimplemented},
 	{0x28, "JR Z,r8", flagZ, 0, 1, 2, jrfr8},
 	{0x29, "ADD HL,HL", 0, 0, 0, 1, notimplemented},
@@ -64,7 +64,7 @@ var opCodes = []*OpCode{
 	{0x2B, "DEC HL", HL, 0, 0, 1, decr16},
 	{0x2C, "INC L", L, 0, 0, 1, incr},
 	{0x2D, "DEC L", L, 0, 0, 1, decr},
-	{0x2E, "LD L,d8", L, 0, 0, 1, ldrd8},
+	{0x2E, "LD L,d8", L, 0, 0, 1, ldrd},
 	{0x2F, "CPL", 0, 0, 0, 1, notimplemented},
 	{0x30, "JR NC,r8", flagC, 0, 1, 2, jrnfr8},
 	{0x31, "LD SP,d16", SP, 0, 2, 3, ldr16d16},
@@ -80,7 +80,7 @@ var opCodes = []*OpCode{
 	{0x3B, "DEC SP", 0, 0, 0, 1, notimplemented},
 	{0x3C, "INC A", A, 0, 0, 1, incr},
 	{0x3D, "DEC A", A, 0, 0, 1, notimplemented},
-	{0x3E, "LD A,d8", A, 0, 1, 2, ldrd8},
+	{0x3E, "LD A,d8", A, 0, 1, 2, ldrd},
 	{0x3F, "CCF", 0, 0, 0, 1, notimplemented},
 	{0x40, "LD B, B", B, B, 0, 1, ldrr},
 	{0x41, "LD B, C", B, C, 0, 1, ldrr},
@@ -290,16 +290,13 @@ func nop(c *CPU, _ byte, _ byte) {}
 //    ldrr16 is LD r8, r16
 //    ldrm   is LD r8, Read(r8)
 //    ldrm16 is LD r8, Read(r16)
+// func order
+//  ldr(r, m16, d, d16, a, a16)
 
 // LD R1, R2
 // Write R2 into R1
 func ldrr(c *CPU, R1 byte, R2 byte) {
 	c.Reg.R[R1] = c.Reg.R[R2]
-}
-
-// LD (r1), r2
-func ldm16r(c *CPU, R1 byte, R2 byte) {
-	c.Bus.WriteByte(c.Reg.R16(int(R1)), c.Reg.R[R2])
 }
 
 // LD r1, (r2)
@@ -308,18 +305,19 @@ func ldrm16(c *CPU, R1 byte, R2 byte) {
 	c.Reg.R[R1] = c.Bus.ReadByte(c.Reg.R16(int(R2)))
 }
 
-// LD r1, d16
-func ldr16d16(c *CPU, R1 byte, _ byte) {
-	c.Reg.setR16(types.Addr(R1), c.fetch16())
-}
-
 // LD r1, d8
-func ldrd8(c *CPU, r8 byte, _ byte) {
+func ldrd(c *CPU, r8 byte, _ byte) {
 	c.Reg.R[r8] = c.fetch()
 }
 
-func ldm16r8(c *CPU, R1 byte, R2 byte) {
+// LD (r1), r2
+func ldm16r(c *CPU, R1 byte, R2 byte) {
 	c.Bus.WriteByte(c.Reg.R16(int(R1)), c.Reg.R[R2])
+}
+
+// LD r1, d16
+func ldr16d16(c *CPU, R1 byte, _ byte) {
+	c.Reg.setR16(types.Addr(R1), c.fetch16())
 }
 
 func lda16r(c *CPU, _ byte, R2 byte) {
