@@ -653,7 +653,7 @@ func _sub(c *CPU, b byte) {
 	flag_c := a < v
 
 	c.Reg.R[A] = v
-	c.Reg.clearFlag(flagN)
+	c.Reg.setFlag(flagN)
 	c.Reg.setFlagZ(byte(v))
 
 	if flag_h {
