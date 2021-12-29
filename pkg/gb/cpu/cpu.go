@@ -32,7 +32,7 @@ func (c *CPU) Step() int {
 		// Prefix Ope
 		log.Info("PREFIX CB")
 		opcode = c.fetch()
-		op = opCodes[opcode]
+		op = cbOpCodes[opcode]
 	} else {
 		op = opCodes[opcode]
 	}
