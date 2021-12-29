@@ -839,38 +839,38 @@ func notimplemented(c *CPU, _ byte, _ byte) {
 
 // Prefix CB
 var cbOpCodes = []*OpCode{
-	{0x00, "RLC B", B, 0, 1, 2, notimplemented},
-	{0x01, "RLC C", C, 0, 1, 2, notimplemented},
-	{0x02, "RLC D", D, 0, 1, 2, notimplemented},
-	{0x03, "RLC E", E, 0, 1, 2, notimplemented},
-	{0x04, "RLC H", H, 0, 1, 2, notimplemented},
-	{0x05, "RLC L", L, 0, 1, 2, notimplemented},
-	{0x06, "RLC (HL)", HL, 0, 1, 4, notimplemented},
-	{0x07, "RLC A", A, 0, 1, 2, notimplemented},
-	{0x08, "RRC B", B, 0, 1, 2, notimplemented},
-	{0x09, "RRC C", C, 0, 1, 2, notimplemented},
-	{0x0A, "RRC D", D, 0, 1, 2, notimplemented},
-	{0x0B, "RRC E", E, 0, 1, 2, notimplemented},
-	{0x0C, "RRC H", H, 0, 1, 2, notimplemented},
-	{0x0D, "RRC L", L, 0, 1, 2, notimplemented},
-	{0x0E, "RRC (HL)", HL, 0, 1, 4, notimplemented},
-	{0x0F, "RRC A", A, 0, 1, 2, notimplemented},
-	{0x10, "RL B", B, 0, 1, 2, notimplemented},
-	{0x11, "RL C", C, 0, 1, 2, notimplemented},
-	{0x12, "RL D", D, 0, 1, 2, notimplemented},
-	{0x13, "RL E", E, 0, 1, 2, notimplemented},
-	{0x14, "RL H", H, 0, 1, 2, notimplemented},
-	{0x15, "RL L", L, 0, 1, 2, notimplemented},
-	{0x16, "RL (HL)", HL, 0, 1, 4, notimplemented},
-	{0x17, "RL A", A, 0, 1, 2, notimplemented},
-	{0x18, "RR B", B, 0, 1, 2, notimplemented},
-	{0x19, "RR C", C, 0, 1, 2, notimplemented},
-	{0x1A, "RR D", D, 0, 1, 2, notimplemented},
-	{0x1B, "RR E", E, 0, 1, 2, notimplemented},
-	{0x1C, "RR H", H, 0, 1, 2, notimplemented},
-	{0x1D, "RR L", L, 0, 1, 2, notimplemented},
-	{0x1E, "RR (HL)", HL, 0, 1, 4, notimplemented},
-	{0x1F, "RR A", A, 0, 1, 2, notimplemented},
+	{0x00, "RLC B", B, 0, 1, 2, rlcr},
+	{0x01, "RLC C", C, 0, 1, 2, rlcr},
+	{0x02, "RLC D", D, 0, 1, 2, rlcr},
+	{0x03, "RLC E", E, 0, 1, 2, rlcr},
+	{0x04, "RLC H", H, 0, 1, 2, rlcr},
+	{0x05, "RLC L", L, 0, 1, 2, rlcr},
+	{0x06, "RLC (HL)", HL, 0, 1, 4, rlcm16},
+	{0x07, "RLC A", A, 0, 1, 2, rlcr},
+	{0x08, "RRC B", B, 0, 1, 2, rrcr},
+	{0x09, "RRC C", C, 0, 1, 2, rrcr},
+	{0x0A, "RRC D", D, 0, 1, 2, rrcr},
+	{0x0B, "RRC E", E, 0, 1, 2, rrcr},
+	{0x0C, "RRC H", H, 0, 1, 2, rrcr},
+	{0x0D, "RRC L", L, 0, 1, 2, rrcr},
+	{0x0E, "RRC (HL)", HL, 0, 1, 4, rrcm16},
+	{0x0F, "RRC A", A, 0, 1, 2, rrcr},
+	{0x10, "RL B", B, 0, 1, 2, rlr},
+	{0x11, "RL C", C, 0, 1, 2, rlr},
+	{0x12, "RL D", D, 0, 1, 2, rlr},
+	{0x13, "RL E", E, 0, 1, 2, rlr},
+	{0x14, "RL H", H, 0, 1, 2, rlr},
+	{0x15, "RL L", L, 0, 1, 2, rlr},
+	{0x16, "RL (HL)", HL, 0, 1, 4, rlm16},
+	{0x17, "RL A", A, 0, 1, 2, rlr},
+	{0x18, "RR B", B, 0, 1, 2, rrr},
+	{0x19, "RR C", C, 0, 1, 2, rrr},
+	{0x1A, "RR D", D, 0, 1, 2, rrr},
+	{0x1B, "RR E", E, 0, 1, 2, rrr},
+	{0x1C, "RR H", H, 0, 1, 2, rrr},
+	{0x1D, "RR L", L, 0, 1, 2, rrr},
+	{0x1E, "RR (HL)", HL, 0, 1, 4, rrm16},
+	{0x1F, "RR A", A, 0, 1, 2, rrr},
 	{0x20, "SLA B", B, 0, 1, 2, notimplemented},
 	{0x21, "SLA C", C, 0, 1, 2, notimplemented},
 	{0x22, "SLA D", D, 0, 1, 2, notimplemented},
@@ -1095,4 +1095,127 @@ var cbOpCodes = []*OpCode{
 	{0xFD, "SET 7,L", 7, L, 1, 2, notimplemented},
 	{0xFE, "SET 7,(HL)", 7, HL, 1, 4, notimplemented},
 	{0xFF, "SET 7,A", 7, A, 1, 2, notimplemented},
+}
+
+func _rlc(c *CPU, v byte) byte {
+	// check Bit 7 is set
+	if v&0x80 == 0x80 {
+		c.Reg.setFlag(flagC)
+	} else {
+		c.Reg.clearFlag(flagC)
+	}
+
+	v = v << 1
+	c.Reg.setFlagZ(v)
+	c.Reg.clearFlag(flagN)
+	c.Reg.clearFlag(flagH)
+
+	return v
+}
+
+// RLC r
+func rlcr(c *CPU, r8 byte, _ byte) {
+	r := c.Reg.R[r8]
+	c.Reg.R[r8] = _rlc(c, r)
+
+}
+
+// RLC (HL)
+func rlcm16(c *CPU, r16 byte, _ byte) {
+	addr := c.Reg.R16(int(r16))
+	r := c.Bus.ReadByte(addr)
+	c.Bus.WriteByte(addr, _rlc(c, r))
+}
+
+func _rrc(c *CPU, v byte) byte {
+	// check Bit 0 is set
+	if v&0x01 == 0x01 {
+		c.Reg.setFlag(flagC)
+	} else {
+		c.Reg.clearFlag(flagC)
+	}
+
+	v = v >> 1
+	c.Reg.setFlagZ(v)
+	c.Reg.clearFlag(flagN)
+	c.Reg.clearFlag(flagH)
+
+	return v
+}
+
+// RLC r
+func rrcr(c *CPU, r8 byte, _ byte) {
+	r := c.Reg.R[r8]
+	c.Reg.R[r8] = _rrc(c, r)
+}
+
+// RLC (HL)
+func rrcm16(c *CPU, r16 byte, _ byte) {
+	addr := c.Reg.R16(int(r16))
+	r := c.Bus.ReadByte(addr)
+	c.Bus.WriteByte(addr, _rrc(c, r))
+}
+
+func _rl(c *CPU, v byte) byte {
+	// check Bit 0 is set
+	if v&0x80 == 0x80 {
+		c.Reg.setFlag(flagC)
+	} else {
+		c.Reg.clearFlag(flagC)
+	}
+
+	v = v << 1
+	if c.Reg.isSet(flagC) {
+		v++
+	}
+	c.Reg.setFlagZ(v)
+	c.Reg.clearFlag(flagN)
+	c.Reg.clearFlag(flagH)
+
+	return v
+}
+
+// RLC r
+func rlr(c *CPU, r8 byte, _ byte) {
+	r := c.Reg.R[r8]
+	c.Reg.R[r8] = _rl(c, r)
+}
+
+// RLC (HL)
+func rlm16(c *CPU, r16 byte, _ byte) {
+	addr := c.Reg.R16(int(r16))
+	r := c.Bus.ReadByte(addr)
+	c.Bus.WriteByte(addr, _rl(c, r))
+}
+
+func _rr(c *CPU, v byte) byte {
+	// check Bit 0 is set
+	if v&0x01 == 0x01 {
+		c.Reg.setFlag(flagC)
+	} else {
+		c.Reg.clearFlag(flagC)
+	}
+
+	v = v >> 1
+	if c.Reg.isSet(flagC) {
+		v |= 0x80
+	}
+	c.Reg.setFlagZ(v)
+	c.Reg.clearFlag(flagN)
+	c.Reg.clearFlag(flagH)
+
+	return v
+}
+
+// RLC r
+func rrr(c *CPU, r8 byte, _ byte) {
+	r := c.Reg.R[r8]
+	c.Reg.R[r8] = _rr(c, r)
+}
+
+// RLC (HL)
+func rrm16(c *CPU, r16 byte, _ byte) {
+	addr := c.Reg.R16(int(r16))
+	r := c.Bus.ReadByte(addr)
+	c.Bus.WriteByte(addr, _rr(c, r))
 }
