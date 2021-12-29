@@ -266,7 +266,7 @@ var opCodes = []*OpCode{
 	{0xF5, "PUSH AF", AF, 0, 0, 1, push},
 	{0xF6, "OR d8", 0, 0, 0, 1, ord8},
 	{0xF7, "RST 30H", 0x30, 0, 0, 1, rst},
-	{0xF8, "LD HL,SP+r8", 0, 0, 0, 1, notimplemented},
+	{0xF8, "LD HL,SP+r8", HL, SP, 1, 3, ldr16r16d},
 	{0xF9, "LD SP,HL", SP, HL, 0, 2, ldr16r16},
 	{0xFA, "LD A,(a16)", A, 0, 2, 4, ldra16},
 	{0xFB, "EI", 0, 0, 0, 1, ei},
@@ -330,6 +330,28 @@ func ldra16(c *CPU, R1 byte, _ byte) {
 // LD r1, r2
 func ldr16r16(c *CPU, R1 byte, R2 byte) {
 	c.Reg.setR16(types.Addr(R1), c.Reg.R16(int(R2)))
+}
+
+// LD r1, r2+d
+func ldr16r16d(c *CPU, R1 byte, R2 byte) {
+	d := c.fetch()
+	v := int32(c.Reg.R16(SP)) + int32(d) // Cast to int32 considers carry
+	carryBits := uint32(c.Reg.R16(SP)) ^ uint32(d) ^ uint32(v)
+	c.Reg.setR16(types.Addr(R1), c.Reg.R16(int(R2)))
+
+	c.Reg.setFlag(flagZ)
+	c.Reg.setFlag(flagN)
+
+	if v < int32(c.Reg.SP) {
+		c.Reg.setFlag(flagC)
+	} else {
+		c.Reg.clearFlag(flagC)
+	}
+	if carryBits&0x1000 == 0x1000 {
+		c.Reg.setFlag(flagH)
+	} else {
+		c.Reg.clearFlag(flagH)
+	}
 }
 
 // LD r1, d16
