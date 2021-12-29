@@ -634,6 +634,7 @@ func addr(c *CPU, _ byte, r8 byte) {
 	r := c.Reg.R[r8]
 	_add(c, r)
 }
+
 func addHL(c *CPU, _ byte, r16 byte) {
 	v := c.Bus.ReadByte(c.Reg.R16(int(r16)))
 	_add(c, v)

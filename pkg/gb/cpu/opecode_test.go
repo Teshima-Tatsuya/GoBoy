@@ -1105,6 +1105,97 @@ func TestOpeCode_decm16(t *testing.T) {
 	}
 }
 
+func TestOpeCode_addr(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     byte
+		r2     byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "ADD A, B",
+			args: args{0x80, A, B},
+		},
+		{
+			name: "ADD A, C",
+			args: args{0x81, A, C},
+		},
+		{
+			name: "ADD A, D",
+			args: args{0x82, A, D},
+		},
+		{
+			name: "ADD A, E",
+			args: args{0x83, A, E},
+		},
+		{
+			name: "ADD A, H",
+			args: args{0x84, A, H},
+		},
+		{
+			name: "ADD A, L",
+			args: args{0x85, A, L},
+		},
+		{
+			name: "ADD A, A",
+			args: args{0x87, A, A},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			t.Run("when no carry", func(t *testing.T) {
+				if tt.args.r2 == A {
+					t.Skip()
+				}
+				c.Reg.R[tt.args.r1] = 0xE1
+				c.Reg.R[tt.args.r2] = 0x0E
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, byte(0xEF), c.Reg.R[A])
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, false, c.Reg.isSet(flagH))
+				assert.Equal(t, false, c.Reg.isSet(flagC))
+			})
+			t.Run("when Harf carry", func(t *testing.T) {
+				if tt.args.r2 == A {
+					t.Skip()
+				}
+				c.Reg.R[tt.args.r1] = 0xE1
+				c.Reg.R[tt.args.r2] = 0x0F
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, byte(0xF0), c.Reg.R[A])
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, true, c.Reg.isSet(flagH))
+				assert.Equal(t, false, c.Reg.isSet(flagC))
+			})
+			t.Run("when carry and zero", func(t *testing.T) {
+				if tt.args.r2 == A {
+					t.Skip()
+				}
+				c.Reg.R[tt.args.r1] = 0xE1
+				c.Reg.R[tt.args.r2] = 0x1F
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, byte(0x00), c.Reg.R[A])
+				assert.Equal(t, true, c.Reg.isSet(flagZ))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, true, c.Reg.isSet(flagH))
+				assert.Equal(t, true, c.Reg.isSet(flagC))
+			})
+		})
+	}
+}
+
 func TestOpeCode_cpr(t *testing.T) {
 	c := setupCPU()
 
