@@ -537,6 +537,39 @@ func TestOpeCode_ldr16d16(t *testing.T) {
 	}
 }
 
+func TestOpeCode_ldr16r16(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     byte
+		r2     byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "LD SP,HL",
+			args: args{0xF9, SP, HL},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+			want := c.Reg.R16(int(tt.args.r2))
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, op.R1, tt.args.r1)
+			assert.Equal(t, op.R2, tt.args.r2)
+			assert.Equal(t, want, c.Reg.R16(int(tt.args.r1)))
+		})
+	}
+}
+
 func TestOpeCode_ldmr(t *testing.T) {
 	c := setupCPU()
 
