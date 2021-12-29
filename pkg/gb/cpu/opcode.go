@@ -26,7 +26,7 @@ var opCodes = []*OpCode{
 	{0x05, "DEC B", B, 0, 0, 1, decr},
 	{0x06, "LD B,d8", B, 0, 1, 2, ldr8d8},
 	{0x07, "RLCA", 0, 0, 0, 1, notimplemented},
-	{0x08, "LD (a16),SP", 0, 0, 0, 1, notimplemented},
+	{0x08, "LD (a16),SP", 0, SP, 2, 5, lda16r16},
 	{0x09, "ADD HL,BC", 0, 0, 0, 1, notimplemented},
 	{0x0A, "LD A,(BC)", A, BC, 0, 2, ldrm16},
 	{0x0B, "DEC BC", BC, 0, 0, 2, decr16},
@@ -146,14 +146,14 @@ var opCodes = []*OpCode{
 	{0x7D, "LD A, L", A, L, 0, 1, ldrr},
 	{0x7E, "LD A, HL", A, HL, 0, 2, ldrm16},
 	{0x7F, "LD A, A", A, A, 0, 1, ldrr},
-	{0x80, "ADD A, B", A, B, 0, 1, notimplemented},
-	{0x81, "ADD A, C", A, C, 0, 1, notimplemented},
-	{0x82, "ADD A, D", A, D, 0, 1, notimplemented},
-	{0x83, "ADD A, E", A, E, 0, 1, notimplemented},
-	{0x84, "ADD A, H", A, H, 0, 1, notimplemented},
-	{0x85, "ADD A, L", A, L, 0, 1, notimplemented},
-	{0x86, "ADD A, (HL)", A, HL, 0, 1, notimplemented},
-	{0x87, "ADD A, A", A, A, 0, 1, notimplemented},
+	{0x80, "ADD A, B", A, B, 0, 1, addr},
+	{0x81, "ADD A, C", A, C, 0, 1, addr},
+	{0x82, "ADD A, D", A, D, 0, 1, addr},
+	{0x83, "ADD A, E", A, E, 0, 1, addr},
+	{0x84, "ADD A, H", A, H, 0, 1, addr},
+	{0x85, "ADD A, L", A, L, 0, 1, addr},
+	{0x86, "ADD A, (HL)", A, HL, 0, 2, addHL},
+	{0x87, "ADD A, A", A, A, 0, 1, addr},
 	{0x88, "ADC A, B", A, B, 0, 1, notimplemented},
 	{0x89, "ADC A, C", A, C, 0, 1, notimplemented},
 	{0x8A, "ADC A, D", A, D, 0, 1, notimplemented},
@@ -162,12 +162,12 @@ var opCodes = []*OpCode{
 	{0x8D, "ADC A, L", A, L, 0, 1, notimplemented},
 	{0x8E, "ADC A, (HL)", A, HL, 0, 1, notimplemented},
 	{0x8F, "ADC A, A", A, A, 0, 1, notimplemented},
-	{0x90, "SUB B", B, 0, 0, 1, notimplemented},
-	{0x91, "SUB C", C, 0, 0, 1, notimplemented},
-	{0x92, "SUB D", D, 0, 0, 1, notimplemented},
-	{0x93, "SUB E", E, 0, 0, 1, notimplemented},
-	{0x94, "SUB H", H, 0, 0, 1, notimplemented},
-	{0x95, "SUB L", L, 0, 0, 1, notimplemented},
+	{0x90, "SUB B", B, 0, 0, 1, subr},
+	{0x91, "SUB C", C, 0, 0, 1, subr},
+	{0x92, "SUB D", D, 0, 0, 1, subr},
+	{0x93, "SUB E", E, 0, 0, 1, subr},
+	{0x94, "SUB H", H, 0, 0, 1, subr},
+	{0x95, "SUB L", L, 0, 0, 1, subr},
 	{0x96, "SUB (HL)", HL, 0, 0, 1, notimplemented},
 	{0x97, "SUB A", A, 0, 0, 1, notimplemented},
 	{0x98, "SBC A, B", A, B, 0, 1, notimplemented},
@@ -216,7 +216,7 @@ var opCodes = []*OpCode{
 	{0xC3, "JP a16", 0, 0, 2, 4, jpa16},
 	{0xC4, "CALL NZ,a16", flagZ, 0, 2, 3, callnf},
 	{0xC5, "PUSH BC", BC, 0, 0, 4, push},
-	{0xC6, "ADD A,d8", A, 0, 0, 1, notimplemented},
+	{0xC6, "ADD A,d8", A, 0, 1, 2, addd8},
 	{0xC7, "RST 00H", 0x00, 0, 0, 1, rst},
 	{0xC8, "RET Z", flagZ, 0, 0, 1, notimplemented},
 	{0xC9, "RET", 0, 0, 0, 4, ret},
@@ -232,7 +232,7 @@ var opCodes = []*OpCode{
 	{0xD3, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xD4, "CALL NC,a16", flagC, 0, 2, 3, callnf},
 	{0xD5, "PUSH DE", DE, 0, 0, 1, push},
-	{0xD6, "SUB d8", 0, 0, 0, 1, notimplemented},
+	{0xD6, "SUB d8", 0, 0, 1, 2, subd8},
 	{0xD7, "RST 10H", 0x10, 0, 0, 1, rst},
 	{0xD8, "RET C", flagC, 0, 0, 1, notimplemented},
 	{0xD9, "RETI", 0, 0, 0, 1, notimplemented},
@@ -324,6 +324,13 @@ func ldm16r8(c *CPU, R1 byte, R2 byte) {
 
 func lda16r(c *CPU, _ byte, R2 byte) {
 	c.Bus.WriteByte(c.fetch16(), c.Reg.R[R2])
+}
+
+func lda16r16(c *CPU, _ byte, R2 byte) {
+	addr := c.fetch16()
+	r16 := c.Reg.R16(int(R2))
+	c.Bus.WriteByte(addr, util.ExtractLower(r16))
+	c.Bus.WriteByte(addr+1, util.ExtractUpper(r16))
 }
 
 func lda8r(c *CPU, _ byte, R2 byte) {
@@ -505,6 +512,82 @@ func cpHL(c *CPU, r16 byte, _ byte) {
 func cpd8(c *CPU, _ byte, _ byte) {
 	v := c.fetch()
 	_cp(c, v)
+}
+
+func _add(c *CPU, b byte) {
+	a := c.Reg.R[A]
+	v := uint16(a) + uint16(b)
+	carryBits := uint16(a) ^ uint16(b) ^ v
+	flag_h := carryBits&(1<<4) != 0
+	flag_c := carryBits&(1<<8) != 0
+
+	c.Reg.R[A] = byte(v)
+	c.Reg.clearFlag(flagN)
+	c.Reg.setFlagZ(byte(v))
+
+	if flag_h {
+		c.Reg.setFlag(flagH)
+	} else {
+		c.Reg.clearFlag(flagH)
+	}
+	if flag_c {
+		c.Reg.setFlag(flagC)
+	} else {
+		c.Reg.clearFlag(flagC)
+	}
+}
+
+func addr(c *CPU, _ byte, r8 byte) {
+	r := c.Reg.R[r8]
+	_add(c, r)
+}
+func addHL(c *CPU, _ byte, r16 byte) {
+	v := c.Bus.ReadByte(c.Reg.R16(int(r16)))
+	_add(c, v)
+}
+
+func addd8(c *CPU, _ byte, r8 byte) {
+	v := c.fetch()
+	_add(c, v)
+}
+
+func _sub(c *CPU, b byte) {
+	a := c.Reg.R[A]
+	v := a - b
+	carryBits := a ^ b ^ v
+	flag_h := carryBits&(1<<4) != 0
+	flag_c := a < v
+
+	c.Reg.R[A] = v
+	c.Reg.clearFlag(flagN)
+	c.Reg.setFlagZ(byte(v))
+
+	if flag_h {
+		c.Reg.setFlag(flagH)
+	} else {
+		c.Reg.clearFlag(flagH)
+	}
+
+	if flag_c {
+		c.Reg.setFlag(flagC)
+	} else {
+		c.Reg.clearFlag(flagC)
+	}
+}
+
+func subr(c *CPU, r8 byte, _ byte) {
+	v := c.Reg.R[r8]
+	_sub(c, v)
+}
+
+func subHL(c *CPU, r16 byte, _ byte) {
+	v := c.Bus.ReadByte(c.Reg.R16(int(r16)))
+	_sub(c, v)
+}
+
+func subd8(c *CPU, _ byte, _ byte) {
+	r := c.fetch()
+	_sub(c, r)
 }
 
 // special
