@@ -137,14 +137,6 @@ func (r *Register) setFlagH(v byte) {
 	}
 }
 
-func (r *Register) setFlagC(v byte) {
-	if r.R[A] < v {
-		r.setFlag(flagC)
-	} else {
-		r.clearFlag(flagC)
-	}
-}
-
 func (r *Register) setFlagZ(v byte) {
 	if v == 0 {
 		r.setFlag(flagZ)

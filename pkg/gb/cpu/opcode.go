@@ -578,8 +578,16 @@ func xord8(c *CPU, _ byte, _ byte) {
 }
 
 func _cp(c *CPU, v byte) {
-	c.Reg.setFlagZ(v)
-	c.Reg.setFlagC(v)
+	if c.Reg.R[A] == v {
+		c.Reg.setFlag(flagZ)
+	} else {
+		c.Reg.clearFlag(flagZ)
+	}
+	if c.Reg.R[A] < v {
+		c.Reg.setFlag(flagC)
+	} else {
+		c.Reg.clearFlag(flagC)
+	}
 	c.Reg.setFlagH(v)
 	c.Reg.setFlag(flagN)
 }
