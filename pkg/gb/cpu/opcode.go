@@ -70,8 +70,8 @@ var opCodes = []*OpCode{
 	{0x31, "LD SP,d16", SP, 0, 2, 3, ldr16d16},
 	{0x32, "LD (HL-),A", HLD, A, 0, 2, ldm16r},
 	{0x33, "INC SP", SP, 0, 0, 2, incr16},
-	{0x34, "INC (HL)", HL, 0, 0, 1, notimplemented},
-	{0x35, "DEC (HL)", HL, 0, 0, 1, notimplemented},
+	{0x34, "INC (HL)", HL, 0, 0, 3, incm16},
+	{0x35, "DEC (HL)", HL, 0, 0, 3, decm16},
 	{0x36, "LD (HL),d8", HL, 0, 1, 3, ldm16d},
 	{0x37, "SCF", 0, 0, 0, 1, notimplemented},
 	{0x38, "JR C,r8", flagC, 0, 1, 2, jrfr8},
@@ -436,6 +436,22 @@ func incr16(c *CPU, r16 byte, _ byte) {
 	c.Reg.setR16(int(r16), types.Addr(c.Reg.R16(int(r16))+1))
 }
 
+func incm16(c *CPU, r16 byte, _ byte) {
+	d := c.Bus.ReadByte(c.Reg.R16(int(r16)))
+	v := d + 1
+	c.Reg.setFlagZ(v)
+	c.Reg.clearFlag(flagN)
+	carryBits := d ^ 1 ^ v
+
+	if carryBits&0x10 == 0x10 {
+		c.Reg.setFlag(flagH)
+	} else {
+		c.Reg.clearFlag(flagH)
+	}
+
+	c.Bus.WriteByte(c.Reg.R16(int(r16)), byte(v))
+}
+
 func decr(c *CPU, r8 byte, _ byte) {
 	r := c.Reg.R[r8]
 
@@ -459,6 +475,22 @@ func decr(c *CPU, r8 byte, _ byte) {
 
 func decr16(c *CPU, r16 byte, _ byte) {
 	c.Reg.setR16(int(r16), types.Addr(c.Reg.R16(int(r16))-1))
+}
+
+func decm16(c *CPU, r16 byte, _ byte) {
+	d := c.Bus.ReadByte(c.Reg.R16(int(r16)))
+	v := d - 1
+	c.Reg.setFlagZ(v)
+	c.Reg.setFlag(flagN)
+	carryBits := d ^ 1 ^ v
+
+	if carryBits&0x10 == 0x10 {
+		c.Reg.setFlag(flagH)
+	} else {
+		c.Reg.clearFlag(flagH)
+	}
+
+	c.Bus.WriteByte(c.Reg.R16(int(r16)), byte(v))
 }
 
 func _and(c *CPU, buf byte) {

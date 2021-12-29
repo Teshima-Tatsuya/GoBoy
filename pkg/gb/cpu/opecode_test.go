@@ -872,6 +872,62 @@ func TestOpeCode_incr16(t *testing.T) {
 	}
 }
 
+func TestOpeCode_incm16(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "INC (HL)",
+			args: args{0x34, HL},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			var want, act byte
+
+			// zero
+			c.Bus.WriteByte(c.Reg.R16(int(tt.args.r1)), byte(0xFF))
+			want = byte(0x00)
+
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			act = c.Bus.ReadByte(c.Reg.R16(int(op.R1)))
+
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, want, act)
+			assert.Equal(t, true, c.Reg.isSet(flagZ))
+			assert.Equal(t, false, c.Reg.isSet(flagN))
+			assert.Equal(t, true, c.Reg.isSet(flagH))
+
+			// not zero
+			c.Bus.WriteByte(c.Reg.R16(int(tt.args.r1)), byte(0x00))
+			want = byte(0x01)
+
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			act = c.Bus.ReadByte(c.Reg.R16(int(op.R1)))
+
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, want, act)
+			assert.Equal(t, false, c.Reg.isSet(flagZ))
+			assert.Equal(t, false, c.Reg.isSet(flagN))
+			assert.Equal(t, false, c.Reg.isSet(flagH))
+		})
+	}
+}
+
 func TestOpeCode_decr(t *testing.T) {
 	c := setupCPU()
 
@@ -989,6 +1045,62 @@ func TestOpeCode_decr16(t *testing.T) {
 
 			assert.Equal(t, tt.args.r1, op.R1)
 			assert.Equal(t, want, c.Reg.R16(int(op.R1)))
+		})
+	}
+}
+
+func TestOpeCode_decm16(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "DEC (HL)",
+			args: args{0x35, HL},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			var want, act byte
+
+			// zero
+			c.Bus.WriteByte(c.Reg.R16(int(tt.args.r1)), byte(0x01))
+			want = byte(0x00)
+
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			act = c.Bus.ReadByte(c.Reg.R16(int(op.R1)))
+
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, want, act)
+			assert.Equal(t, true, c.Reg.isSet(flagZ))
+			assert.Equal(t, true, c.Reg.isSet(flagN))
+			assert.Equal(t, false, c.Reg.isSet(flagH))
+
+			// not zero
+			c.Bus.WriteByte(c.Reg.R16(int(tt.args.r1)), byte(0x00))
+			want = byte(0xFF)
+
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			act = c.Bus.ReadByte(c.Reg.R16(int(op.R1)))
+
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, want, act)
+			assert.Equal(t, false, c.Reg.isSet(flagZ))
+			assert.Equal(t, true, c.Reg.isSet(flagN))
+			assert.Equal(t, true, c.Reg.isSet(flagH))
 		})
 	}
 }
