@@ -30,7 +30,8 @@ func (c *CPU) Step() int {
 	var op *OpCode
 	if opcode == 0xCB {
 		// Prefix Ope
-		c.fetch()
+		log.Info("PREFIX CB")
+		opcode = c.fetch()
 		op = opCodes[opcode]
 	} else {
 		op = opCodes[opcode]

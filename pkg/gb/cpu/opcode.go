@@ -226,7 +226,7 @@ var opCodes = []*OpCode{
 	{0xCD, "CALL a16", 0, 0, 2, 4, call},
 	{0xCE, "ADC A,d8", 0, 0, 0, 1, notimplemented},
 	{0xCF, "RST 08H", 0x08, 0, 0, 1, rst},
-	{0xD0, "RET NC", flagC, 0, 0, 1, notimplemented},
+	{0xD0, "RET NC", flagC, 0, 0, 2, retnf},
 	{0xD1, "POP DE", DE, 0, 0, 3, pop},
 	{0xD2, "JP NC,a16", flagC, 0, 2, 3, jpnfa16},
 	{0xD3, "EMPTY", 0, 0, 0, 1, notimplemented},
@@ -235,7 +235,7 @@ var opCodes = []*OpCode{
 	{0xD6, "SUB d8", 0, 0, 1, 2, subd8},
 	{0xD7, "RST 10H", 0x10, 0, 0, 1, rst},
 	{0xD8, "RET C", flagC, 0, 0, 2, retf},
-	{0xD9, "RETI", 0, 0, 0, 1, notimplemented},
+	{0xD9, "RETI", 0, 0, 0, 4, reti},
 	{0xDA, "JP C,a16", flagC, 0, 2, 3, jpfa16},
 	{0xDB, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xDC, "CALL C,a16", flagC, 0, 2, 3, callf},
@@ -399,13 +399,13 @@ func lda16r16(c *CPU, _ byte, R2 byte) {
 }
 
 func retf(c *CPU, R1 byte, _ byte) {
-	if c.Reg.R[F]&(1<<R1) != 0 {
+	if c.Reg.isSet(R1) {
 		c.popPC()
 	}
 }
 
 func retnf(c *CPU, R1 byte, _ byte) {
-	if c.Reg.R[F]&(1<<R1) == 0 {
+	if !c.Reg.isSet(R1) {
 		c.popPC()
 	}
 }
@@ -675,9 +675,15 @@ func subd8(c *CPU, _ byte, _ byte) {
 	_sub(c, r)
 }
 
-// special
+// ret
 func ret(c *CPU, _ byte, _ byte) {
 	c.popPC()
+}
+
+func reti(c *CPU, _ byte, _ byte) {
+	c.popPC()
+
+	// TODO irq enable
 }
 
 // -----jp-----
