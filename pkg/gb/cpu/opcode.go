@@ -49,7 +49,7 @@ var opCodes = []*OpCode{
 	{0x1C, "INC E", E, 0, 0, 1, incr},
 	{0x1D, "DEC E", E, 0, 0, 1, decr},
 	{0x1E, "LD E,d8", E, 0, 1, 2, ldrd},
-	{0x1F, "RRA", 0, 0, 0, 1, notimplemented},
+	{0x1F, "RRA", A, 0, 0, 1, rrr},
 	{0x20, "JR NZ,r8", flagZ, 0, 1, 2, jrnfr8},
 	{0x21, "LD HL,d16", HL, 0, 2, 3, ldr16d16},
 	{0x22, "LD (HL+),A", HLI, A, 0, 2, ldm16r},
@@ -871,230 +871,230 @@ var cbOpCodes = []*OpCode{
 	{0x1D, "RR L", L, 0, 1, 2, rrr},
 	{0x1E, "RR (HL)", HL, 0, 1, 4, rrm16},
 	{0x1F, "RR A", A, 0, 1, 2, rrr},
-	{0x20, "SLA B", B, 0, 1, 2, notimplemented},
-	{0x21, "SLA C", C, 0, 1, 2, notimplemented},
-	{0x22, "SLA D", D, 0, 1, 2, notimplemented},
-	{0x23, "SLA E", E, 0, 1, 2, notimplemented},
-	{0x24, "SLA H", H, 0, 1, 2, notimplemented},
-	{0x25, "SLA L", L, 0, 1, 2, notimplemented},
-	{0x26, "SLA (HL)", HL, 0, 1, 4, notimplemented},
-	{0x27, "SLA A", A, 0, 1, 2, notimplemented},
-	{0x28, "SRA B", B, 0, 1, 2, notimplemented},
-	{0x29, "SRA C", C, 0, 1, 2, notimplemented},
-	{0x2A, "SRA D", D, 0, 1, 2, notimplemented},
-	{0x2B, "SRA E", E, 0, 1, 2, notimplemented},
-	{0x2C, "SRA H", H, 0, 1, 2, notimplemented},
-	{0x2D, "SRA L", L, 0, 1, 2, notimplemented},
-	{0x2E, "SRA (HL)", HL, 0, 1, 4, notimplemented},
-	{0x2F, "SRA A", A, 0, 1, 2, notimplemented},
-	{0x30, "SWAP B", B, 0, 1, 2, notimplemented},
-	{0x31, "SWAP C", C, 0, 1, 2, notimplemented},
-	{0x32, "SWAP D", D, 0, 1, 2, notimplemented},
-	{0x33, "SWAP E", E, 0, 1, 2, notimplemented},
-	{0x34, "SWAP H", H, 0, 1, 2, notimplemented},
-	{0x35, "SWAP L", L, 0, 1, 2, notimplemented},
-	{0x36, "SWAP (HL)", HL, 0, 1, 4, notimplemented},
-	{0x37, "SWAP A", A, 0, 1, 2, notimplemented},
-	{0x38, "SRL B", B, 0, 1, 2, notimplemented},
-	{0x39, "SRL C", C, 0, 1, 2, notimplemented},
-	{0x3A, "SRL D", D, 0, 1, 2, notimplemented},
-	{0x3B, "SRL E", E, 0, 1, 2, notimplemented},
-	{0x3C, "SRL H", H, 0, 1, 2, notimplemented},
-	{0x3D, "SRL L", L, 0, 1, 2, notimplemented},
-	{0x3E, "SRL (HL)", HL, 0, 1, 4, notimplemented},
-	{0x3F, "SRL A", A, 0, 1, 2, notimplemented},
-	{0x40, "BIT 0,B", 0, B, 1, 2, notimplemented},
-	{0x41, "BIT 0,C", 0, C, 1, 2, notimplemented},
-	{0x42, "BIT 0,D", 0, D, 1, 2, notimplemented},
-	{0x43, "BIT 0,E", 0, E, 1, 2, notimplemented},
-	{0x44, "BIT 0,H", 0, H, 1, 2, notimplemented},
-	{0x45, "BIT 0,L", 0, L, 1, 2, notimplemented},
-	{0x46, "BIT 0,(HL)", 0, HL, 1, 4, notimplemented},
-	{0x47, "BIT 0,A", 0, A, 1, 2, notimplemented},
-	{0x48, "BIT 1,B", 1, B, 1, 2, notimplemented},
-	{0x49, "BIT 1,C", 1, C, 1, 2, notimplemented},
-	{0x4A, "BIT 1,D", 1, D, 1, 2, notimplemented},
-	{0x4B, "BIT 1,E", 1, E, 1, 2, notimplemented},
-	{0x4C, "BIT 1,H", 1, H, 1, 2, notimplemented},
-	{0x4D, "BIT 1,L", 1, L, 1, 2, notimplemented},
-	{0x4E, "BIT 1,(HL)", 1, HL, 1, 4, notimplemented},
-	{0x4F, "BIT 1,A", 1, A, 1, 2, notimplemented},
-	{0x50, "BIT 2,B", 2, B, 1, 2, notimplemented},
-	{0x51, "BIT 2,C", 2, C, 1, 2, notimplemented},
-	{0x52, "BIT 2,D", 2, D, 1, 2, notimplemented},
-	{0x53, "BIT 2,E", 2, E, 1, 2, notimplemented},
-	{0x54, "BIT 2,H", 2, H, 1, 2, notimplemented},
-	{0x55, "BIT 2,L", 2, L, 1, 2, notimplemented},
-	{0x56, "BIT 2,(HL)", 2, HL, 1, 4, notimplemented},
-	{0x57, "BIT 2,A", 2, A, 1, 2, notimplemented},
-	{0x58, "BIT 3,B", 3, B, 1, 2, notimplemented},
-	{0x59, "BIT 3,C", 3, C, 1, 2, notimplemented},
-	{0x5A, "BIT 3,D", 3, D, 1, 2, notimplemented},
-	{0x5B, "BIT 3,E", 3, E, 1, 2, notimplemented},
-	{0x5C, "BIT 3,H", 3, H, 1, 2, notimplemented},
-	{0x5D, "BIT 3,L", 3, L, 1, 2, notimplemented},
-	{0x5E, "BIT 3,(HL)", 3, HL, 1, 4, notimplemented},
-	{0x5F, "BIT 3,A", 3, A, 1, 2, notimplemented},
-	{0x60, "BIT 4,B", 4, B, 1, 2, notimplemented},
-	{0x61, "BIT 4,C", 4, C, 1, 2, notimplemented},
-	{0x62, "BIT 4,D", 4, D, 1, 2, notimplemented},
-	{0x63, "BIT 4,E", 4, E, 1, 2, notimplemented},
-	{0x64, "BIT 4,H", 4, H, 1, 2, notimplemented},
-	{0x65, "BIT 4,L", 4, L, 1, 2, notimplemented},
-	{0x66, "BIT 4,(HL)", 4, HL, 1, 4, notimplemented},
-	{0x67, "BIT 4,A", 4, A, 1, 2, notimplemented},
-	{0x68, "BIT 5,B", 5, B, 1, 2, notimplemented},
-	{0x69, "BIT 5,C", 5, C, 1, 2, notimplemented},
-	{0x6A, "BIT 5,D", 5, D, 1, 2, notimplemented},
-	{0x6B, "BIT 5,E", 5, E, 1, 2, notimplemented},
-	{0x6C, "BIT 5,H", 5, H, 1, 2, notimplemented},
-	{0x6D, "BIT 5,L", 5, L, 1, 2, notimplemented},
-	{0x6E, "BIT 5,(HL)", 5, HL, 1, 4, notimplemented},
-	{0x6F, "BIT 5,A", 5, A, 1, 2, notimplemented},
-	{0x70, "BIT 6,B", 6, B, 1, 2, notimplemented},
-	{0x71, "BIT 6,C", 6, C, 1, 2, notimplemented},
-	{0x72, "BIT 6,D", 6, D, 1, 2, notimplemented},
-	{0x73, "BIT 6,E", 6, E, 1, 2, notimplemented},
-	{0x74, "BIT 6,H", 6, H, 1, 2, notimplemented},
-	{0x75, "BIT 6,L", 6, L, 1, 2, notimplemented},
-	{0x76, "BIT 6,(HL)", 6, HL, 1, 4, notimplemented},
-	{0x77, "BIT 6,A", 6, A, 1, 2, notimplemented},
-	{0x78, "BIT 7,B", 7, B, 1, 2, notimplemented},
-	{0x79, "BIT 7,C", 7, C, 1, 2, notimplemented},
-	{0x7A, "BIT 7,D", 7, D, 1, 2, notimplemented},
-	{0x7B, "BIT 7,E", 7, E, 1, 2, notimplemented},
-	{0x7C, "BIT 7,H", 7, H, 1, 2, notimplemented},
-	{0x7D, "BIT 7,L", 7, L, 1, 2, notimplemented},
-	{0x7E, "BIT 7,(HL)", 7, HL, 1, 4, notimplemented},
-	{0x7F, "BIT 7,A", 7, A, 1, 2, notimplemented},
-	{0x80, "RES 0,B", 0, B, 1, 2, notimplemented},
-	{0x81, "RES 0,C", 0, C, 1, 2, notimplemented},
-	{0x82, "RES 0,D", 0, D, 1, 2, notimplemented},
-	{0x83, "RES 0,E", 0, E, 1, 2, notimplemented},
-	{0x84, "RES 0,H", 0, H, 1, 2, notimplemented},
-	{0x85, "RES 0,L", 0, L, 1, 2, notimplemented},
-	{0x86, "RES 0,(HL)", 0, HL, 1, 4, notimplemented},
-	{0x87, "RES 0,A", 0, A, 1, 2, notimplemented},
-	{0x88, "RES 1,B", 1, B, 1, 2, notimplemented},
-	{0x89, "RES 1,C", 1, C, 1, 2, notimplemented},
-	{0x8A, "RES 1,D", 1, D, 1, 2, notimplemented},
-	{0x8B, "RES 1,E", 1, E, 1, 2, notimplemented},
-	{0x8C, "RES 1,H", 1, H, 1, 2, notimplemented},
-	{0x8D, "RES 1,L", 1, L, 1, 2, notimplemented},
-	{0x8E, "RES 1,(HL)", 1, HL, 1, 4, notimplemented},
-	{0x8F, "RES 1,A", 1, A, 1, 2, notimplemented},
-	{0x90, "RES 2,B", 2, B, 1, 2, notimplemented},
-	{0x91, "RES 2,C", 2, C, 1, 2, notimplemented},
-	{0x92, "RES 2,D", 2, D, 1, 2, notimplemented},
-	{0x93, "RES 2,E", 2, E, 1, 2, notimplemented},
-	{0x94, "RES 2,H", 2, H, 1, 2, notimplemented},
-	{0x95, "RES 2,L", 2, L, 1, 2, notimplemented},
-	{0x96, "RES 2,(HL)", 2, HL, 1, 4, notimplemented},
-	{0x97, "RES 2,A", 2, A, 1, 2, notimplemented},
-	{0x98, "RES 3,B", 3, B, 1, 2, notimplemented},
-	{0x99, "RES 3,C", 3, C, 1, 2, notimplemented},
-	{0x9A, "RES 3,D", 3, D, 1, 2, notimplemented},
-	{0x9B, "RES 3,E", 3, E, 1, 2, notimplemented},
-	{0x9C, "RES 3,H", 3, H, 1, 2, notimplemented},
-	{0x9D, "RES 3,L", 3, L, 1, 2, notimplemented},
-	{0x9E, "RES 3,(HL)", 3, HL, 1, 4, notimplemented},
-	{0x9F, "RES 3,A", 3, A, 1, 2, notimplemented},
-	{0xA0, "RES 4,B", 4, B, 1, 2, notimplemented},
-	{0xA1, "RES 4,C", 4, C, 1, 2, notimplemented},
-	{0xA2, "RES 4,D", 4, D, 1, 2, notimplemented},
-	{0xA3, "RES 4,E", 4, E, 1, 2, notimplemented},
-	{0xA4, "RES 4,H", 4, H, 1, 2, notimplemented},
-	{0xA5, "RES 4,L", 4, L, 1, 2, notimplemented},
-	{0xA6, "RES 4,(HL)", 4, HL, 1, 4, notimplemented},
-	{0xA7, "RES 4,A", 4, A, 1, 2, notimplemented},
-	{0xA8, "RES 5,B", 5, B, 1, 2, notimplemented},
-	{0xA9, "RES 5,C", 5, C, 1, 2, notimplemented},
-	{0xAA, "RES 5,D", 5, D, 1, 2, notimplemented},
-	{0xAB, "RES 5,E", 5, E, 1, 2, notimplemented},
-	{0xAC, "RES 5,H", 5, H, 1, 2, notimplemented},
-	{0xAD, "RES 5,L", 5, L, 1, 2, notimplemented},
-	{0xAE, "RES 5,(HL)", 5, HL, 1, 4, notimplemented},
-	{0xAF, "RES 5,A", 5, A, 1, 2, notimplemented},
-	{0xB0, "RES 6,B", 6, B, 1, 2, notimplemented},
-	{0xB1, "RES 6,C", 6, C, 1, 2, notimplemented},
-	{0xB2, "RES 6,D", 6, D, 1, 2, notimplemented},
-	{0xB3, "RES 6,E", 6, E, 1, 2, notimplemented},
-	{0xB4, "RES 6,H", 6, H, 1, 2, notimplemented},
-	{0xB5, "RES 6,L", 6, L, 1, 2, notimplemented},
-	{0xB6, "RES 6,(HL)", 6, HL, 1, 4, notimplemented},
-	{0xB7, "RES 6,A", 6, A, 1, 2, notimplemented},
-	{0xB8, "RES 7,B", 7, B, 1, 2, notimplemented},
-	{0xB9, "RES 7,C", 7, C, 1, 2, notimplemented},
-	{0xBA, "RES 7,D", 7, D, 1, 2, notimplemented},
-	{0xBB, "RES 7,E", 7, E, 1, 2, notimplemented},
-	{0xBC, "RES 7,H", 7, H, 1, 2, notimplemented},
-	{0xBD, "RES 7,L", 7, L, 1, 2, notimplemented},
-	{0xBE, "RES 7,(HL)", 7, HL, 1, 4, notimplemented},
-	{0xBF, "RES 7,A", 7, A, 1, 2, notimplemented},
-	{0xC0, "SET 0,B", 0, B, 1, 2, notimplemented},
-	{0xC1, "SET 0,C", 0, C, 1, 2, notimplemented},
-	{0xC2, "SET 0,D", 0, D, 1, 2, notimplemented},
-	{0xC3, "SET 0,E", 0, E, 1, 2, notimplemented},
-	{0xC4, "SET 0,H", 0, H, 1, 2, notimplemented},
-	{0xC5, "SET 0,L", 0, L, 1, 2, notimplemented},
-	{0xC6, "SET 0,(HL)", 0, HL, 1, 4, notimplemented},
-	{0xC7, "SET 0,A", 0, A, 1, 2, notimplemented},
-	{0xC8, "SET 1,B", 1, B, 1, 2, notimplemented},
-	{0xC9, "SET 1,C", 1, C, 1, 2, notimplemented},
-	{0xCA, "SET 1,D", 1, D, 1, 2, notimplemented},
-	{0xCB, "SET 1,E", 1, E, 1, 2, notimplemented},
-	{0xCC, "SET 1,H", 1, H, 1, 2, notimplemented},
-	{0xCD, "SET 1,L", 1, L, 1, 2, notimplemented},
-	{0xCE, "SET 1,(HL)", 1, HL, 1, 4, notimplemented},
-	{0xCF, "SET 1,A", 1, A, 1, 2, notimplemented},
-	{0xD0, "SET 2,B", 2, B, 1, 2, notimplemented},
-	{0xD1, "SET 2,C", 2, C, 1, 2, notimplemented},
-	{0xD2, "SET 2,D", 2, D, 1, 2, notimplemented},
-	{0xD3, "SET 2,E", 2, E, 1, 2, notimplemented},
-	{0xD4, "SET 2,H", 2, H, 1, 2, notimplemented},
-	{0xD5, "SET 2,L", 2, L, 1, 2, notimplemented},
-	{0xD6, "SET 2,(HL)", 2, HL, 1, 4, notimplemented},
-	{0xD7, "SET 2,A", 2, A, 1, 2, notimplemented},
-	{0xD8, "SET 3,B", 3, B, 1, 2, notimplemented},
-	{0xD9, "SET 3,C", 3, C, 1, 2, notimplemented},
-	{0xDA, "SET 3,D", 3, D, 1, 2, notimplemented},
-	{0xDB, "SET 3,E", 3, E, 1, 2, notimplemented},
-	{0xDC, "SET 3,H", 3, H, 1, 2, notimplemented},
-	{0xDD, "SET 3,L", 3, L, 1, 2, notimplemented},
-	{0xDE, "SET 3,(HL)", 3, HL, 1, 4, notimplemented},
-	{0xDF, "SET 3,A", 3, A, 1, 2, notimplemented},
-	{0xE0, "SET 4,B", 4, B, 1, 2, notimplemented},
-	{0xE1, "SET 4,C", 4, C, 1, 2, notimplemented},
-	{0xE2, "SET 4,D", 4, D, 1, 2, notimplemented},
-	{0xE3, "SET 4,E", 4, E, 1, 2, notimplemented},
-	{0xE4, "SET 4,H", 4, H, 1, 2, notimplemented},
-	{0xE5, "SET 4,L", 4, L, 1, 2, notimplemented},
-	{0xE6, "SET 4,(HL)", 4, HL, 1, 4, notimplemented},
-	{0xE7, "SET 4,A", 4, A, 1, 2, notimplemented},
-	{0xE8, "SET 5,B", 5, B, 1, 2, notimplemented},
-	{0xE9, "SET 5,C", 5, C, 1, 2, notimplemented},
-	{0xEA, "SET 5,D", 5, D, 1, 2, notimplemented},
-	{0xEB, "SET 5,E", 5, E, 1, 2, notimplemented},
-	{0xEC, "SET 5,H", 5, H, 1, 2, notimplemented},
-	{0xED, "SET 5,L", 5, L, 1, 2, notimplemented},
-	{0xEE, "SET 5,(HL)", 5, HL, 1, 4, notimplemented},
-	{0xEF, "SET 5,A", 5, A, 1, 2, notimplemented},
-	{0xF0, "SET 6,B", 6, B, 1, 2, notimplemented},
-	{0xF1, "SET 6,C", 6, C, 1, 2, notimplemented},
-	{0xF2, "SET 6,D", 6, D, 1, 2, notimplemented},
-	{0xF3, "SET 6,E", 6, E, 1, 2, notimplemented},
-	{0xF4, "SET 6,H", 6, H, 1, 2, notimplemented},
-	{0xF5, "SET 6,L", 6, L, 1, 2, notimplemented},
-	{0xF6, "SET 6,(HL)", 6, HL, 1, 4, notimplemented},
-	{0xF7, "SET 6,A", 6, A, 1, 2, notimplemented},
-	{0xF8, "SET 7,B", 7, B, 1, 2, notimplemented},
-	{0xF9, "SET 7,C", 7, C, 1, 2, notimplemented},
-	{0xFA, "SET 7,D", 7, D, 1, 2, notimplemented},
-	{0xFB, "SET 7,E", 7, E, 1, 2, notimplemented},
-	{0xFC, "SET 7,H", 7, H, 1, 2, notimplemented},
-	{0xFD, "SET 7,L", 7, L, 1, 2, notimplemented},
-	{0xFE, "SET 7,(HL)", 7, HL, 1, 4, notimplemented},
-	{0xFF, "SET 7,A", 7, A, 1, 2, notimplemented},
+	{0x20, "SLA B", B, 0, 1, 2, slar},
+	{0x21, "SLA C", C, 0, 1, 2, slar},
+	{0x22, "SLA D", D, 0, 1, 2, slar},
+	{0x23, "SLA E", E, 0, 1, 2, slar},
+	{0x24, "SLA H", H, 0, 1, 2, slar},
+	{0x25, "SLA L", L, 0, 1, 2, slar},
+	{0x26, "SLA (HL)", HL, 0, 1, 4, slam16},
+	{0x27, "SLA A", A, 0, 1, 2, slar},
+	{0x28, "SRA B", B, 0, 1, 2, srar},
+	{0x29, "SRA C", C, 0, 1, 2, srar},
+	{0x2A, "SRA D", D, 0, 1, 2, srar},
+	{0x2B, "SRA E", E, 0, 1, 2, srar},
+	{0x2C, "SRA H", H, 0, 1, 2, srar},
+	{0x2D, "SRA L", L, 0, 1, 2, srar},
+	{0x2E, "SRA (HL)", HL, 0, 1, 4, sram16},
+	{0x2F, "SRA A", A, 0, 1, 2, srar},
+	{0x30, "SWAP B", B, 0, 1, 2, swapr},
+	{0x31, "SWAP C", C, 0, 1, 2, swapr},
+	{0x32, "SWAP D", D, 0, 1, 2, swapr},
+	{0x33, "SWAP E", E, 0, 1, 2, swapr},
+	{0x34, "SWAP H", H, 0, 1, 2, swapr},
+	{0x35, "SWAP L", L, 0, 1, 2, swapr},
+	{0x36, "SWAP (HL)", HL, 0, 1, 4, swapm16},
+	{0x37, "SWAP A", A, 0, 1, 2, swapr},
+	{0x38, "SRL B", B, 0, 1, 2, srlr},
+	{0x39, "SRL C", C, 0, 1, 2, srlr},
+	{0x3A, "SRL D", D, 0, 1, 2, srlr},
+	{0x3B, "SRL E", E, 0, 1, 2, srlr},
+	{0x3C, "SRL H", H, 0, 1, 2, srlr},
+	{0x3D, "SRL L", L, 0, 1, 2, srlr},
+	{0x3E, "SRL (HL)", HL, 0, 1, 4, srlm16},
+	{0x3F, "SRL A", A, 0, 1, 2, srlr},
+	{0x40, "BIT 0,B", 0, B, 1, 2, bitr},
+	{0x41, "BIT 0,C", 0, C, 1, 2, bitr},
+	{0x42, "BIT 0,D", 0, D, 1, 2, bitr},
+	{0x43, "BIT 0,E", 0, E, 1, 2, bitr},
+	{0x44, "BIT 0,H", 0, H, 1, 2, bitr},
+	{0x45, "BIT 0,L", 0, L, 1, 2, bitr},
+	{0x46, "BIT 0,(HL)", 0, HL, 1, 4, bitm16},
+	{0x47, "BIT 0,A", 0, A, 1, 2, bitr},
+	{0x48, "BIT 1,B", 1, B, 1, 2, bitr},
+	{0x49, "BIT 1,C", 1, C, 1, 2, bitr},
+	{0x4A, "BIT 1,D", 1, D, 1, 2, bitr},
+	{0x4B, "BIT 1,E", 1, E, 1, 2, bitr},
+	{0x4C, "BIT 1,H", 1, H, 1, 2, bitr},
+	{0x4D, "BIT 1,L", 1, L, 1, 2, bitr},
+	{0x4E, "BIT 1,(HL)", 1, HL, 1, 4, bitm16},
+	{0x4F, "BIT 1,A", 1, A, 1, 2, bitr},
+	{0x50, "BIT 2,B", 2, B, 1, 2, bitr},
+	{0x51, "BIT 2,C", 2, C, 1, 2, bitr},
+	{0x52, "BIT 2,D", 2, D, 1, 2, bitr},
+	{0x53, "BIT 2,E", 2, E, 1, 2, bitr},
+	{0x54, "BIT 2,H", 2, H, 1, 2, bitr},
+	{0x55, "BIT 2,L", 2, L, 1, 2, bitr},
+	{0x56, "BIT 2,(HL)", 2, HL, 1, 4, bitm16},
+	{0x57, "BIT 2,A", 2, A, 1, 2, bitr},
+	{0x58, "BIT 3,B", 3, B, 1, 2, bitr},
+	{0x59, "BIT 3,C", 3, C, 1, 2, bitr},
+	{0x5A, "BIT 3,D", 3, D, 1, 2, bitr},
+	{0x5B, "BIT 3,E", 3, E, 1, 2, bitr},
+	{0x5C, "BIT 3,H", 3, H, 1, 2, bitr},
+	{0x5D, "BIT 3,L", 3, L, 1, 2, bitr},
+	{0x5E, "BIT 3,(HL)", 3, HL, 1, 4, bitm16},
+	{0x5F, "BIT 3,A", 3, A, 1, 2, bitr},
+	{0x60, "BIT 4,B", 4, B, 1, 2, bitr},
+	{0x61, "BIT 4,C", 4, C, 1, 2, bitr},
+	{0x62, "BIT 4,D", 4, D, 1, 2, bitr},
+	{0x63, "BIT 4,E", 4, E, 1, 2, bitr},
+	{0x64, "BIT 4,H", 4, H, 1, 2, bitr},
+	{0x65, "BIT 4,L", 4, L, 1, 2, bitr},
+	{0x66, "BIT 4,(HL)", 4, HL, 1, 4, bitm16},
+	{0x67, "BIT 4,A", 4, A, 1, 2, bitr},
+	{0x68, "BIT 5,B", 5, B, 1, 2, bitr},
+	{0x69, "BIT 5,C", 5, C, 1, 2, bitr},
+	{0x6A, "BIT 5,D", 5, D, 1, 2, bitr},
+	{0x6B, "BIT 5,E", 5, E, 1, 2, bitr},
+	{0x6C, "BIT 5,H", 5, H, 1, 2, bitr},
+	{0x6D, "BIT 5,L", 5, L, 1, 2, bitr},
+	{0x6E, "BIT 5,(HL)", 5, HL, 1, 4, bitm16},
+	{0x6F, "BIT 5,A", 5, A, 1, 2, bitr},
+	{0x70, "BIT 6,B", 6, B, 1, 2, bitr},
+	{0x71, "BIT 6,C", 6, C, 1, 2, bitr},
+	{0x72, "BIT 6,D", 6, D, 1, 2, bitr},
+	{0x73, "BIT 6,E", 6, E, 1, 2, bitr},
+	{0x74, "BIT 6,H", 6, H, 1, 2, bitr},
+	{0x75, "BIT 6,L", 6, L, 1, 2, bitr},
+	{0x76, "BIT 6,(HL)", 6, HL, 1, 4, bitm16},
+	{0x77, "BIT 6,A", 6, A, 1, 2, bitr},
+	{0x78, "BIT 7,B", 7, B, 1, 2, bitr},
+	{0x79, "BIT 7,C", 7, C, 1, 2, bitr},
+	{0x7A, "BIT 7,D", 7, D, 1, 2, bitr},
+	{0x7B, "BIT 7,E", 7, E, 1, 2, bitr},
+	{0x7C, "BIT 7,H", 7, H, 1, 2, bitr},
+	{0x7D, "BIT 7,L", 7, L, 1, 2, bitr},
+	{0x7E, "BIT 7,(HL)", 7, HL, 1, 4, bitm16},
+	{0x7F, "BIT 7,A", 7, A, 1, 2, bitr},
+	{0x80, "RES 0,B", 0, B, 1, 2, resr},
+	{0x81, "RES 0,C", 0, C, 1, 2, resr},
+	{0x82, "RES 0,D", 0, D, 1, 2, resr},
+	{0x83, "RES 0,E", 0, E, 1, 2, resr},
+	{0x84, "RES 0,H", 0, H, 1, 2, resr},
+	{0x85, "RES 0,L", 0, L, 1, 2, resr},
+	{0x86, "RES 0,(HL)", 0, HL, 1, 4, resm16},
+	{0x87, "RES 0,A", 0, A, 1, 2, resr},
+	{0x88, "RES 1,B", 1, B, 1, 2, resr},
+	{0x89, "RES 1,C", 1, C, 1, 2, resr},
+	{0x8A, "RES 1,D", 1, D, 1, 2, resr},
+	{0x8B, "RES 1,E", 1, E, 1, 2, resr},
+	{0x8C, "RES 1,H", 1, H, 1, 2, resr},
+	{0x8D, "RES 1,L", 1, L, 1, 2, resr},
+	{0x8E, "RES 1,(HL)", 1, HL, 1, 4, resm16},
+	{0x8F, "RES 1,A", 1, A, 1, 2, resr},
+	{0x90, "RES 2,B", 2, B, 1, 2, resr},
+	{0x91, "RES 2,C", 2, C, 1, 2, resr},
+	{0x92, "RES 2,D", 2, D, 1, 2, resr},
+	{0x93, "RES 2,E", 2, E, 1, 2, resr},
+	{0x94, "RES 2,H", 2, H, 1, 2, resr},
+	{0x95, "RES 2,L", 2, L, 1, 2, resr},
+	{0x96, "RES 2,(HL)", 2, HL, 1, 4, resm16},
+	{0x97, "RES 2,A", 2, A, 1, 2, resr},
+	{0x98, "RES 3,B", 3, B, 1, 2, resr},
+	{0x99, "RES 3,C", 3, C, 1, 2, resr},
+	{0x9A, "RES 3,D", 3, D, 1, 2, resr},
+	{0x9B, "RES 3,E", 3, E, 1, 2, resr},
+	{0x9C, "RES 3,H", 3, H, 1, 2, resr},
+	{0x9D, "RES 3,L", 3, L, 1, 2, resr},
+	{0x9E, "RES 3,(HL)", 3, HL, 1, 4, resm16},
+	{0x9F, "RES 3,A", 3, A, 1, 2, resr},
+	{0xA0, "RES 4,B", 4, B, 1, 2, resr},
+	{0xA1, "RES 4,C", 4, C, 1, 2, resr},
+	{0xA2, "RES 4,D", 4, D, 1, 2, resr},
+	{0xA3, "RES 4,E", 4, E, 1, 2, resr},
+	{0xA4, "RES 4,H", 4, H, 1, 2, resr},
+	{0xA5, "RES 4,L", 4, L, 1, 2, resr},
+	{0xA6, "RES 4,(HL)", 4, HL, 1, 4, resm16},
+	{0xA7, "RES 4,A", 4, A, 1, 2, resr},
+	{0xA8, "RES 5,B", 5, B, 1, 2, resr},
+	{0xA9, "RES 5,C", 5, C, 1, 2, resr},
+	{0xAA, "RES 5,D", 5, D, 1, 2, resr},
+	{0xAB, "RES 5,E", 5, E, 1, 2, resr},
+	{0xAC, "RES 5,H", 5, H, 1, 2, resr},
+	{0xAD, "RES 5,L", 5, L, 1, 2, resr},
+	{0xAE, "RES 5,(HL)", 5, HL, 1, 4, resm16},
+	{0xAF, "RES 5,A", 5, A, 1, 2, resr},
+	{0xB0, "RES 6,B", 6, B, 1, 2, resr},
+	{0xB1, "RES 6,C", 6, C, 1, 2, resr},
+	{0xB2, "RES 6,D", 6, D, 1, 2, resr},
+	{0xB3, "RES 6,E", 6, E, 1, 2, resr},
+	{0xB4, "RES 6,H", 6, H, 1, 2, resr},
+	{0xB5, "RES 6,L", 6, L, 1, 2, resr},
+	{0xB6, "RES 6,(HL)", 6, HL, 1, 4, resm16},
+	{0xB7, "RES 6,A", 6, A, 1, 2, resr},
+	{0xB8, "RES 7,B", 7, B, 1, 2, resr},
+	{0xB9, "RES 7,C", 7, C, 1, 2, resr},
+	{0xBA, "RES 7,D", 7, D, 1, 2, resr},
+	{0xBB, "RES 7,E", 7, E, 1, 2, resr},
+	{0xBC, "RES 7,H", 7, H, 1, 2, resr},
+	{0xBD, "RES 7,L", 7, L, 1, 2, resr},
+	{0xBE, "RES 7,(HL)", 7, HL, 1, 4, resm16},
+	{0xBF, "RES 7,A", 7, A, 1, 2, resr},
+	{0xC0, "SET 0,B", 0, B, 1, 2, setr},
+	{0xC1, "SET 0,C", 0, C, 1, 2, setr},
+	{0xC2, "SET 0,D", 0, D, 1, 2, setr},
+	{0xC3, "SET 0,E", 0, E, 1, 2, setr},
+	{0xC4, "SET 0,H", 0, H, 1, 2, setr},
+	{0xC5, "SET 0,L", 0, L, 1, 2, setr},
+	{0xC6, "SET 0,(HL)", 0, HL, 1, 4, setm16},
+	{0xC7, "SET 0,A", 0, A, 1, 2, setr},
+	{0xC8, "SET 1,B", 1, B, 1, 2, setr},
+	{0xC9, "SET 1,C", 1, C, 1, 2, setr},
+	{0xCA, "SET 1,D", 1, D, 1, 2, setr},
+	{0xCB, "SET 1,E", 1, E, 1, 2, setr},
+	{0xCC, "SET 1,H", 1, H, 1, 2, setr},
+	{0xCD, "SET 1,L", 1, L, 1, 2, setr},
+	{0xCE, "SET 1,(HL)", 1, HL, 1, 4, setm16},
+	{0xCF, "SET 1,A", 1, A, 1, 2, setr},
+	{0xD0, "SET 2,B", 2, B, 1, 2, setr},
+	{0xD1, "SET 2,C", 2, C, 1, 2, setr},
+	{0xD2, "SET 2,D", 2, D, 1, 2, setr},
+	{0xD3, "SET 2,E", 2, E, 1, 2, setr},
+	{0xD4, "SET 2,H", 2, H, 1, 2, setr},
+	{0xD5, "SET 2,L", 2, L, 1, 2, setr},
+	{0xD6, "SET 2,(HL)", 2, HL, 1, 4, setm16},
+	{0xD7, "SET 2,A", 2, A, 1, 2, setr},
+	{0xD8, "SET 3,B", 3, B, 1, 2, setr},
+	{0xD9, "SET 3,C", 3, C, 1, 2, setr},
+	{0xDA, "SET 3,D", 3, D, 1, 2, setr},
+	{0xDB, "SET 3,E", 3, E, 1, 2, setr},
+	{0xDC, "SET 3,H", 3, H, 1, 2, setr},
+	{0xDD, "SET 3,L", 3, L, 1, 2, setr},
+	{0xDE, "SET 3,(HL)", 3, HL, 1, 4, setm16},
+	{0xDF, "SET 3,A", 3, A, 1, 2, setr},
+	{0xE0, "SET 4,B", 4, B, 1, 2, setr},
+	{0xE1, "SET 4,C", 4, C, 1, 2, setr},
+	{0xE2, "SET 4,D", 4, D, 1, 2, setr},
+	{0xE3, "SET 4,E", 4, E, 1, 2, setr},
+	{0xE4, "SET 4,H", 4, H, 1, 2, setr},
+	{0xE5, "SET 4,L", 4, L, 1, 2, setr},
+	{0xE6, "SET 4,(HL)", 4, HL, 1, 4, setm16},
+	{0xE7, "SET 4,A", 4, A, 1, 2, setr},
+	{0xE8, "SET 5,B", 5, B, 1, 2, setr},
+	{0xE9, "SET 5,C", 5, C, 1, 2, setr},
+	{0xEA, "SET 5,D", 5, D, 1, 2, setr},
+	{0xEB, "SET 5,E", 5, E, 1, 2, setr},
+	{0xEC, "SET 5,H", 5, H, 1, 2, setr},
+	{0xED, "SET 5,L", 5, L, 1, 2, setr},
+	{0xEE, "SET 5,(HL)", 5, HL, 1, 4, setm16},
+	{0xEF, "SET 5,A", 5, A, 1, 2, setr},
+	{0xF0, "SET 6,B", 6, B, 1, 2, setr},
+	{0xF1, "SET 6,C", 6, C, 1, 2, setr},
+	{0xF2, "SET 6,D", 6, D, 1, 2, setr},
+	{0xF3, "SET 6,E", 6, E, 1, 2, setr},
+	{0xF4, "SET 6,H", 6, H, 1, 2, setr},
+	{0xF5, "SET 6,L", 6, L, 1, 2, setr},
+	{0xF6, "SET 6,(HL)", 6, HL, 1, 4, setm16},
+	{0xF7, "SET 6,A", 6, A, 1, 2, setr},
+	{0xF8, "SET 7,B", 7, B, 1, 2, setr},
+	{0xF9, "SET 7,C", 7, C, 1, 2, setr},
+	{0xFA, "SET 7,D", 7, D, 1, 2, setr},
+	{0xFB, "SET 7,E", 7, E, 1, 2, setr},
+	{0xFC, "SET 7,H", 7, H, 1, 2, setr},
+	{0xFD, "SET 7,L", 7, L, 1, 2, setr},
+	{0xFE, "SET 7,(HL)", 7, HL, 1, 4, setm16},
+	{0xFF, "SET 7,A", 7, A, 1, 2, setr},
 }
 
 func _rlc(c *CPU, v byte) byte {
@@ -1143,13 +1143,13 @@ func _rrc(c *CPU, v byte) byte {
 	return v
 }
 
-// RLC r
+// RRC r
 func rrcr(c *CPU, r8 byte, _ byte) {
 	r := c.Reg.R[r8]
 	c.Reg.R[r8] = _rrc(c, r)
 }
 
-// RLC (HL)
+// RRC (HL)
 func rrcm16(c *CPU, r16 byte, _ byte) {
 	addr := c.Reg.R16(int(r16))
 	r := c.Bus.ReadByte(addr)
@@ -1175,13 +1175,13 @@ func _rl(c *CPU, v byte) byte {
 	return v
 }
 
-// RLC r
+// RL r
 func rlr(c *CPU, r8 byte, _ byte) {
 	r := c.Reg.R[r8]
 	c.Reg.R[r8] = _rl(c, r)
 }
 
-// RLC (HL)
+// RL (HL)
 func rlm16(c *CPU, r16 byte, _ byte) {
 	addr := c.Reg.R16(int(r16))
 	r := c.Bus.ReadByte(addr)
@@ -1207,15 +1207,161 @@ func _rr(c *CPU, v byte) byte {
 	return v
 }
 
-// RLC r
+// RR r
 func rrr(c *CPU, r8 byte, _ byte) {
 	r := c.Reg.R[r8]
 	c.Reg.R[r8] = _rr(c, r)
 }
 
-// RLC (HL)
+// RR (HL)
 func rrm16(c *CPU, r16 byte, _ byte) {
 	addr := c.Reg.R16(int(r16))
 	r := c.Bus.ReadByte(addr)
 	c.Bus.WriteByte(addr, _rr(c, r))
+}
+
+func _sla(c *CPU, v byte) byte {
+	// check Bit 7 is set
+	if v&0x80 == 0x80 {
+		c.Reg.setFlag(flagC)
+	} else {
+		c.Reg.clearFlag(flagC)
+	}
+
+	v = v << 1
+	c.Reg.setFlagZ(v)
+	c.Reg.clearFlag(flagN)
+	c.Reg.clearFlag(flagH)
+
+	return v
+}
+
+// SLA r
+func slar(c *CPU, r8 byte, _ byte) {
+	r := c.Reg.R[r8]
+	c.Reg.R[r8] = _sla(c, r)
+}
+
+// SLA (HL)
+func slam16(c *CPU, r16 byte, _ byte) {
+	addr := c.Reg.R16(int(r16))
+	r := c.Bus.ReadByte(addr)
+	c.Bus.WriteByte(addr, _sla(c, r))
+}
+
+func _sra(c *CPU, v byte) byte {
+	// check Bit 0 is set
+	if v&0x01 == 0x01 {
+		c.Reg.setFlag(flagC)
+	} else {
+		c.Reg.clearFlag(flagC)
+	}
+
+	v = v>>1 | (v & 0x80)
+	c.Reg.setFlagZ(v)
+	c.Reg.clearFlag(flagN)
+	c.Reg.clearFlag(flagH)
+
+	return v
+}
+
+// SRA r
+func srar(c *CPU, r8 byte, _ byte) {
+	r := c.Reg.R[r8]
+	c.Reg.R[r8] = _sra(c, r)
+}
+
+// SRA (HL)
+func sram16(c *CPU, r16 byte, _ byte) {
+	addr := c.Reg.R16(int(r16))
+	r := c.Bus.ReadByte(addr)
+	c.Bus.WriteByte(addr, _sra(c, r))
+}
+
+// SWAP R
+func swapr(c *CPU, r byte, _ byte) {
+	v := c.Reg.R[r]
+	upper := (v >> 4) & 0x0F
+	lower := v & 0x0F
+
+	c.Reg.R[r] = byte(lower<<4) | upper
+}
+
+// SWAP (HL)
+func swapm16(c *CPU, r16 byte, _ byte) {
+	addr := c.Reg.R16(int(r16))
+	v := c.Bus.ReadByte(addr)
+	upper := (v >> 4) & 0x0F
+	lower := v & 0x0F
+
+	c.Bus.WriteByte(addr, byte(lower<<4)|upper)
+}
+
+func _srl(c *CPU, v byte) byte {
+	// check Bit 0 is set
+	if v&0x01 == 0x01 {
+		c.Reg.setFlag(flagC)
+	} else {
+		c.Reg.clearFlag(flagC)
+	}
+
+	v = v >> 1
+	c.Reg.setFlagZ(v)
+	c.Reg.clearFlag(flagN)
+	c.Reg.clearFlag(flagH)
+
+	return v
+}
+
+func srlr(c *CPU, r8 byte, _ byte) {
+	r := c.Reg.R[r8]
+	c.Reg.R[r8] = _srl(c, r)
+}
+
+// SRA (HL)
+func srlm16(c *CPU, r16 byte, _ byte) {
+	addr := c.Reg.R16(int(r16))
+	r := c.Bus.ReadByte(addr)
+	c.Bus.WriteByte(addr, _srl(c, r))
+}
+
+func bitr(c *CPU, b byte, r8 byte) {
+	c.Reg.clearFlag(flagN)
+	c.Reg.setFlag(flagH)
+
+	r := c.Reg.R[r8]
+
+	c.Reg.setFlagZ((r >> b) & 0x01)
+}
+
+func bitm16(c *CPU, b byte, r16 byte) {
+	addr := c.Reg.R16(int(r16))
+	r := c.Bus.ReadByte(addr)
+
+	c.Reg.clearFlag(flagN)
+	c.Reg.setFlag(flagH)
+
+	c.Reg.setFlagZ((r >> b) & 0x01)
+}
+
+func resr(c *CPU, b byte, r8 byte) {
+	c.Reg.R[r8] = c.Reg.R[r8] & (^(1 << b))
+}
+
+func resm16(c *CPU, b byte, r16 byte) {
+	addr := c.Reg.R16(int(r16))
+	r := c.Bus.ReadByte(addr)
+
+	c.Bus.WriteByte(addr, r&(^(1 << b)))
+}
+
+func setr(c *CPU, b byte, r8 byte) {
+	c.Reg.R[r8] = c.Reg.R[r8] | (1 << b)
+}
+
+func setm16(c *CPU, b byte, r16 byte) {
+	addr := c.Reg.R16(int(r16))
+	r := c.Bus.ReadByte(addr)
+
+	c.Bus.WriteByte(addr, r|(1<<b))
 }

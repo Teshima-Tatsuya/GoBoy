@@ -1304,6 +1304,199 @@ func TestOpeCode_subr(t *testing.T) {
 	}
 }
 
+// test andr andHL
+func TestOpeCode_and(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "AND B",
+			args: args{0xA0, B},
+		},
+		{
+			name: "AND C",
+			args: args{0xA1, C},
+		},
+		{
+			name: "AND D",
+			args: args{0xA2, D},
+		},
+		{
+			name: "AND E",
+			args: args{0xA3, E},
+		},
+		{
+			name: "AND H",
+			args: args{0xA4, H},
+		},
+		{
+			name: "AND L",
+			args: args{0xA5, L},
+		},
+		{
+			name: "AND (HL)",
+			args: args{0xA6, HL},
+		},
+		{
+			name: "AND A",
+			args: args{0xA7, A},
+		},
+		{
+			name: "AND d8",
+			args: args{0xE6, 0},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+			assert.Equal(t, tt.args.r1, op.R1)
+
+			if tt.args.r1 == A {
+				t.Skip()
+			}
+			t.Run("when oposite", func(t *testing.T) {
+				c.Reg.R[A] = 0b11110000
+				val := byte(0b00001111)
+				c.Bus.WriteByte(c.Reg.PC, val)
+				if tt.args.r1 == HL {
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
+				}
+				c.Reg.R[tt.args.r1] = val
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, byte(0b00000000), c.Reg.R[A])
+			})
+			t.Run("when equal", func(t *testing.T) {
+				c.Reg.R[A] = 0b11110000
+				val := byte(0b11110000)
+				c.Bus.WriteByte(c.Reg.PC, val)
+				if tt.args.r1 == HL {
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
+				}
+				c.Reg.R[tt.args.r1] = val
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, byte(0b11110000), c.Reg.R[A])
+			})
+			t.Run("when other", func(t *testing.T) {
+				c.Reg.R[A] = 0b11110000
+				val := byte(0b10100000)
+				c.Bus.WriteByte(c.Reg.PC, val)
+				if tt.args.r1 == HL {
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
+				}
+				c.Reg.R[tt.args.r1] = val
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, byte(0b10100000), c.Reg.R[A])
+			})
+		})
+	}
+}
+
+// test orr orHL
+func TestOpeCode_or(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "OR B",
+			args: args{0xB0, B},
+		},
+		{
+			name: "OR C",
+			args: args{0xB1, C},
+		},
+		{
+			name: "OR D",
+			args: args{0xB2, D},
+		},
+		{
+			name: "OR E",
+			args: args{0xB3, E},
+		},
+		{
+			name: "OR H",
+			args: args{0xB4, H},
+		},
+		{
+			name: "OR L",
+			args: args{0xB5, L},
+		},
+		{
+			name: "OR (HL)",
+			args: args{0xB6, HL},
+		},
+		{
+			name: "OR A",
+			args: args{0xB7, A},
+		},
+		{
+			name: "OR d8",
+			args: args{0xF6, 0},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+			assert.Equal(t, tt.args.r1, op.R1)
+
+			if tt.args.r1 == A {
+				t.Skip()
+			}
+			t.Run("when oposite", func(t *testing.T) {
+				c.Reg.R[A] = 0b11110000
+				val := byte(0b00001111)
+				c.Bus.WriteByte(c.Reg.PC, val)
+				if tt.args.r1 == HL {
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
+				}
+				c.Reg.R[tt.args.r1] = val
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, byte(0b11111111), c.Reg.R[A])
+			})
+			t.Run("when equal", func(t *testing.T) {
+				c.Reg.R[A] = 0b11110000
+				val := byte(0b11110000)
+				c.Bus.WriteByte(c.Reg.PC, val)
+				if tt.args.r1 == HL {
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
+				}
+				c.Reg.R[tt.args.r1] = val
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, byte(0b11110000), c.Reg.R[A])
+			})
+			t.Run("when other", func(t *testing.T) {
+				c.Reg.R[A] = 0b11110000
+				val := byte(0b00000101)
+				if tt.args.r1 == HL {
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
+				}
+				c.Reg.R[tt.args.r1] = val
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, byte(0b11110101), c.Reg.R[A])
+			})
+		})
+	}
+}
+
 func TestOpeCode_cpr(t *testing.T) {
 	c := setupCPU()
 
