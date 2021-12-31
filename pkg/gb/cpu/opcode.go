@@ -1320,7 +1320,7 @@ func _sra(c *CPU, v byte) byte {
 		c.Reg.clearFlag(flagC)
 	}
 
-	v = v>>1 | (v & 0x80)
+	v = v >> 1
 	c.Reg.setFlagZ(v)
 	c.Reg.clearFlag(flagN)
 	c.Reg.clearFlag(flagH)
