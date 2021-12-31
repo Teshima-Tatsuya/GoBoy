@@ -1160,11 +1160,12 @@ func _rlc(c *CPU, v byte) byte {
 	// check Bit 7 is set
 	if v&0x80 == 0x80 {
 		c.Reg.setFlag(flagC)
+		v = v<<1 | 0x01
 	} else {
 		c.Reg.clearFlag(flagC)
+		v = v << 1
 	}
 
-	v = v << 1
 	c.Reg.setFlagZ(v)
 	c.Reg.clearFlag(flagN)
 	c.Reg.clearFlag(flagH)
@@ -1190,11 +1191,12 @@ func _rrc(c *CPU, v byte) byte {
 	// check Bit 0 is set
 	if v&0x01 == 0x01 {
 		c.Reg.setFlag(flagC)
+		v = v>>1 | 0x80
 	} else {
 		c.Reg.clearFlag(flagC)
+		v = v >> 1
 	}
 
-	v = v >> 1
 	c.Reg.setFlagZ(v)
 	c.Reg.clearFlag(flagN)
 	c.Reg.clearFlag(flagH)
