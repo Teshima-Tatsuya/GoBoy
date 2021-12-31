@@ -13,3 +13,11 @@ func ExtractLower(addr types.Addr) byte {
 func ExtractUpper(addr types.Addr) byte {
 	return byte(addr >> 8)
 }
+
+func Bool2Int8(v bool) int8 {
+	if v {
+		return 1
+	} else {
+		return 0
+	}
+}

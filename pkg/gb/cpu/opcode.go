@@ -154,14 +154,14 @@ var opCodes = []*OpCode{
 	{0x85, "ADD A, L", A, L, 0, 1, addr},
 	{0x86, "ADD A, (HL)", A, HL, 0, 2, addHL},
 	{0x87, "ADD A, A", A, A, 0, 1, addr},
-	{0x88, "ADC A, B", A, B, 0, 1, notimplemented},
-	{0x89, "ADC A, C", A, C, 0, 1, notimplemented},
-	{0x8A, "ADC A, D", A, D, 0, 1, notimplemented},
-	{0x8B, "ADC A, E", A, E, 0, 1, notimplemented},
-	{0x8C, "ADC A, H", A, H, 0, 1, notimplemented},
-	{0x8D, "ADC A, L", A, L, 0, 1, notimplemented},
-	{0x8E, "ADC A, (HL)", A, HL, 0, 1, notimplemented},
-	{0x8F, "ADC A, A", A, A, 0, 1, notimplemented},
+	{0x88, "ADC A, B", A, B, 0, 1, adcr},
+	{0x89, "ADC A, C", A, C, 0, 1, adcr},
+	{0x8A, "ADC A, D", A, D, 0, 1, adcr},
+	{0x8B, "ADC A, E", A, E, 0, 1, adcr},
+	{0x8C, "ADC A, H", A, H, 0, 1, adcr},
+	{0x8D, "ADC A, L", A, L, 0, 1, adcr},
+	{0x8E, "ADC A, (HL)", A, HL, 0, 2, adcm16},
+	{0x8F, "ADC A, A", A, A, 0, 1, adcr},
 	{0x90, "SUB B", B, 0, 0, 1, subr},
 	{0x91, "SUB C", C, 0, 0, 1, subr},
 	{0x92, "SUB D", D, 0, 0, 1, subr},
@@ -224,7 +224,7 @@ var opCodes = []*OpCode{
 	{0xCB, "PREFIX CB", 0, 0, 0, 1, notimplemented},
 	{0xCC, "CALL Z,a16", flagZ, 0, 2, 3, callf},
 	{0xCD, "CALL a16", 0, 0, 2, 4, call},
-	{0xCE, "ADC A,d8", 0, 0, 0, 1, notimplemented},
+	{0xCE, "ADC A,d8", A, 0, 1, 2, adcd},
 	{0xCF, "RST 08H", 0x08, 0, 0, 1, rst},
 	{0xD0, "RET NC", flagC, 0, 0, 2, retnf},
 	{0xD1, "POP DE", DE, 0, 0, 3, pop},
@@ -643,6 +643,46 @@ func addHL(c *CPU, _ byte, r16 byte) {
 func addd8(c *CPU, _ byte, r8 byte) {
 	v := c.fetch()
 	_add(c, v)
+}
+
+func _adc(c *CPU, r byte) {
+	a := c.Reg.R[A]
+	carry := c.Reg.isSet(flagC)
+
+	v := a + r + byte(util.Bool2Int8(carry))
+
+	if a&0x0F+r&0x0F+byte(util.Bool2Int8(carry)) > 0x0F {
+		c.Reg.setFlag(flagH)
+	} else {
+		c.Reg.clearFlag(flagH)
+	}
+
+	if uint(a&0xFF)+uint(r&0xFF)+uint(util.Bool2Int8(carry)) > 0xFF {
+		c.Reg.setFlag(flagC)
+	} else {
+		c.Reg.clearFlag(flagC)
+	}
+
+	c.Reg.clearFlag(flagN)
+
+	c.Reg.R[A] = v
+	c.Reg.setFlagZ(v)
+}
+
+// ADC A,R
+func adcr(c *CPU, _ byte, r2 byte) {
+	r := c.Reg.R[r2]
+	_adc(c, r)
+}
+
+func adcm16(c *CPU, _ byte, r2 byte) {
+	r := c.Bus.ReadByte(c.Reg.R16(int(r2)))
+	_adc(c, r)
+}
+
+func adcd(c *CPU, _ byte, _ byte) {
+	r := c.fetch()
+	_adc(c, r)
 }
 
 func _sub(c *CPU, b byte) {
