@@ -1218,6 +1218,7 @@ func rrcm16(c *CPU, r16 byte, _ byte) {
 }
 
 func _rl(c *CPU, v byte) byte {
+	beforeCarry := c.Reg.isSet(flagC)
 	// check Bit 0 is set
 	if v&0x80 == 0x80 {
 		c.Reg.setFlag(flagC)
@@ -1226,7 +1227,7 @@ func _rl(c *CPU, v byte) byte {
 	}
 
 	v = v << 1
-	if c.Reg.isSet(flagC) {
+	if beforeCarry {
 		v++
 	}
 	c.Reg.setFlagZ(v)
@@ -1250,6 +1251,7 @@ func rlm16(c *CPU, r16 byte, _ byte) {
 }
 
 func _rr(c *CPU, v byte) byte {
+	beforeCarry := c.Reg.isSet(flagC)
 	// check Bit 0 is set
 	if v&0x01 == 0x01 {
 		c.Reg.setFlag(flagC)
@@ -1258,7 +1260,7 @@ func _rr(c *CPU, v byte) byte {
 	}
 
 	v = v >> 1
-	if c.Reg.isSet(flagC) {
+	if beforeCarry {
 		v |= 0x80
 	}
 	c.Reg.setFlagZ(v)

@@ -2306,3 +2306,351 @@ func TestOpeCode_rrc(t *testing.T) {
 		})
 	}
 }
+
+func TestOpeCode_rl(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     int
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "RL B",
+			args: args{0x10, B},
+		},
+		{
+			name: "RL C",
+			args: args{0x11, C},
+		},
+		{
+			name: "RL D",
+			args: args{0x12, D},
+		},
+		{
+			name: "RL E",
+			args: args{0x13, E},
+		},
+		{
+			name: "RL H",
+			args: args{0x14, H},
+		},
+		{
+			name: "RL L",
+			args: args{0x15, L},
+		},
+		{
+			name: "RL HL",
+			args: args{0x16, HL},
+		},
+		{
+			name: "RL A",
+			args: args{0x17, A},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := cbOpCodes[tt.args.opcode]
+
+			assert.Equal(t, uint8(tt.args.r1), op.R1)
+
+			t.Run("when bit7 = 1", func(t *testing.T) {
+				before := byte(0b10010000)
+				t.Run("and carry = 1", func(t *testing.T) {
+					c.Reg.R[tt.args.r1] = before
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+					c.Reg.setFlag(flagC)
+					op.Handler(c, byte(op.R1), byte(op.R2))
+					assert.Equal(t, false, c.Reg.isSet(flagZ))
+					assert.Equal(t, false, c.Reg.isSet(flagN))
+					assert.Equal(t, false, c.Reg.isSet(flagH))
+					assert.Equal(t, true, c.Reg.isSet(flagC))
+
+					want := byte(0b00100001)
+
+					if tt.name != "RL HL" {
+						assert.Equal(t, want, c.Reg.R[op.R1])
+					} else {
+						assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(HL))))
+					}
+				})
+				t.Run("and carry = 0", func(t *testing.T) {
+					c.Reg.R[tt.args.r1] = before
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+					c.Reg.clearFlag(flagC)
+					op.Handler(c, byte(op.R1), byte(op.R2))
+					assert.Equal(t, false, c.Reg.isSet(flagZ))
+					assert.Equal(t, false, c.Reg.isSet(flagN))
+					assert.Equal(t, false, c.Reg.isSet(flagH))
+					assert.Equal(t, true, c.Reg.isSet(flagC))
+
+					want := byte(0b00100000)
+
+					if tt.name != "RL HL" {
+						assert.Equal(t, want, c.Reg.R[op.R1])
+					} else {
+						assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(HL))))
+					}
+				})
+			})
+			t.Run("when bit7 = 0 and other = 0", func(t *testing.T) {
+				before := byte(0b00000000)
+				t.Run("and carry = 1", func(t *testing.T) {
+					c.Reg.R[tt.args.r1] = before
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+					c.Reg.setFlag(flagC)
+					op.Handler(c, byte(op.R1), byte(op.R2))
+					assert.Equal(t, false, c.Reg.isSet(flagZ))
+					assert.Equal(t, false, c.Reg.isSet(flagN))
+					assert.Equal(t, false, c.Reg.isSet(flagH))
+					assert.Equal(t, false, c.Reg.isSet(flagC))
+
+					want := byte(0b00000001)
+
+					if tt.name != "RL HL" {
+						assert.Equal(t, want, c.Reg.R[op.R1])
+					} else {
+						assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(HL))))
+					}
+				})
+				t.Run("and carry = 0", func(t *testing.T) {
+					c.Reg.R[tt.args.r1] = before
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+					c.Reg.clearFlag(flagC)
+					op.Handler(c, byte(op.R1), byte(op.R2))
+					assert.Equal(t, true, c.Reg.isSet(flagZ))
+					assert.Equal(t, false, c.Reg.isSet(flagN))
+					assert.Equal(t, false, c.Reg.isSet(flagH))
+					assert.Equal(t, false, c.Reg.isSet(flagC))
+
+					want := byte(0b00000000)
+
+					if tt.name != "RL HL" {
+						assert.Equal(t, want, c.Reg.R[op.R1])
+					} else {
+						assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(HL))))
+					}
+				})
+			})
+			t.Run("when bit7 = 0 and other != 0", func(t *testing.T) {
+				before := byte(0b00100000)
+				t.Run("and carry = 1", func(t *testing.T) {
+					c.Reg.R[tt.args.r1] = before
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+					c.Reg.setFlag(flagC)
+					op.Handler(c, byte(op.R1), byte(op.R2))
+					assert.Equal(t, false, c.Reg.isSet(flagZ))
+					assert.Equal(t, false, c.Reg.isSet(flagN))
+					assert.Equal(t, false, c.Reg.isSet(flagH))
+					assert.Equal(t, false, c.Reg.isSet(flagC))
+
+					want := byte(0b01000001)
+
+					if tt.name != "RL HL" {
+						assert.Equal(t, want, c.Reg.R[op.R1])
+					} else {
+						assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(HL))))
+					}
+				})
+				t.Run("and carry = 0", func(t *testing.T) {
+					c.Reg.R[tt.args.r1] = before
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+					c.Reg.clearFlag(flagC)
+					op.Handler(c, byte(op.R1), byte(op.R2))
+					assert.Equal(t, false, c.Reg.isSet(flagZ))
+					assert.Equal(t, false, c.Reg.isSet(flagN))
+					assert.Equal(t, false, c.Reg.isSet(flagH))
+					assert.Equal(t, false, c.Reg.isSet(flagC))
+
+					want := byte(0b01000000)
+
+					if tt.name != "RL HL" {
+						assert.Equal(t, want, c.Reg.R[op.R1])
+					} else {
+						assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(HL))))
+					}
+				})
+			})
+		})
+	}
+}
+
+func TestOpeCode_rr(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     int
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "RR B",
+			args: args{0x18, B},
+		},
+		{
+			name: "RR C",
+			args: args{0x19, C},
+		},
+		{
+			name: "RR D",
+			args: args{0x1A, D},
+		},
+		{
+			name: "RR E",
+			args: args{0x1B, E},
+		},
+		{
+			name: "RR H",
+			args: args{0x1C, H},
+		},
+		{
+			name: "RR L",
+			args: args{0x1D, L},
+		},
+		{
+			name: "RR HL",
+			args: args{0x1E, HL},
+		},
+		{
+			name: "RR A",
+			args: args{0x1F, A},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := cbOpCodes[tt.args.opcode]
+
+			assert.Equal(t, uint8(tt.args.r1), op.R1)
+
+			t.Run("when bit0 = 1", func(t *testing.T) {
+				before := byte(0b10010001)
+				t.Run("and carry = 1", func(t *testing.T) {
+					c.Reg.R[tt.args.r1] = before
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+					c.Reg.setFlag(flagC)
+					op.Handler(c, byte(op.R1), byte(op.R2))
+					assert.Equal(t, false, c.Reg.isSet(flagZ))
+					assert.Equal(t, false, c.Reg.isSet(flagN))
+					assert.Equal(t, false, c.Reg.isSet(flagH))
+					assert.Equal(t, true, c.Reg.isSet(flagC))
+
+					want := byte(0b11001000)
+
+					if tt.name != "RR HL" {
+						assert.Equal(t, want, c.Reg.R[op.R1])
+					} else {
+						assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(HL))))
+					}
+				})
+				t.Run("and carry = 0", func(t *testing.T) {
+					c.Reg.R[tt.args.r1] = before
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+					c.Reg.clearFlag(flagC)
+					op.Handler(c, byte(op.R1), byte(op.R2))
+					assert.Equal(t, false, c.Reg.isSet(flagZ))
+					assert.Equal(t, false, c.Reg.isSet(flagN))
+					assert.Equal(t, false, c.Reg.isSet(flagH))
+					assert.Equal(t, true, c.Reg.isSet(flagC))
+
+					want := byte(0b01001000)
+
+					if tt.name != "RR HL" {
+						assert.Equal(t, want, c.Reg.R[op.R1])
+					} else {
+						assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(HL))))
+					}
+				})
+			})
+			t.Run("when bit0 = 0 and other = 0", func(t *testing.T) {
+				before := byte(0b00000000)
+				t.Run("and carry = 1", func(t *testing.T) {
+					c.Reg.R[tt.args.r1] = before
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+					c.Reg.setFlag(flagC)
+					op.Handler(c, byte(op.R1), byte(op.R2))
+					assert.Equal(t, false, c.Reg.isSet(flagZ))
+					assert.Equal(t, false, c.Reg.isSet(flagN))
+					assert.Equal(t, false, c.Reg.isSet(flagH))
+					assert.Equal(t, false, c.Reg.isSet(flagC))
+
+					want := byte(0b10000000)
+
+					if tt.name != "RR HL" {
+						assert.Equal(t, want, c.Reg.R[op.R1])
+					} else {
+						assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(HL))))
+					}
+				})
+				t.Run("and carry = 0", func(t *testing.T) {
+					c.Reg.R[tt.args.r1] = before
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+					c.Reg.clearFlag(flagC)
+					op.Handler(c, byte(op.R1), byte(op.R2))
+					assert.Equal(t, true, c.Reg.isSet(flagZ))
+					assert.Equal(t, false, c.Reg.isSet(flagN))
+					assert.Equal(t, false, c.Reg.isSet(flagH))
+					assert.Equal(t, false, c.Reg.isSet(flagC))
+
+					want := byte(0b00000000)
+
+					if tt.name != "RR HL" {
+						assert.Equal(t, want, c.Reg.R[op.R1])
+					} else {
+						assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(HL))))
+					}
+				})
+			})
+			t.Run("when bit0 = 0 and other != 0", func(t *testing.T) {
+				before := byte(0b00100000)
+				t.Run("and carry = 1", func(t *testing.T) {
+					c.Reg.R[tt.args.r1] = before
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+					c.Reg.setFlag(flagC)
+					op.Handler(c, byte(op.R1), byte(op.R2))
+					assert.Equal(t, false, c.Reg.isSet(flagZ))
+					assert.Equal(t, false, c.Reg.isSet(flagN))
+					assert.Equal(t, false, c.Reg.isSet(flagH))
+					assert.Equal(t, false, c.Reg.isSet(flagC))
+
+					want := byte(0b10010000)
+
+					if tt.name != "RR HL" {
+						assert.Equal(t, want, c.Reg.R[op.R1])
+					} else {
+						assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(HL))))
+					}
+				})
+				t.Run("and carry = 0", func(t *testing.T) {
+					c.Reg.R[tt.args.r1] = before
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+					c.Reg.clearFlag(flagC)
+					op.Handler(c, byte(op.R1), byte(op.R2))
+					assert.Equal(t, false, c.Reg.isSet(flagZ))
+					assert.Equal(t, false, c.Reg.isSet(flagN))
+					assert.Equal(t, false, c.Reg.isSet(flagH))
+					assert.Equal(t, false, c.Reg.isSet(flagC))
+
+					want := byte(0b00010000)
+
+					if tt.name != "RR HL" {
+						assert.Equal(t, want, c.Reg.R[op.R1])
+					} else {
+						assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(HL))))
+					}
+				})
+			})
+		})
+	}
+}
