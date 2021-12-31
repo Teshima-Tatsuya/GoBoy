@@ -16,17 +16,20 @@ type Bus struct {
 	WRAM  *ram.RAM
 	WRAM2 *ram.RAM
 	HRAM  *ram.RAM
+	ERAM  *ram.RAM
 	IO    *io.IO
 	IE    *ie.IE
 }
 
 func New(cart *cartridge.Cartridge, vram *ram.RAM, wram *ram.RAM, wram2 *ram.RAM, hram *ram.RAM, io *io.IO, ie *ie.IE) *Bus {
+	eram := ram.New(0x0100)
 	return &Bus{
 		Cart:  cart,
 		VRAM:  vram,
 		WRAM:  wram,
 		WRAM2: wram2,
 		HRAM:  hram,
+		ERAM:  eram,
 		IO:    io,
 		IE:    ie,
 	}
@@ -43,6 +46,8 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 		return b.WRAM.Read(addr - 0xC000)
 	case addr >= 0xD000 && addr <= 0xDFFF:
 		return b.WRAM2.Read(addr - 0xD000)
+	case addr >= 0xE000 && addr <= 0xFDFF:
+		return b.ERAM.Read(addr - 0xE000)
 	case addr >= 0xFF00 && addr <= 0xFF7F:
 		return b.IO.Read(addr - 0xFF00)
 	case addr >= 0xFF80 && addr <= 0xFFFE:
@@ -69,6 +74,8 @@ func (b *Bus) WriteByte(addr types.Addr, value byte) {
 		b.WRAM.Write(addr-0xC000, value)
 	case addr >= 0xD000 && addr <= 0xDFFF:
 		b.WRAM2.Write(addr-0xD000, value)
+	case addr >= 0xE000 && addr <= 0xFDFF:
+		b.ERAM.Write(addr-0xE000, value)
 	case addr >= 0xFF00 && addr <= 0xFF7F:
 		b.IO.Write(addr-0xFF00, value)
 	case addr >= 0xFF80 && addr <= 0xFFFE:
