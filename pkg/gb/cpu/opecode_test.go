@@ -1941,7 +1941,7 @@ func TestOpeCode_xor(t *testing.T) {
 	}
 }
 
-func TestOpeCode_cpr(t *testing.T) {
+func TestOpeCode_cp(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -1978,8 +1978,16 @@ func TestOpeCode_cpr(t *testing.T) {
 			args: args{0xBD, L},
 		},
 		{
+			name: "CP (HL)",
+			args: args{0xBE, HL},
+		},
+		{
 			name: "CP A",
 			args: args{0xBF, A},
+		},
+		{
+			name: "CP d8",
+			args: args{0xFE, 0},
 		},
 	}
 
@@ -1990,8 +1998,20 @@ func TestOpeCode_cpr(t *testing.T) {
 			// prepare
 			c.Reg.R[A] = 0x12
 
+			assert.Equal(t, tt.args.r1, op.R1)
+
+			if tt.args.r1 == A {
+				t.Skip()
+			}
+
 			t.Run("when equal", func(t *testing.T) {
 				c.Reg.R[tt.args.r1] = 0x12
+				// (HL)
+				c.Reg.setR16(int(HL), 0x1212)
+				c.Bus.WriteByte(c.Reg.R16(HL), 0x12)
+				// d8
+				c.Bus.WriteByte(c.Reg.PC, 0x12)
+
 				op.Handler(c, byte(op.R1), byte(op.R2))
 				assert.Equal(t, true, c.Reg.isSet(flagZ))
 				assert.Equal(t, true, c.Reg.isSet(flagN))
@@ -1999,10 +2019,13 @@ func TestOpeCode_cpr(t *testing.T) {
 				assert.Equal(t, false, c.Reg.isSet(flagC))
 			})
 			t.Run("when greater than A", func(t *testing.T) {
-				if tt.args.r1 == A {
-					t.Skip()
-				}
 				c.Reg.R[tt.args.r1] = 0x13
+				// (HL)
+				c.Reg.setR16(int(HL), 0x1313)
+				c.Bus.WriteByte(c.Reg.R16(HL), 0x13)
+				// d8
+				c.Bus.WriteByte(c.Reg.PC, 0x13)
+
 				op.Handler(c, byte(op.R1), byte(op.R2))
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, true, c.Reg.isSet(flagN))
@@ -2010,10 +2033,13 @@ func TestOpeCode_cpr(t *testing.T) {
 				assert.Equal(t, true, c.Reg.isSet(flagC))
 			})
 			t.Run("when less than A with borrow", func(t *testing.T) {
-				if tt.args.r1 == A {
-					t.Skip()
-				}
 				c.Reg.R[tt.args.r1] = 0x03
+				// (HL)
+				c.Reg.setR16(int(HL), 0x0303)
+				c.Bus.WriteByte(c.Reg.R16(HL), 0x03)
+				// d8
+				c.Bus.WriteByte(c.Reg.PC, 0x03)
+
 				op.Handler(c, byte(op.R1), byte(op.R2))
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, true, c.Reg.isSet(flagN))
@@ -2021,10 +2047,13 @@ func TestOpeCode_cpr(t *testing.T) {
 				assert.Equal(t, false, c.Reg.isSet(flagC))
 			})
 			t.Run("when less than A no borrow", func(t *testing.T) {
-				if tt.args.r1 == A {
-					t.Skip()
-				}
 				c.Reg.R[tt.args.r1] = 0x02
+				// (HL)
+				c.Reg.setR16(int(HL), 0x0202)
+				c.Bus.WriteByte(c.Reg.R16(HL), 0x02)
+				// d8
+				c.Bus.WriteByte(c.Reg.PC, 0x02)
+
 				op.Handler(c, byte(op.R1), byte(op.R2))
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, true, c.Reg.isSet(flagN))
