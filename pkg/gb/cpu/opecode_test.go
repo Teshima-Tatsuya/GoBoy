@@ -749,6 +749,81 @@ func TestOpeCode_ldar(t *testing.T) {
 	}
 }
 
+func TestOpeCode_lda16r(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "LD (a16),A",
+			args: args{0xEA, A},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			addr := types.Addr(0x1234)
+			want := byte(0x01)
+			c.Reg.R[A] = want
+			c.Bus.WriteByte(c.Reg.PC, util.ExtractLower(addr))
+			c.Bus.WriteByte(c.Reg.PC+1, util.ExtractUpper(addr))
+
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, op.R2, tt.args.r1)
+			assert.Equal(t, want, c.Bus.ReadByte(addr))
+		})
+	}
+}
+
+func TestOpeCode_lda16r16(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "LD (a16),SP",
+			args: args{0x08, SP},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			addr := types.Addr(0x1234)
+			want := types.Addr(0x4567)
+			c.Reg.setR16(SP, want)
+			c.Bus.WriteByte(c.Reg.PC, util.ExtractLower(addr))
+			c.Bus.WriteByte(c.Reg.PC+1, util.ExtractUpper(addr))
+
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, op.R2, tt.args.r1)
+			assert.Equal(t, util.ExtractLower(want), c.Bus.ReadByte(addr))
+			assert.Equal(t, util.ExtractUpper(want), c.Bus.ReadByte(addr+1))
+		})
+	}
+}
+
 // -arithmetic-
 
 func TestOpeCode_incr(t *testing.T) {
