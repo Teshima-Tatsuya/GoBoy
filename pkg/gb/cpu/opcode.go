@@ -27,7 +27,7 @@ var opCodes = []*OpCode{
 	{0x06, "LD B,d8", B, 0, 1, 2, ldrd},
 	{0x07, "RLCA", 0, 0, 0, 1, notimplemented},
 	{0x08, "LD (a16),SP", 0, SP, 2, 5, lda16r16},
-	{0x09, "ADD HL,BC", 0, 0, 0, 1, notimplemented},
+	{0x09, "ADD HL,BC", HL, BC, 0, 2, addr16r16},
 	{0x0A, "LD A,(BC)", A, BC, 0, 2, ldrm16},
 	{0x0B, "DEC BC", BC, 0, 0, 2, decr16},
 	{0x0C, "INC C", C, 0, 1, 2, incr},
@@ -43,7 +43,7 @@ var opCodes = []*OpCode{
 	{0x16, "LD D,d8", D, 0, 1, 2, ldrd},
 	{0x17, "RLA", 0, 0, 0, 1, notimplemented},
 	{0x18, "JR r8", 0, 0, 1, 3, jrr8},
-	{0x19, "ADD HL,DE", 0, 0, 0, 1, notimplemented},
+	{0x19, "ADD HL,DE", HL, DE, 0, 2, addr16r16},
 	{0x1A, "LD A,(DE)", A, DE, 0, 2, ldrm16},
 	{0x1B, "DEC DE", DE, 0, 0, 2, decr16},
 	{0x1C, "INC E", E, 0, 0, 1, incr},
@@ -59,7 +59,7 @@ var opCodes = []*OpCode{
 	{0x26, "LD H,d8", H, 0, 1, 2, ldrd},
 	{0x27, "DAA", 0, 0, 0, 1, notimplemented},
 	{0x28, "JR Z,r8", flagZ, 0, 1, 2, jrfr8},
-	{0x29, "ADD HL,HL", 0, 0, 0, 1, notimplemented},
+	{0x29, "ADD HL,HL", HL, HL, 0, 2, addr16r16},
 	{0x2A, "LD A,(HL+)", A, HLI, 0, 2, ldrm16},
 	{0x2B, "DEC HL", HL, 0, 0, 1, decr16},
 	{0x2C, "INC L", L, 0, 0, 1, incr},
@@ -75,7 +75,7 @@ var opCodes = []*OpCode{
 	{0x36, "LD (HL),d8", HL, 0, 1, 3, ldm16d},
 	{0x37, "SCF", 0, 0, 0, 1, notimplemented},
 	{0x38, "JR C,r8", flagC, 0, 1, 2, jrfr8},
-	{0x39, "ADD HL,SP", 0, 0, 0, 1, notimplemented},
+	{0x39, "ADD HL,SP", HL, SP, 0, 2, addr16r16},
 	{0x3A, "LD A,(HL-)", A, HLD, 0, 2, ldrm16},
 	{0x3B, "DEC SP", SP, 0, 0, 1, decr16},
 	{0x3C, "INC A", A, 0, 0, 1, incr},
@@ -633,6 +633,25 @@ func _add(c *CPU, b byte) {
 func addr(c *CPU, _ byte, r8 byte) {
 	r := c.Reg.R[r8]
 	_add(c, r)
+}
+
+func addr16r16(c *CPU, r1 byte, r2 byte) {
+	a := c.Reg.R16(int(r1))
+	b := c.Reg.R16(int(r2))
+	v := a + b
+
+	c.Reg.clearFlag(flagN)
+
+	if (v^a^b)&0x1000 == 0x1000 {
+		c.Reg.setFlag(flagH)
+	} else {
+		c.Reg.clearFlag(flagH)
+	}
+	if a+b < a {
+		c.Reg.setFlag(flagC)
+	} else {
+		c.Reg.clearFlag(flagC)
+	}
 }
 
 func addHL(c *CPU, _ byte, r16 byte) {
