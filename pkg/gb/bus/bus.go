@@ -22,7 +22,7 @@ type Bus struct {
 }
 
 func New(cart *cartridge.Cartridge, vram *ram.RAM, wram *ram.RAM, wram2 *ram.RAM, hram *ram.RAM, io *io.IO, ie *ie.IE) *Bus {
-	eram := ram.New(0x0100)
+	eram := ram.New(wram.Size)
 	return &Bus{
 		Cart:  cart,
 		VRAM:  vram,

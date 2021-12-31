@@ -4,12 +4,14 @@ import "github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 
 type RAM struct {
 	data []byte
+	Size int
 }
 
 func New(size int) *RAM {
 	data := make([]byte, size)
 	return &RAM{
 		data: data,
+		Size: size,
 	}
 }
 
