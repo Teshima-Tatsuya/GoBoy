@@ -1274,6 +1274,85 @@ func TestOpeCode_addr(t *testing.T) {
 	}
 }
 
+func TestOpeCode_addr16r16(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     byte
+		r2     byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "ADD HL,BC",
+			args: args{0x09, HL, BC},
+		},
+		{
+			name: "ADD HL,DE",
+			args: args{0x19, HL, DE},
+		},
+		{
+			name: "ADD HL,HL",
+			args: args{0x29, HL, HL},
+		},
+		{
+			name: "ADD HL,SP",
+			args: args{0x39, HL, SP},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, tt.args.r2, op.R2)
+
+			t.Run("when no carry", func(t *testing.T) {
+				if tt.args.r2 == HL {
+					t.Skip()
+				}
+				c.Reg.setR16(int(tt.args.r1), 0x00E1)
+				c.Reg.setR16(int(tt.args.r2), 0x000E)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, types.Addr(0x00EF), c.Reg.R16(int(op.R1)))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, false, c.Reg.isSet(flagH))
+				assert.Equal(t, false, c.Reg.isSet(flagC))
+			})
+			t.Run("when Harf carry", func(t *testing.T) {
+				if tt.args.r2 == HL {
+					t.Skip()
+				}
+				c.Reg.setR16(int(tt.args.r1), 0x0FF1)
+				c.Reg.setR16(int(tt.args.r2), 0x000F)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, types.Addr(0x1000), c.Reg.R16(int(op.R1)))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, true, c.Reg.isSet(flagH))
+				assert.Equal(t, false, c.Reg.isSet(flagC))
+			})
+			t.Run("when carry and zero", func(t *testing.T) {
+				if tt.args.r2 == HL {
+					t.Skip()
+				}
+				c.Reg.setR16(int(tt.args.r1), 0xFFF1)
+				c.Reg.setR16(int(tt.args.r2), 0x000F)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, types.Addr(0x00), c.Reg.R16(int(op.R1)))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, true, c.Reg.isSet(flagH))
+				assert.Equal(t, true, c.Reg.isSet(flagC))
+			})
+		})
+	}
+}
+
 func TestOpeCode_subr(t *testing.T) {
 	c := setupCPU()
 

@@ -652,6 +652,8 @@ func addr16r16(c *CPU, r1 byte, r2 byte) {
 	} else {
 		c.Reg.clearFlag(flagC)
 	}
+
+	c.Reg.setR16(int(r1), v)
 }
 
 func addHL(c *CPU, _ byte, r16 byte) {
