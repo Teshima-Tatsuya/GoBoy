@@ -1341,23 +1341,29 @@ func sram16(c *CPU, r16 byte, _ byte) {
 	c.Bus.WriteByte(addr, _sra(c, r))
 }
 
-// SWAP R
-func swapr(c *CPU, r byte, _ byte) {
-	v := c.Reg.R[r]
+func _swap(c *CPU, v byte) byte {
 	upper := (v >> 4) & 0x0F
 	lower := v & 0x0F
 
-	c.Reg.R[r] = byte(lower<<4) | upper
+	b := byte(lower<<4) | upper
+	c.Reg.setFlagZ(b)
+	c.Reg.clearFlag(flagN)
+	c.Reg.clearFlag(flagH)
+	c.Reg.clearFlag(flagC)
+
+	return b
+}
+
+// SWAP R
+func swapr(c *CPU, r byte, _ byte) {
+	c.Reg.R[r] = _swap(c, c.Reg.R[r])
 }
 
 // SWAP (HL)
 func swapm16(c *CPU, r16 byte, _ byte) {
 	addr := c.Reg.R16(int(r16))
 	v := c.Bus.ReadByte(addr)
-	upper := (v >> 4) & 0x0F
-	lower := v & 0x0F
-
-	c.Bus.WriteByte(addr, byte(lower<<4)|upper)
+	c.Bus.WriteByte(addr, _swap(c, v))
 }
 
 func _srl(c *CPU, v byte) byte {

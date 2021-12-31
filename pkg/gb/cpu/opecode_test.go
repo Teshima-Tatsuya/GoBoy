@@ -2712,7 +2712,6 @@ func TestOpeCode_sla(t *testing.T) {
 				before := byte(0b10010000)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				c.Reg.clearFlag(flagC)
 				op.Handler(c, byte(op.R1), byte(op.R2))
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
@@ -2731,7 +2730,6 @@ func TestOpeCode_sla(t *testing.T) {
 				before := byte(0b00000000)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				c.Reg.clearFlag(flagC)
 				op.Handler(c, byte(op.R1), byte(op.R2))
 				assert.Equal(t, true, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
@@ -2750,7 +2748,6 @@ func TestOpeCode_sla(t *testing.T) {
 				before := byte(0b00100000)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				c.Reg.clearFlag(flagC)
 				op.Handler(c, byte(op.R1), byte(op.R2))
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
@@ -2826,7 +2823,6 @@ func TestOpeCode_sra(t *testing.T) {
 				before := byte(0b10010001)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				c.Reg.clearFlag(flagC)
 				op.Handler(c, byte(op.R1), byte(op.R2))
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
@@ -2845,7 +2841,6 @@ func TestOpeCode_sra(t *testing.T) {
 				before := byte(0b00000000)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				c.Reg.clearFlag(flagC)
 				op.Handler(c, byte(op.R1), byte(op.R2))
 				assert.Equal(t, true, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
@@ -2864,7 +2859,6 @@ func TestOpeCode_sra(t *testing.T) {
 				before := byte(0b00100000)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				c.Reg.clearFlag(flagC)
 				op.Handler(c, byte(op.R1), byte(op.R2))
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
@@ -2874,6 +2868,99 @@ func TestOpeCode_sra(t *testing.T) {
 				want := byte(0b00010000)
 
 				if tt.name != "SRA HL" {
+					assert.Equal(t, want, c.Reg.R[op.R1])
+				} else {
+					assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(HL))))
+				}
+			})
+		})
+	}
+}
+
+func TestOpeCode_swap(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     int
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "SWAP B",
+			args: args{0x30, B},
+		},
+		{
+			name: "SWAP C",
+			args: args{0x31, C},
+		},
+		{
+			name: "SWAP D",
+			args: args{0x32, D},
+		},
+		{
+			name: "SWAP E",
+			args: args{0x33, E},
+		},
+		{
+			name: "SWAP H",
+			args: args{0x34, H},
+		},
+		{
+			name: "SWAP L",
+			args: args{0x35, L},
+		},
+		{
+			name: "SWAP HL",
+			args: args{0x36, HL},
+		},
+		{
+			name: "SWAP A",
+			args: args{0x37, A},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := cbOpCodes[tt.args.opcode]
+
+			assert.Equal(t, uint8(tt.args.r1), op.R1)
+
+			t.Run("when != 0 ", func(t *testing.T) {
+				before := byte(0b10010100)
+				c.Reg.R[tt.args.r1] = before
+				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, false, c.Reg.isSet(flagH))
+				assert.Equal(t, false, c.Reg.isSet(flagC))
+
+				want := byte(0b01001001)
+
+				if tt.name != "SWAP HL" {
+					assert.Equal(t, want, c.Reg.R[op.R1])
+				} else {
+					assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(HL))))
+				}
+			})
+			t.Run("when = 0", func(t *testing.T) {
+				before := byte(0b00000000)
+				c.Reg.R[tt.args.r1] = before
+				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, true, c.Reg.isSet(flagZ))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, false, c.Reg.isSet(flagH))
+				assert.Equal(t, false, c.Reg.isSet(flagC))
+
+				want := byte(0b00000000)
+
+				if tt.name != "SWAP HL" {
 					assert.Equal(t, want, c.Reg.R[op.R1])
 				} else {
 					assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(HL))))
