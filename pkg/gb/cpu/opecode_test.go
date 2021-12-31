@@ -1521,7 +1521,7 @@ func TestOpeCode_adc(t *testing.T) {
 	}
 }
 
-func TestOpeCode_subr(t *testing.T) {
+func TestOpeCode_sub(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -1558,8 +1558,16 @@ func TestOpeCode_subr(t *testing.T) {
 			args: args{0x95, L},
 		},
 		{
+			name: "SUB (HL)",
+			args: args{0x96, HL},
+		},
+		{
 			name: "SUB A",
 			args: args{0x97, A},
+		},
+		{
+			name: "SUB d8",
+			args: args{0xD6, 0},
 		},
 	}
 
@@ -1570,12 +1578,18 @@ func TestOpeCode_subr(t *testing.T) {
 
 			assert.Equal(t, tt.args.r1, op.R1)
 
+			if tt.args.r1 == A {
+				t.Skip()
+			}
 			t.Run("when no carry", func(t *testing.T) {
-				if tt.args.r1 == A {
-					t.Skip()
-				}
 				c.Reg.R[A] = 0xE1
 				c.Reg.R[tt.args.r1] = 0x01
+				// (HL)
+				c.Reg.setR16(int(HL), 0x0101)
+				c.Bus.WriteByte(c.Reg.R16(HL), 0x01)
+				// d8
+				c.Bus.WriteByte(c.Reg.PC, 0x01)
+
 				op.Handler(c, byte(op.R1), byte(op.R2))
 				assert.Equal(t, byte(0xE0), c.Reg.R[A])
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
@@ -1584,11 +1598,14 @@ func TestOpeCode_subr(t *testing.T) {
 				assert.Equal(t, false, c.Reg.isSet(flagC))
 			})
 			t.Run("when Harf carry", func(t *testing.T) {
-				if tt.args.r1 == A {
-					t.Skip()
-				}
 				c.Reg.R[A] = 0xE1
 				c.Reg.R[tt.args.r1] = 0x02
+				// (HL)
+				c.Reg.setR16(int(HL), 0x0202)
+				c.Bus.WriteByte(c.Reg.R16(HL), 0x02)
+				// d8
+				c.Bus.WriteByte(c.Reg.PC, 0x02)
+
 				op.Handler(c, byte(op.R1), byte(op.R2))
 				assert.Equal(t, byte(0xDF), c.Reg.R[A])
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
@@ -1597,11 +1614,14 @@ func TestOpeCode_subr(t *testing.T) {
 				assert.Equal(t, false, c.Reg.isSet(flagC))
 			})
 			t.Run("when zero", func(t *testing.T) {
-				if tt.args.r1 == A {
-					t.Skip()
-				}
 				c.Reg.R[A] = 0xE1
 				c.Reg.R[tt.args.r1] = 0xE1
+				// (HL)
+				c.Reg.setR16(int(HL), 0xE1E1)
+				c.Bus.WriteByte(c.Reg.R16(HL), 0xE1)
+				// d8
+				c.Bus.WriteByte(c.Reg.PC, 0xE1)
+
 				op.Handler(c, byte(op.R1), byte(op.R2))
 				assert.Equal(t, byte(0x00), c.Reg.R[A])
 				assert.Equal(t, true, c.Reg.isSet(flagZ))
@@ -1615,6 +1635,12 @@ func TestOpeCode_subr(t *testing.T) {
 				}
 				c.Reg.R[A] = 0xE1
 				c.Reg.R[tt.args.r1] = 0xE2
+				// (HL)
+				c.Reg.setR16(int(HL), 0xE2E2)
+				c.Bus.WriteByte(c.Reg.R16(HL), 0xE2)
+				// d8
+				c.Bus.WriteByte(c.Reg.PC, 0xE2)
+
 				op.Handler(c, byte(op.R1), byte(op.R2))
 				assert.Equal(t, byte(0xFF), c.Reg.R[A])
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
