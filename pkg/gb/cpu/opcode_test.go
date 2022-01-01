@@ -39,12 +39,12 @@ func (c *CPU) regreset() {
 	c.Reg.SP = 0xFFFE
 }
 
-func TestOpeCode_nop(t *testing.T) {
+func TestOpCode_nop(t *testing.T) {
 
 }
 
 // test 0x40-0x6F (except 0xX6, 0xXE)
-func TestOpeCode_ldrr(t *testing.T) {
+func TestOpCode_ldrr(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -242,7 +242,7 @@ func TestOpeCode_ldrr(t *testing.T) {
 	}
 }
 
-func TestOpeCode_ldrm(t *testing.T) {
+func TestOpCode_ldrm(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -277,7 +277,7 @@ func TestOpeCode_ldrm(t *testing.T) {
 	}
 }
 
-func TestOpeCode_ldrm16(t *testing.T) {
+func TestOpCode_ldrm16(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -356,7 +356,7 @@ func TestOpeCode_ldrm16(t *testing.T) {
 	}
 }
 
-func TestOpeCode_ldrd(t *testing.T) {
+func TestOpCode_ldrd(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -412,7 +412,7 @@ func TestOpeCode_ldrd(t *testing.T) {
 	}
 }
 
-func TestOpeCode_ldra(t *testing.T) {
+func TestOpCode_ldra(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -453,7 +453,7 @@ func TestOpeCode_ldra(t *testing.T) {
 	}
 }
 
-func TestOpeCode_ldra16(t *testing.T) {
+func TestOpCode_ldra16(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -492,7 +492,7 @@ func TestOpeCode_ldra16(t *testing.T) {
 	}
 }
 
-func TestOpeCode_ldr16d16(t *testing.T) {
+func TestOpCode_ldr16d16(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -537,7 +537,7 @@ func TestOpeCode_ldr16d16(t *testing.T) {
 	}
 }
 
-func TestOpeCode_ldr16r16(t *testing.T) {
+func TestOpCode_ldr16r16(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -570,7 +570,7 @@ func TestOpeCode_ldr16r16(t *testing.T) {
 	}
 }
 
-func TestOpeCode_ldmr(t *testing.T) {
+func TestOpCode_ldmr(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -605,7 +605,7 @@ func TestOpeCode_ldmr(t *testing.T) {
 	}
 }
 
-func TestOpeCode_ldm16r(t *testing.T) {
+func TestOpCode_ldm16r(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -680,7 +680,7 @@ func TestOpeCode_ldm16r(t *testing.T) {
 	}
 }
 
-func TestOpeCode_ldm16d(t *testing.T) {
+func TestOpCode_ldm16d(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -714,7 +714,7 @@ func TestOpeCode_ldm16d(t *testing.T) {
 	}
 }
 
-func TestOpeCode_ldar(t *testing.T) {
+func TestOpCode_ldar(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -749,7 +749,7 @@ func TestOpeCode_ldar(t *testing.T) {
 	}
 }
 
-func TestOpeCode_lda16r(t *testing.T) {
+func TestOpCode_lda16r(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -786,7 +786,7 @@ func TestOpeCode_lda16r(t *testing.T) {
 	}
 }
 
-func TestOpeCode_lda16r16(t *testing.T) {
+func TestOpCode_lda16r16(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -826,7 +826,7 @@ func TestOpeCode_lda16r16(t *testing.T) {
 
 // -arithmetic-
 
-func TestOpeCode_incr(t *testing.T) {
+func TestOpCode_incr(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -901,7 +901,7 @@ func TestOpeCode_incr(t *testing.T) {
 	}
 }
 
-func TestOpeCode_incr16(t *testing.T) {
+func TestOpCode_incr16(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -947,7 +947,7 @@ func TestOpeCode_incr16(t *testing.T) {
 	}
 }
 
-func TestOpeCode_incm16(t *testing.T) {
+func TestOpCode_incm16(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -1003,7 +1003,7 @@ func TestOpeCode_incm16(t *testing.T) {
 	}
 }
 
-func TestOpeCode_decr(t *testing.T) {
+func TestOpCode_decr(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -1078,7 +1078,7 @@ func TestOpeCode_decr(t *testing.T) {
 	}
 }
 
-func TestOpeCode_decr16(t *testing.T) {
+func TestOpCode_decr16(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -1124,7 +1124,7 @@ func TestOpeCode_decr16(t *testing.T) {
 	}
 }
 
-func TestOpeCode_decm16(t *testing.T) {
+func TestOpCode_decm16(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -1180,7 +1180,7 @@ func TestOpeCode_decm16(t *testing.T) {
 	}
 }
 
-func TestOpeCode_addr(t *testing.T) {
+func TestOpCode_addr(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -1274,7 +1274,7 @@ func TestOpeCode_addr(t *testing.T) {
 	}
 }
 
-func TestOpeCode_addr16r16(t *testing.T) {
+func TestOpCode_addr16r16(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -1353,7 +1353,7 @@ func TestOpeCode_addr16r16(t *testing.T) {
 	}
 }
 
-func TestOpeCode_adc(t *testing.T) {
+func TestOpCode_adc(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -1521,7 +1521,7 @@ func TestOpeCode_adc(t *testing.T) {
 	}
 }
 
-func TestOpeCode_sub(t *testing.T) {
+func TestOpCode_sub(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -1653,7 +1653,7 @@ func TestOpeCode_sub(t *testing.T) {
 }
 
 // test andr andHL andd8
-func TestOpeCode_and(t *testing.T) {
+func TestOpCode_and(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -1750,7 +1750,7 @@ func TestOpeCode_and(t *testing.T) {
 }
 
 // test orr orHL ord8
-func TestOpeCode_or(t *testing.T) {
+func TestOpCode_or(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -1846,7 +1846,7 @@ func TestOpeCode_or(t *testing.T) {
 }
 
 // test xorr xorHL xord8
-func TestOpeCode_xor(t *testing.T) {
+func TestOpCode_xor(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -1941,7 +1941,7 @@ func TestOpeCode_xor(t *testing.T) {
 	}
 }
 
-func TestOpeCode_cp(t *testing.T) {
+func TestOpCode_cp(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -2065,7 +2065,7 @@ func TestOpeCode_cp(t *testing.T) {
 }
 
 // -----jp-----
-func TestOpeCode_jpa16(t *testing.T) {
+func TestOpCode_jpa16(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -2097,7 +2097,7 @@ func TestOpeCode_jpa16(t *testing.T) {
 	}
 }
 
-func TestOpeCode_jpfa16(t *testing.T) {
+func TestOpCode_jpfa16(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -2149,7 +2149,7 @@ func TestOpeCode_jpfa16(t *testing.T) {
 	}
 }
 
-func TestOpeCode_jpnfa16(t *testing.T) {
+func TestOpCode_jpnfa16(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -2201,7 +2201,7 @@ func TestOpeCode_jpnfa16(t *testing.T) {
 	}
 }
 
-func TestOpeCode_jpm16(t *testing.T) {
+func TestOpCode_jpm16(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -2236,7 +2236,7 @@ func TestOpeCode_jpm16(t *testing.T) {
 
 // -----jr-----
 
-func TestOpeCode_jrnfr8(t *testing.T) {
+func TestOpCode_jrnfr8(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -2288,7 +2288,7 @@ func TestOpeCode_jrnfr8(t *testing.T) {
 }
 
 // ----push----
-func TestOpeCode_push(t *testing.T) {
+func TestOpCode_push(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -2336,7 +2336,7 @@ func TestOpeCode_push(t *testing.T) {
 	}
 }
 
-func TestOpeCode_pop(t *testing.T) {
+func TestOpCode_pop(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -2387,7 +2387,7 @@ func TestOpeCode_pop(t *testing.T) {
 
 // PREFIX CB
 
-func TestOpeCode_rlc(t *testing.T) {
+func TestOpCode_rlc(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -2498,7 +2498,7 @@ func TestOpeCode_rlc(t *testing.T) {
 	}
 }
 
-func TestOpeCode_rrc(t *testing.T) {
+func TestOpCode_rrc(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -2609,7 +2609,7 @@ func TestOpeCode_rrc(t *testing.T) {
 	}
 }
 
-func TestOpeCode_rl(t *testing.T) {
+func TestOpCode_rl(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -2783,7 +2783,7 @@ func TestOpeCode_rl(t *testing.T) {
 	}
 }
 
-func TestOpeCode_rr(t *testing.T) {
+func TestOpCode_rr(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -2957,7 +2957,7 @@ func TestOpeCode_rr(t *testing.T) {
 	}
 }
 
-func TestOpeCode_sla(t *testing.T) {
+func TestOpCode_sla(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -3068,7 +3068,7 @@ func TestOpeCode_sla(t *testing.T) {
 	}
 }
 
-func TestOpeCode_sra(t *testing.T) {
+func TestOpCode_sra(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -3179,7 +3179,7 @@ func TestOpeCode_sra(t *testing.T) {
 	}
 }
 
-func TestOpeCode_swap(t *testing.T) {
+func TestOpCode_swap(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -3272,7 +3272,7 @@ func TestOpeCode_swap(t *testing.T) {
 	}
 }
 
-func TestOpeCode_srl(t *testing.T) {
+func TestOpCode_srl(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
