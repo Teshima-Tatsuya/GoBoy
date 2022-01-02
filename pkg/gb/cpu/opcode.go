@@ -1402,7 +1402,7 @@ func bitr(c *CPU, b byte, r8 byte) {
 
 	r := c.Reg.R[r8]
 
-	c.Reg.setFlagZ((r >> b) & 0x01)
+	c.Reg.setFlagZ(util.Bit(r, int(b)))
 }
 
 func bitm16(c *CPU, b byte, r16 byte) {
@@ -1412,7 +1412,7 @@ func bitm16(c *CPU, b byte, r16 byte) {
 	c.Reg.clearFlag(flagN)
 	c.Reg.setFlag(flagH)
 
-	c.Reg.setFlagZ((r >> b) & 0x01)
+	c.Reg.setFlagZ(util.Bit(r, int(b)))
 }
 
 func resr(c *CPU, b byte, r8 byte) {

@@ -3382,3 +3382,115 @@ func TestOpCode_srl(t *testing.T) {
 		})
 	}
 }
+
+func TestOpCode_bit(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		bit    int
+		r1     int
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{name: "BIT 0,B", args: args{0x40, 0, B}},
+		{name: "BIT 0,C", args: args{0x41, 0, C}},
+		{name: "BIT 0,D", args: args{0x42, 0, D}},
+		{name: "BIT 0,E", args: args{0x43, 0, E}},
+		{name: "BIT 0,H", args: args{0x44, 0, H}},
+		{name: "BIT 0,L", args: args{0x45, 0, L}},
+		{name: "BIT 0,(HL)", args: args{0x46, 0, HL}},
+		{name: "BIT 0,A", args: args{0x47, 0, A}},
+		{name: "BIT 1,B", args: args{0x48, 1, B}},
+		{name: "BIT 1,C", args: args{0x49, 1, C}},
+		{name: "BIT 1,D", args: args{0x4A, 1, D}},
+		{name: "BIT 1,E", args: args{0x4B, 1, E}},
+		{name: "BIT 1,H", args: args{0x4C, 1, H}},
+		{name: "BIT 1,L", args: args{0x4D, 1, L}},
+		{name: "BIT 1,(HL)", args: args{0x4E, 1, HL}},
+		{name: "BIT 1,A", args: args{0x4F, 1, A}},
+		{name: "BIT 2,B", args: args{0x50, 2, B}},
+		{name: "BIT 2,C", args: args{0x51, 2, C}},
+		{name: "BIT 2,D", args: args{0x52, 2, D}},
+		{name: "BIT 2,E", args: args{0x53, 2, E}},
+		{name: "BIT 2,H", args: args{0x54, 2, H}},
+		{name: "BIT 2,L", args: args{0x55, 2, L}},
+		{name: "BIT 2,(HL)", args: args{0x56, 2, HL}},
+		{name: "BIT 2,A", args: args{0x57, 2, A}},
+		{name: "BIT 3,B", args: args{0x58, 3, B}},
+		{name: "BIT 3,C", args: args{0x59, 3, C}},
+		{name: "BIT 3,D", args: args{0x5A, 3, D}},
+		{name: "BIT 3,E", args: args{0x5B, 3, E}},
+		{name: "BIT 3,H", args: args{0x5C, 3, H}},
+		{name: "BIT 3,L", args: args{0x5D, 3, L}},
+		{name: "BIT 3,(HL)", args: args{0x5E, 3, HL}},
+		{name: "BIT 3,A", args: args{0x5F, 3, A}},
+		{name: "BIT 4,B", args: args{0x60, 4, B}},
+		{name: "BIT 4,C", args: args{0x61, 4, C}},
+		{name: "BIT 4,D", args: args{0x62, 4, D}},
+		{name: "BIT 4,E", args: args{0x63, 4, E}},
+		{name: "BIT 4,H", args: args{0x64, 4, H}},
+		{name: "BIT 4,L", args: args{0x65, 4, L}},
+		{name: "BIT 4,(HL)", args: args{0x66, 4, HL}},
+		{name: "BIT 4,A", args: args{0x67, 4, A}},
+		{name: "BIT 5,B", args: args{0x68, 5, B}},
+		{name: "BIT 5,C", args: args{0x69, 5, C}},
+		{name: "BIT 5,D", args: args{0x6A, 5, D}},
+		{name: "BIT 5,E", args: args{0x6B, 5, E}},
+		{name: "BIT 5,H", args: args{0x6C, 5, H}},
+		{name: "BIT 5,L", args: args{0x6D, 5, L}},
+		{name: "BIT 5,(HL)", args: args{0x6E, 5, HL}},
+		{name: "BIT 5,A", args: args{0x6F, 5, A}},
+		{name: "BIT 6,B", args: args{0x70, 6, B}},
+		{name: "BIT 6,C", args: args{0x71, 6, C}},
+		{name: "BIT 6,D", args: args{0x72, 6, D}},
+		{name: "BIT 6,E", args: args{0x73, 6, E}},
+		{name: "BIT 6,H", args: args{0x74, 6, H}},
+		{name: "BIT 6,L", args: args{0x75, 6, L}},
+		{name: "BIT 6,(HL)", args: args{0x76, 6, HL}},
+		{name: "BIT 6,A", args: args{0x77, 6, A}},
+		{name: "BIT 7,B", args: args{0x78, 7, B}},
+		{name: "BIT 7,C", args: args{0x79, 7, C}},
+		{name: "BIT 7,D", args: args{0x7A, 7, D}},
+		{name: "BIT 7,E", args: args{0x7B, 7, E}},
+		{name: "BIT 7,H", args: args{0x7C, 7, H}},
+		{name: "BIT 7,L", args: args{0x7D, 7, L}},
+		{name: "BIT 7,(HL)", args: args{0x7E, 7, HL}},
+		{name: "BIT 7,A", args: args{0x7F, 7, A}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := cbOpCodes[tt.args.opcode]
+
+			assert.Equal(t, uint8(tt.args.bit), op.R1)
+			assert.Equal(t, uint8(tt.args.r1), op.R2)
+
+			t.Run("when bitN = 1", func(t *testing.T) {
+				before := byte(0b00000000)
+				before |= (1 << tt.args.bit)
+				c.Reg.R[tt.args.r1] = before
+				// HL
+				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, true, c.Reg.isSet(flagH))
+			})
+			t.Run("when bitN = 0", func(t *testing.T) {
+				before := byte(0b00000000)
+				c.Reg.R[tt.args.r1] = before
+				// HL
+				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, true, c.Reg.isSet(flagZ))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, true, c.Reg.isSet(flagH))
+			})
+		})
+	}
+}
