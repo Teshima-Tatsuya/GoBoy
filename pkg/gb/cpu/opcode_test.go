@@ -3611,3 +3611,119 @@ func TestOpCode_res(t *testing.T) {
 		})
 	}
 }
+
+func TestOpCode_set(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		bit    int
+		r1     int
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{name: "SET 0,B", args: args{0xC0, 0, B}},
+		{name: "SET 0,C", args: args{0xC1, 0, C}},
+		{name: "SET 0,D", args: args{0xC2, 0, D}},
+		{name: "SET 0,E", args: args{0xC3, 0, E}},
+		{name: "SET 0,H", args: args{0xC4, 0, H}},
+		{name: "SET 0,L", args: args{0xC5, 0, L}},
+		{name: "SET 0,(HL)", args: args{0xC6, 0, HL}},
+		{name: "SET 0,A", args: args{0xC7, 0, A}},
+		{name: "SET 1,B", args: args{0xC8, 1, B}},
+		{name: "SET 1,C", args: args{0xC9, 1, C}},
+		{name: "SET 1,D", args: args{0xCA, 1, D}},
+		{name: "SET 1,E", args: args{0xCB, 1, E}},
+		{name: "SET 1,H", args: args{0xCC, 1, H}},
+		{name: "SET 1,L", args: args{0xCD, 1, L}},
+		{name: "SET 1,(HL)", args: args{0xCE, 1, HL}},
+		{name: "SET 1,A", args: args{0xCF, 1, A}},
+		{name: "SET 2,B", args: args{0xD0, 2, B}},
+		{name: "SET 2,C", args: args{0xD1, 2, C}},
+		{name: "SET 2,D", args: args{0xD2, 2, D}},
+		{name: "SET 2,E", args: args{0xD3, 2, E}},
+		{name: "SET 2,H", args: args{0xD4, 2, H}},
+		{name: "SET 2,L", args: args{0xD5, 2, L}},
+		{name: "SET 2,(HL)", args: args{0xD6, 2, HL}},
+		{name: "SET 2,A", args: args{0xD7, 2, A}},
+		{name: "SET 3,B", args: args{0xD8, 3, B}},
+		{name: "SET 3,C", args: args{0xD9, 3, C}},
+		{name: "SET 3,D", args: args{0xDA, 3, D}},
+		{name: "SET 3,E", args: args{0xDB, 3, E}},
+		{name: "SET 3,H", args: args{0xDC, 3, H}},
+		{name: "SET 3,L", args: args{0xDD, 3, L}},
+		{name: "SET 3,(HL)", args: args{0xDE, 3, HL}},
+		{name: "SET 3,A", args: args{0xDF, 3, A}},
+		{name: "SET 4,B", args: args{0xE0, 4, B}},
+		{name: "SET 4,C", args: args{0xE1, 4, C}},
+		{name: "SET 4,D", args: args{0xE2, 4, D}},
+		{name: "SET 4,E", args: args{0xE3, 4, E}},
+		{name: "SET 4,H", args: args{0xE4, 4, H}},
+		{name: "SET 4,L", args: args{0xE5, 4, L}},
+		{name: "SET 4,(HL)", args: args{0xE6, 4, HL}},
+		{name: "SET 4,A", args: args{0xE7, 4, A}},
+		{name: "SET 5,B", args: args{0xE8, 5, B}},
+		{name: "SET 5,C", args: args{0xE9, 5, C}},
+		{name: "SET 5,D", args: args{0xEA, 5, D}},
+		{name: "SET 5,E", args: args{0xEB, 5, E}},
+		{name: "SET 5,H", args: args{0xEC, 5, H}},
+		{name: "SET 5,L", args: args{0xED, 5, L}},
+		{name: "SET 5,(HL)", args: args{0xEE, 5, HL}},
+		{name: "SET 5,A", args: args{0xEF, 5, A}},
+		{name: "SET 6,B", args: args{0xF0, 6, B}},
+		{name: "SET 6,C", args: args{0xF1, 6, C}},
+		{name: "SET 6,D", args: args{0xF2, 6, D}},
+		{name: "SET 6,E", args: args{0xF3, 6, E}},
+		{name: "SET 6,H", args: args{0xF4, 6, H}},
+		{name: "SET 6,L", args: args{0xF5, 6, L}},
+		{name: "SET 6,(HL)", args: args{0xF6, 6, HL}},
+		{name: "SET 6,A", args: args{0xF7, 6, A}},
+		{name: "SET 7,B", args: args{0xF8, 7, B}},
+		{name: "SET 7,C", args: args{0xF9, 7, C}},
+		{name: "SET 7,D", args: args{0xFA, 7, D}},
+		{name: "SET 7,E", args: args{0xFB, 7, E}},
+		{name: "SET 7,H", args: args{0xFC, 7, H}},
+		{name: "SET 7,L", args: args{0xFD, 7, L}},
+		{name: "SET 7,(HL)", args: args{0xFE, 7, HL}},
+		{name: "SET 7,A", args: args{0xFF, 7, A}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := cbOpCodes[tt.args.opcode]
+
+			assert.Equal(t, uint8(tt.args.bit), op.R1)
+			assert.Equal(t, uint8(tt.args.r1), op.R2)
+
+			t.Run("when bitN = 1", func(t *testing.T) {
+				before := byte(0b00000000)
+				before |= (1 << tt.args.bit)
+				c.Reg.R[tt.args.r1] = before
+				// HL
+				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				if !strings.Contains(op.Mnemonic, "HL") {
+					assert.Equal(t, byte(1), util.Bit(c.Reg.R[op.R2], int(op.R1)))
+				} else {
+					assert.Equal(t, byte(1), util.Bit(c.Bus.ReadByte(c.Reg.R16(int(op.R2))), int(op.R1)))
+				}
+			})
+			t.Run("when bitN = 0", func(t *testing.T) {
+				before := byte(0b00000000)
+				c.Reg.R[tt.args.r1] = before
+				// HL
+				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				if !strings.Contains(op.Mnemonic, "HL") {
+					assert.Equal(t, byte(1), util.Bit(c.Reg.R[op.R2], int(op.R1)))
+				} else {
+					assert.Equal(t, byte(1), util.Bit(c.Bus.ReadByte(c.Reg.R16(int(op.R2))), int(op.R1)))
+				}
+			})
+		})
+	}
+}
