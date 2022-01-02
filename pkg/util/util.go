@@ -21,3 +21,8 @@ func Bool2Int8(v bool) int8 {
 		return 0
 	}
 }
+
+// Extrct v bit
+func Bit(v byte, b int) byte {
+	return (v >> b) & 0x01
+}
