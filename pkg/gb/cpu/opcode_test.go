@@ -1,6 +1,7 @@
 package cpu
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/bus"
@@ -3490,6 +3491,122 @@ func TestOpCode_bit(t *testing.T) {
 				assert.Equal(t, true, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, true, c.Reg.isSet(flagH))
+			})
+		})
+	}
+}
+
+func TestOpCode_res(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		bit    int
+		r1     int
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{name: "RES 0,B", args: args{0x80, 0, B}},
+		{name: "RES 0,C", args: args{0x81, 0, C}},
+		{name: "RES 0,D", args: args{0x82, 0, D}},
+		{name: "RES 0,E", args: args{0x83, 0, E}},
+		{name: "RES 0,H", args: args{0x84, 0, H}},
+		{name: "RES 0,L", args: args{0x85, 0, L}},
+		{name: "RES 0,(HL)", args: args{0x86, 0, HL}},
+		{name: "RES 0,A", args: args{0x87, 0, A}},
+		{name: "RES 1,B", args: args{0x88, 1, B}},
+		{name: "RES 1,C", args: args{0x89, 1, C}},
+		{name: "RES 1,D", args: args{0x8A, 1, D}},
+		{name: "RES 1,E", args: args{0x8B, 1, E}},
+		{name: "RES 1,H", args: args{0x8C, 1, H}},
+		{name: "RES 1,L", args: args{0x8D, 1, L}},
+		{name: "RES 1,(HL)", args: args{0x8E, 1, HL}},
+		{name: "RES 1,A", args: args{0x8F, 1, A}},
+		{name: "RES 2,B", args: args{0x90, 2, B}},
+		{name: "RES 2,C", args: args{0x91, 2, C}},
+		{name: "RES 2,D", args: args{0x92, 2, D}},
+		{name: "RES 2,E", args: args{0x93, 2, E}},
+		{name: "RES 2,H", args: args{0x94, 2, H}},
+		{name: "RES 2,L", args: args{0x95, 2, L}},
+		{name: "RES 2,(HL)", args: args{0x96, 2, HL}},
+		{name: "RES 2,A", args: args{0x97, 2, A}},
+		{name: "RES 3,B", args: args{0x98, 3, B}},
+		{name: "RES 3,C", args: args{0x99, 3, C}},
+		{name: "RES 3,D", args: args{0x9A, 3, D}},
+		{name: "RES 3,E", args: args{0x9B, 3, E}},
+		{name: "RES 3,H", args: args{0x9C, 3, H}},
+		{name: "RES 3,L", args: args{0x9D, 3, L}},
+		{name: "RES 3,(HL)", args: args{0x9E, 3, HL}},
+		{name: "RES 3,A", args: args{0x9F, 3, A}},
+		{name: "RES 4,B", args: args{0xA0, 4, B}},
+		{name: "RES 4,C", args: args{0xA1, 4, C}},
+		{name: "RES 4,D", args: args{0xA2, 4, D}},
+		{name: "RES 4,E", args: args{0xA3, 4, E}},
+		{name: "RES 4,H", args: args{0xA4, 4, H}},
+		{name: "RES 4,L", args: args{0xA5, 4, L}},
+		{name: "RES 4,(HL)", args: args{0xA6, 4, HL}},
+		{name: "RES 4,A", args: args{0xA7, 4, A}},
+		{name: "RES 5,B", args: args{0xA8, 5, B}},
+		{name: "RES 5,C", args: args{0xA9, 5, C}},
+		{name: "RES 5,D", args: args{0xAA, 5, D}},
+		{name: "RES 5,E", args: args{0xAB, 5, E}},
+		{name: "RES 5,H", args: args{0xAC, 5, H}},
+		{name: "RES 5,L", args: args{0xAD, 5, L}},
+		{name: "RES 5,(HL)", args: args{0xAE, 5, HL}},
+		{name: "RES 5,A", args: args{0xAF, 5, A}},
+		{name: "RES 6,B", args: args{0xB0, 6, B}},
+		{name: "RES 6,C", args: args{0xB1, 6, C}},
+		{name: "RES 6,D", args: args{0xB2, 6, D}},
+		{name: "RES 6,E", args: args{0xB3, 6, E}},
+		{name: "RES 6,H", args: args{0xB4, 6, H}},
+		{name: "RES 6,L", args: args{0xB5, 6, L}},
+		{name: "RES 6,(HL)", args: args{0xB6, 6, HL}},
+		{name: "RES 6,A", args: args{0xB7, 6, A}},
+		{name: "RES 7,B", args: args{0xB8, 7, B}},
+		{name: "RES 7,C", args: args{0xB9, 7, C}},
+		{name: "RES 7,D", args: args{0xBA, 7, D}},
+		{name: "RES 7,E", args: args{0xBB, 7, E}},
+		{name: "RES 7,H", args: args{0xBC, 7, H}},
+		{name: "RES 7,L", args: args{0xBD, 7, L}},
+		{name: "RES 7,(HL)", args: args{0xBE, 7, HL}},
+		{name: "RES 7,A", args: args{0xBF, 7, A}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := cbOpCodes[tt.args.opcode]
+
+			assert.Equal(t, uint8(tt.args.bit), op.R1)
+			assert.Equal(t, uint8(tt.args.r1), op.R2)
+
+			t.Run("when bitN = 1", func(t *testing.T) {
+				before := byte(0b00000000)
+				before |= (1 << tt.args.bit)
+				c.Reg.R[tt.args.r1] = before
+				// HL
+				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				if !strings.Contains(op.Mnemonic, "HL") {
+					assert.Equal(t, byte(0), util.Bit(c.Reg.R[op.R2], int(op.R1)))
+				} else {
+					assert.Equal(t, byte(0), util.Bit(c.Bus.ReadByte(c.Reg.R16(int(op.R2))), int(op.R1)))
+				}
+			})
+			t.Run("when bitN = 0", func(t *testing.T) {
+				before := byte(0b00000000)
+				c.Reg.R[tt.args.r1] = before
+				// HL
+				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				if !strings.Contains(op.Mnemonic, "HL") {
+					assert.Equal(t, byte(0), util.Bit(c.Reg.R[op.R2], int(op.R1)))
+				} else {
+					assert.Equal(t, byte(0), util.Bit(c.Bus.ReadByte(c.Reg.R16(int(op.R2))), int(op.R1)))
+				}
 			})
 		})
 	}
