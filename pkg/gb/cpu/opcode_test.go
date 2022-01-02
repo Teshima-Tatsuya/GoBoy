@@ -2970,38 +2970,14 @@ func TestOpCode_sla(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "RL B",
-			args: args{0x20, B},
-		},
-		{
-			name: "SLA C",
-			args: args{0x21, C},
-		},
-		{
-			name: "SLA D",
-			args: args{0x22, D},
-		},
-		{
-			name: "SLA E",
-			args: args{0x23, E},
-		},
-		{
-			name: "SLA H",
-			args: args{0x24, H},
-		},
-		{
-			name: "SLA L",
-			args: args{0x25, L},
-		},
-		{
-			name: "SLA HL",
-			args: args{0x26, HL},
-		},
-		{
-			name: "SLA A",
-			args: args{0x27, A},
-		},
+		{name: "SLA B", args: args{0x20, B}},
+		{name: "SLA C", args: args{0x21, C}},
+		{name: "SLA D", args: args{0x22, D}},
+		{name: "SLA E", args: args{0x23, E}},
+		{name: "SLA H", args: args{0x24, H}},
+		{name: "SLA L", args: args{0x25, L}},
+		{name: "SLA HL", args: args{0x26, HL}},
+		{name: "SLA A", args: args{0x27, A}},
 	}
 
 	for _, tt := range tests {
@@ -3023,7 +2999,7 @@ func TestOpCode_sla(t *testing.T) {
 
 				want := byte(0b00100000)
 
-				if tt.name != "SLA HL" {
+				if !strings.Contains(op.Mnemonic, "HL") {
 					assert.Equal(t, want, c.Reg.R[op.R1])
 				} else {
 					assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(HL))))
@@ -3041,7 +3017,7 @@ func TestOpCode_sla(t *testing.T) {
 
 				want := byte(0b00000000)
 
-				if tt.name != "SLA HL" {
+				if !strings.Contains(op.Mnemonic, "HL") {
 					assert.Equal(t, want, c.Reg.R[op.R1])
 				} else {
 					assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(HL))))
@@ -3059,7 +3035,7 @@ func TestOpCode_sla(t *testing.T) {
 
 				want := byte(0b01000000)
 
-				if tt.name != "SLA HL" {
+				if !strings.Contains(op.Mnemonic, "HL") {
 					assert.Equal(t, want, c.Reg.R[op.R1])
 				} else {
 					assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(HL))))
