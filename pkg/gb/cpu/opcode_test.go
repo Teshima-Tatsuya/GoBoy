@@ -1669,42 +1669,15 @@ func TestOpCode_and(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "AND B",
-			args: args{0xA0, B},
-		},
-		{
-			name: "AND C",
-			args: args{0xA1, C},
-		},
-		{
-			name: "AND D",
-			args: args{0xA2, D},
-		},
-		{
-			name: "AND E",
-			args: args{0xA3, E},
-		},
-		{
-			name: "AND H",
-			args: args{0xA4, H},
-		},
-		{
-			name: "AND L",
-			args: args{0xA5, L},
-		},
-		{
-			name: "AND (HL)",
-			args: args{0xA6, HL},
-		},
-		{
-			name: "AND A",
-			args: args{0xA7, A},
-		},
-		{
-			name: "AND d8",
-			args: args{0xE6, 0},
-		},
+		{name: "AND B", args: args{0xA0, B}},
+		{name: "AND C", args: args{0xA1, C}},
+		{name: "AND D", args: args{0xA2, D}},
+		{name: "AND E", args: args{0xA3, E}},
+		{name: "AND H", args: args{0xA4, H}},
+		{name: "AND L", args: args{0xA5, L}},
+		{name: "AND (HL)", args: args{0xA6, HL}},
+		{name: "AND A", args: args{0xA7, A}},
+		{name: "AND d8", args: args{0xE6, 0}},
 	}
 
 	for _, tt := range tests {
@@ -1719,8 +1692,9 @@ func TestOpCode_and(t *testing.T) {
 			t.Run("when oposite", func(t *testing.T) {
 				c.Reg.R[A] = 0b11110000
 				val := byte(0b00001111)
+				// d8
 				c.Bus.WriteByte(c.Reg.PC, val)
-				if tt.args.r1 == HL {
+				if strings.Contains(op.Mnemonic, "HL") {
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
 				}
 				c.Reg.R[tt.args.r1] = val
@@ -1730,8 +1704,9 @@ func TestOpCode_and(t *testing.T) {
 			t.Run("when equal", func(t *testing.T) {
 				c.Reg.R[A] = 0b11110000
 				val := byte(0b11110000)
+				// d8
 				c.Bus.WriteByte(c.Reg.PC, val)
-				if tt.args.r1 == HL {
+				if strings.Contains(op.Mnemonic, "HL") {
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
 				}
 				c.Reg.R[tt.args.r1] = val
@@ -1741,8 +1716,9 @@ func TestOpCode_and(t *testing.T) {
 			t.Run("when other", func(t *testing.T) {
 				c.Reg.R[A] = 0b11110000
 				val := byte(0b10100000)
+				// d8
 				c.Bus.WriteByte(c.Reg.PC, val)
-				if tt.args.r1 == HL {
+				if strings.Contains(op.Mnemonic, "HL") {
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
 				}
 				c.Reg.R[tt.args.r1] = val
