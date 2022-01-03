@@ -145,7 +145,7 @@ func (r *Register) setFlagZ(v byte) {
 	}
 }
 
-func (r *Register) setFlag(flag byte) {
+func (r *Register) setFlag(flag int) {
 	switch flag {
 	case flagZ:
 		r.R[F] = r.R[F] | (1 << uint(flagZ))
@@ -158,7 +158,7 @@ func (r *Register) setFlag(flag byte) {
 	}
 }
 
-func (r *Register) clearFlag(flag byte) {
+func (r *Register) clearFlag(flag int) {
 	switch flag {
 	case flagZ:
 		r.R[F] = r.R[F] & ^byte((uint(1 << uint(flagZ))))
@@ -171,7 +171,7 @@ func (r *Register) clearFlag(flag byte) {
 	}
 }
 
-func (r *Register) isSet(flag byte) bool {
+func (r *Register) isSet(flag int) bool {
 	switch flag {
 	case flagZ:
 		return r.R[F]&byte(1<<uint(flagZ)) == 1<<uint(flagZ)

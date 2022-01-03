@@ -11,10 +11,10 @@ import (
 type OpCode struct {
 	Code     byte
 	Mnemonic string
-	R1, R2   byte
+	R1, R2   int
 	Size     uint8
 	Cycles   uint8
-	Handler  func(*CPU, byte, byte)
+	Handler  func(*CPU, int, int)
 }
 
 var opCodes = []*OpCode{
@@ -276,7 +276,7 @@ var opCodes = []*OpCode{
 	{0xFF, "RST 38H", 0x38, 0, 0, 1, rst},
 }
 
-func nop(c *CPU, _ byte, _ byte) {}
+func nop(c *CPU, _ int, _ int) {}
 
 // -----LD----
 // r   is Register Single
@@ -295,45 +295,45 @@ func nop(c *CPU, _ byte, _ byte) {}
 
 // LD R1, R2
 // Write R2 into R1
-func ldrr(c *CPU, R1 byte, R2 byte) {
+func ldrr(c *CPU, R1 int, R2 int) {
 	c.Reg.R[R1] = c.Reg.R[R2]
 }
 
 // LD r1, (r2)
 // Write r2 value into r1
-func ldrm(c *CPU, R1 byte, R2 byte) {
+func ldrm(c *CPU, R1 int, R2 int) {
 	c.Reg.R[R1] = c.Bus.ReadByte(types.Addr(0xFF00 | types.Addr(c.Reg.R[R2])))
 }
 
 // LD r1, (r2)
 // Write r2 value into r1
-func ldrm16(c *CPU, R1 byte, R2 byte) {
+func ldrm16(c *CPU, R1 int, R2 int) {
 	c.Reg.R[R1] = c.Bus.ReadByte(c.Reg.R16(int(R2)))
 }
 
 // LD r1, d8
-func ldrd(c *CPU, r8 byte, _ byte) {
+func ldrd(c *CPU, r8 int, _ int) {
 	c.Reg.R[r8] = c.fetch()
 }
 
 // LDH R,(a8)
-func ldra(c *CPU, R1 byte, _ byte) {
+func ldra(c *CPU, R1 int, _ int) {
 	c.Reg.R[R1] = c.Bus.ReadByte(util.Byte2Addr(byte(0xFF), c.fetch()))
 }
 
-func ldra16(c *CPU, R1 byte, _ byte) {
+func ldra16(c *CPU, R1 int, _ int) {
 	c.Reg.R[R1] = c.Bus.ReadByte(c.fetch16())
 }
 
 // func ldr16(r16, r16d, d16)
 
 // LD r1, r2
-func ldr16r16(c *CPU, R1 byte, R2 byte) {
+func ldr16r16(c *CPU, R1 int, R2 int) {
 	c.Reg.setR16(int(R1), c.Reg.R16(int(R2)))
 }
 
 // LD r1, r2+d
-func ldr16r16d(c *CPU, R1 byte, R2 byte) {
+func ldr16r16d(c *CPU, R1 int, R2 int) {
 	d := c.fetch()
 	v := int32(c.Reg.R16(SP)) + int32(d) // Cast to int32 considers carry
 	c.Reg.setR16(int(R1), types.Addr(v))
@@ -354,14 +354,14 @@ func ldr16r16d(c *CPU, R1 byte, R2 byte) {
 }
 
 // LD r1, d16
-func ldr16d16(c *CPU, R1 byte, _ byte) {
+func ldr16d16(c *CPU, R1 int, _ int) {
 	c.Reg.setR16(int(R1), c.fetch16())
 }
 
 // func ldm(r)
 
 // LD (C), A
-func ldmr(c *CPU, R1 byte, R2 byte) {
+func ldmr(c *CPU, R1 int, R2 int) {
 	addr := util.Byte2Addr(0xFF, c.Reg.R[R1])
 	c.Bus.WriteByte(addr, c.Reg.R[R2])
 }
@@ -369,30 +369,30 @@ func ldmr(c *CPU, R1 byte, R2 byte) {
 // func ldm16(r, d)
 
 // LD (r1), r2
-func ldm16r(c *CPU, R1 byte, R2 byte) {
+func ldm16r(c *CPU, R1 int, R2 int) {
 	c.Bus.WriteByte(c.Reg.R16(int(R1)), c.Reg.R[R2])
 }
 
 // LD (HL),d8
-func ldm16d(c *CPU, R1 byte, R2 byte) {
+func ldm16d(c *CPU, R1 int, R2 int) {
 	c.Bus.WriteByte(c.Reg.R16(int(R1)), c.fetch())
 }
 
 // func lda(r)
 
-func ldar(c *CPU, _ byte, R2 byte) {
+func ldar(c *CPU, _ int, R2 int) {
 	addr := util.Byte2Addr(0xFF, c.fetch())
 	c.Bus.WriteByte(addr, c.Reg.R[R2])
 }
 
 // func lda16(r, r16)
 
-func lda16r(c *CPU, _ byte, R2 byte) {
+func lda16r(c *CPU, _ int, R2 int) {
 	addr := c.fetch16()
 	c.Bus.WriteByte(addr, c.Reg.R[R2])
 }
 
-func lda16r16(c *CPU, _ byte, R2 byte) {
+func lda16r16(c *CPU, _ int, R2 int) {
 	addr := c.fetch16()
 	r16 := c.Reg.R16(int(R2))
 	c.Bus.WriteByte(addr, util.ExtractLower(r16))
@@ -400,7 +400,7 @@ func lda16r16(c *CPU, _ byte, R2 byte) {
 }
 
 // arithmetic
-func incr(c *CPU, r8 byte, _ byte) {
+func incr(c *CPU, r8 int, _ int) {
 	r := c.Reg.R[r8]
 
 	incremented := r + 0x01
@@ -421,11 +421,11 @@ func incr(c *CPU, r8 byte, _ byte) {
 	c.Reg.R[r8] = incremented
 }
 
-func incr16(c *CPU, r16 byte, _ byte) {
+func incr16(c *CPU, r16 int, _ int) {
 	c.Reg.setR16(int(r16), types.Addr(c.Reg.R16(int(r16))+1))
 }
 
-func incm16(c *CPU, r16 byte, _ byte) {
+func incm16(c *CPU, r16 int, _ int) {
 	d := c.Bus.ReadByte(c.Reg.R16(int(r16)))
 	v := d + 1
 	c.Reg.setFlagZ(v)
@@ -441,7 +441,7 @@ func incm16(c *CPU, r16 byte, _ byte) {
 	c.Bus.WriteByte(c.Reg.R16(int(r16)), byte(v))
 }
 
-func decr(c *CPU, r8 byte, _ byte) {
+func decr(c *CPU, r8 int, _ int) {
 	r := c.Reg.R[r8]
 
 	decremented := r - 0x01
@@ -462,11 +462,11 @@ func decr(c *CPU, r8 byte, _ byte) {
 	c.Reg.R[r8] = decremented
 }
 
-func decr16(c *CPU, r16 byte, _ byte) {
+func decr16(c *CPU, r16 int, _ int) {
 	c.Reg.setR16(int(r16), types.Addr(c.Reg.R16(int(r16))-1))
 }
 
-func decm16(c *CPU, r16 byte, _ byte) {
+func decm16(c *CPU, r16 int, _ int) {
 	d := c.Bus.ReadByte(c.Reg.R16(int(r16)))
 	v := d - 1
 	c.Reg.setFlagZ(v)
@@ -495,17 +495,17 @@ func _and(c *CPU, buf byte) {
 	c.Reg.clearFlag(flagC)
 }
 
-func andr(c *CPU, r8 byte, _ byte) {
+func andr(c *CPU, r8 int, _ int) {
 	buf := c.Reg.R[r8]
 	_and(c, buf)
 }
 
-func andHL(c *CPU, r16 byte, _ byte) {
+func andHL(c *CPU, r16 int, _ int) {
 	buf := c.Bus.ReadByte(c.Reg.R16(int(r16)))
 	_and(c, buf)
 }
 
-func andd8(c *CPU, _ byte, _ byte) {
+func andd8(c *CPU, _ int, _ int) {
 	buf := c.fetch()
 	_and(c, buf)
 }
@@ -523,17 +523,17 @@ func _or(c *CPU, buf byte) {
 	c.Reg.clearFlag(flagC)
 }
 
-func orr(c *CPU, r8 byte, _ byte) {
+func orr(c *CPU, r8 int, _ int) {
 	buf := c.Reg.R[r8]
 	_or(c, buf)
 }
 
-func orHL(c *CPU, r16 byte, _ byte) {
+func orHL(c *CPU, r16 int, _ int) {
 	buf := c.Bus.ReadByte(c.Reg.R16(int(r16)))
 	_or(c, buf)
 }
 
-func ord8(c *CPU, r8 byte, _ byte) {
+func ord8(c *CPU, r8 int, _ int) {
 	buf := c.fetch()
 	_or(c, buf)
 }
@@ -551,17 +551,17 @@ func _xor(c *CPU, buf byte) {
 	c.Reg.clearFlag(flagC)
 }
 
-func xorr(c *CPU, r8 byte, _ byte) {
+func xorr(c *CPU, r8 int, _ int) {
 	buf := c.Reg.R[r8]
 	_xor(c, buf)
 }
 
-func xorHL(c *CPU, r16 byte, _ byte) {
+func xorHL(c *CPU, r16 int, _ int) {
 	buf := c.Bus.ReadByte(c.Reg.R16(int(r16)))
 	_xor(c, buf)
 }
 
-func xord8(c *CPU, _ byte, _ byte) {
+func xord8(c *CPU, _ int, _ int) {
 	buf := c.fetch()
 	_xor(c, buf)
 }
@@ -581,17 +581,17 @@ func _cp(c *CPU, v byte) {
 	c.Reg.setFlag(flagN)
 }
 
-func cpr(c *CPU, r8 byte, _ byte) {
+func cpr(c *CPU, r8 int, _ int) {
 	v := c.Reg.R[r8]
 	_cp(c, v)
 }
 
-func cpHL(c *CPU, r16 byte, _ byte) {
+func cpHL(c *CPU, r16 int, _ int) {
 	v := c.Bus.ReadByte(c.Reg.R16(int(r16)))
 	_cp(c, v)
 }
 
-func cpd8(c *CPU, _ byte, _ byte) {
+func cpd8(c *CPU, _ int, _ int) {
 	v := c.fetch()
 	_cp(c, v)
 }
@@ -619,12 +619,12 @@ func _add(c *CPU, b byte) {
 	}
 }
 
-func addr(c *CPU, _ byte, r8 byte) {
+func addr(c *CPU, _ int, r8 int) {
 	r := c.Reg.R[r8]
 	_add(c, r)
 }
 
-func addr16r16(c *CPU, r1 byte, r2 byte) {
+func addr16r16(c *CPU, r1 int, r2 int) {
 	a := c.Reg.R16(int(r1))
 	b := c.Reg.R16(int(r2))
 	v := a + b
@@ -645,12 +645,12 @@ func addr16r16(c *CPU, r1 byte, r2 byte) {
 	c.Reg.setR16(int(r1), v)
 }
 
-func addHL(c *CPU, _ byte, r16 byte) {
+func addHL(c *CPU, _ int, r16 int) {
 	v := c.Bus.ReadByte(c.Reg.R16(int(r16)))
 	_add(c, v)
 }
 
-func addd8(c *CPU, _ byte, r8 byte) {
+func addd8(c *CPU, _ int, r8 int) {
 	v := c.fetch()
 	_add(c, v)
 }
@@ -680,17 +680,17 @@ func _adc(c *CPU, r byte) {
 }
 
 // ADC A,R
-func adcr(c *CPU, _ byte, r2 byte) {
+func adcr(c *CPU, _ int, r2 int) {
 	r := c.Reg.R[r2]
 	_adc(c, r)
 }
 
-func adcm16(c *CPU, _ byte, r2 byte) {
+func adcm16(c *CPU, _ int, r2 int) {
 	r := c.Bus.ReadByte(c.Reg.R16(int(r2)))
 	_adc(c, r)
 }
 
-func adcd(c *CPU, _ byte, _ byte) {
+func adcd(c *CPU, _ int, _ int) {
 	r := c.fetch()
 	_adc(c, r)
 }
@@ -719,39 +719,39 @@ func _sub(c *CPU, b byte) {
 	}
 }
 
-func subr(c *CPU, r8 byte, _ byte) {
+func subr(c *CPU, r8 int, _ int) {
 	v := c.Reg.R[r8]
 	_sub(c, v)
 }
 
-func subHL(c *CPU, r16 byte, _ byte) {
+func subHL(c *CPU, r16 int, _ int) {
 	v := c.Bus.ReadByte(c.Reg.R16(int(r16)))
 	_sub(c, v)
 }
 
-func subd8(c *CPU, _ byte, _ byte) {
+func subd8(c *CPU, _ int, _ int) {
 	r := c.fetch()
 	_sub(c, r)
 }
 
 // ret
-func ret(c *CPU, _ byte, _ byte) {
+func ret(c *CPU, _ int, _ int) {
 	c.popPC()
 }
 
-func retf(c *CPU, R1 byte, _ byte) {
+func retf(c *CPU, R1 int, _ int) {
 	if c.Reg.isSet(R1) {
 		c.popPC()
 	}
 }
 
-func retnf(c *CPU, R1 byte, _ byte) {
+func retnf(c *CPU, R1 int, _ int) {
 	if !c.Reg.isSet(R1) {
 		c.popPC()
 	}
 }
 
-func reti(c *CPU, _ byte, _ byte) {
+func reti(c *CPU, _ int, _ int) {
 	c.popPC()
 
 	// TODO irq enable
@@ -764,13 +764,13 @@ func _jp(c *CPU, addr types.Addr) {
 }
 
 // JP a16
-func jpa16(c *CPU, _ byte, _ byte) {
+func jpa16(c *CPU, _ int, _ int) {
 	_jp(c, c.fetch16())
 }
 
 // JP flag, a16
 // jump when flag = 1
-func jpfa16(c *CPU, flag byte, _ byte) {
+func jpfa16(c *CPU, flag int, _ int) {
 	if c.Reg.isSet(flag) {
 		_jp(c, c.fetch16())
 	}
@@ -778,14 +778,14 @@ func jpfa16(c *CPU, flag byte, _ byte) {
 
 // JP Nflag, a16
 // jump when flag = 0
-func jpnfa16(c *CPU, flag byte, _ byte) {
+func jpnfa16(c *CPU, flag int, _ int) {
 	if !c.Reg.isSet(flag) {
 		_jp(c, c.fetch16())
 	}
 }
 
 // JP (r16)
-func jpm16(c *CPU, R1 byte, _ byte) {
+func jpm16(c *CPU, R1 int, _ int) {
 	_jp(c, c.Reg.R16(int(R1)))
 }
 
@@ -795,13 +795,13 @@ func _jr(c *CPU, addr int8) {
 }
 
 // r8 is a signed data, which are added to PC
-func jrr8(c *CPU, _ byte, _ byte) {
+func jrr8(c *CPU, _ int, _ int) {
 	n := c.fetch()
 	_jr(c, int8(n))
 }
 
 // r8 is a signed data, which are added to PC
-func jrfr8(c *CPU, flag byte, _ byte) {
+func jrfr8(c *CPU, flag int, _ int) {
 	n := c.fetch()
 	// flag is not set
 	if c.Reg.isSet(flag) {
@@ -810,7 +810,7 @@ func jrfr8(c *CPU, flag byte, _ byte) {
 }
 
 // r8 is a signed data, which are added to PC
-func jrnfr8(c *CPU, flag byte, _ byte) {
+func jrnfr8(c *CPU, flag int, _ int) {
 	n := c.fetch()
 	// flag is not set
 	if !c.Reg.isSet(flag) {
@@ -822,14 +822,14 @@ func jrnfr8(c *CPU, flag byte, _ byte) {
 
 // RST n
 // push and jump to n
-func rst(c *CPU, n byte, _ byte) {
+func rst(c *CPU, n int, _ int) {
 	log.Debug("TODO: implement")
 	c.pushPC()
 	c.Reg.PC = types.Addr(n)
 }
 
 // -----push-----
-func push(c *CPU, r16 byte, _ byte) {
+func push(c *CPU, r16 int, _ int) {
 	buf := c.Reg.R16(int(r16))
 	upper := util.ExtractUpper(types.Addr(buf))
 	lower := util.ExtractLower(types.Addr(buf))
@@ -838,7 +838,7 @@ func push(c *CPU, r16 byte, _ byte) {
 }
 
 // -----pop------
-func pop(c *CPU, r16 byte, _ byte) {
+func pop(c *CPU, r16 int, _ int) {
 	var lower byte
 	if r16 != AF {
 		lower = c.pop()
@@ -858,19 +858,19 @@ func _call(c *CPU, dest types.Addr) {
 
 }
 
-func call(c *CPU, _ byte, _ byte) {
+func call(c *CPU, _ int, _ int) {
 	dest := c.fetch16()
 	_call(c, dest)
 }
 
-func callf(c *CPU, flag byte, _ byte) {
+func callf(c *CPU, flag int, _ int) {
 	dest := c.fetch16()
 	if c.Reg.isSet(flag) {
 		_call(c, dest)
 	}
 }
 
-func callnf(c *CPU, flag byte, _ byte) {
+func callnf(c *CPU, flag int, _ int) {
 	dest := c.fetch16()
 	if !c.Reg.isSet(flag) {
 		_call(c, dest)
@@ -879,22 +879,22 @@ func callnf(c *CPU, flag byte, _ byte) {
 
 // -----misc-----
 
-func stop(c *CPU, _ byte, _ byte) {
+func stop(c *CPU, _ int, _ int) {
 	log.Debug("TODO: implement")
 	c.Reg.PC++
 }
 
 // desable interrupt
-func di(c *CPU, _ byte, _ byte) {
+func di(c *CPU, _ int, _ int) {
 	log.Debug("TODO: implement")
 }
 
 // enable interrupt
-func ei(c *CPU, _ byte, _ byte) {
+func ei(c *CPU, _ int, _ int) {
 	log.Debug("TODO: implement")
 }
 
-func notimplemented(c *CPU, _ byte, _ byte) {
+func notimplemented(c *CPU, _ int, _ int) {
 	c.Reg.PC--
 	panic(fmt.Sprintf("OpCode 0x%2x is not implemented", c.fetch()))
 }
@@ -1177,14 +1177,14 @@ func _rlc(c *CPU, v byte) byte {
 }
 
 // RLC r
-func rlcr(c *CPU, r8 byte, _ byte) {
+func rlcr(c *CPU, r8 int, _ int) {
 	r := c.Reg.R[r8]
 	c.Reg.R[r8] = _rlc(c, r)
 
 }
 
 // RLC (HL)
-func rlcm16(c *CPU, r16 byte, _ byte) {
+func rlcm16(c *CPU, r16 int, _ int) {
 	addr := c.Reg.R16(int(r16))
 	r := c.Bus.ReadByte(addr)
 	c.Bus.WriteByte(addr, _rlc(c, r))
@@ -1208,13 +1208,13 @@ func _rrc(c *CPU, v byte) byte {
 }
 
 // RRC r
-func rrcr(c *CPU, r8 byte, _ byte) {
+func rrcr(c *CPU, r8 int, _ int) {
 	r := c.Reg.R[r8]
 	c.Reg.R[r8] = _rrc(c, r)
 }
 
 // RRC (HL)
-func rrcm16(c *CPU, r16 byte, _ byte) {
+func rrcm16(c *CPU, r16 int, _ int) {
 	addr := c.Reg.R16(int(r16))
 	r := c.Bus.ReadByte(addr)
 	c.Bus.WriteByte(addr, _rrc(c, r))
@@ -1241,13 +1241,13 @@ func _rl(c *CPU, v byte) byte {
 }
 
 // RL r
-func rlr(c *CPU, r8 byte, _ byte) {
+func rlr(c *CPU, r8 int, _ int) {
 	r := c.Reg.R[r8]
 	c.Reg.R[r8] = _rl(c, r)
 }
 
 // RL (HL)
-func rlm16(c *CPU, r16 byte, _ byte) {
+func rlm16(c *CPU, r16 int, _ int) {
 	addr := c.Reg.R16(int(r16))
 	r := c.Bus.ReadByte(addr)
 	c.Bus.WriteByte(addr, _rl(c, r))
@@ -1274,13 +1274,13 @@ func _rr(c *CPU, v byte) byte {
 }
 
 // RR r
-func rrr(c *CPU, r8 byte, _ byte) {
+func rrr(c *CPU, r8 int, _ int) {
 	r := c.Reg.R[r8]
 	c.Reg.R[r8] = _rr(c, r)
 }
 
 // RR (HL)
-func rrm16(c *CPU, r16 byte, _ byte) {
+func rrm16(c *CPU, r16 int, _ int) {
 	addr := c.Reg.R16(int(r16))
 	r := c.Bus.ReadByte(addr)
 	c.Bus.WriteByte(addr, _rr(c, r))
@@ -1303,13 +1303,13 @@ func _sla(c *CPU, v byte) byte {
 }
 
 // SLA r
-func slar(c *CPU, r8 byte, _ byte) {
+func slar(c *CPU, r8 int, _ int) {
 	r := c.Reg.R[r8]
 	c.Reg.R[r8] = _sla(c, r)
 }
 
 // SLA (HL)
-func slam16(c *CPU, r16 byte, _ byte) {
+func slam16(c *CPU, r16 int, _ int) {
 	addr := c.Reg.R16(int(r16))
 	r := c.Bus.ReadByte(addr)
 	c.Bus.WriteByte(addr, _sla(c, r))
@@ -1332,13 +1332,13 @@ func _sra(c *CPU, v byte) byte {
 }
 
 // SRA r
-func srar(c *CPU, r8 byte, _ byte) {
+func srar(c *CPU, r8 int, _ int) {
 	r := c.Reg.R[r8]
 	c.Reg.R[r8] = _sra(c, r)
 }
 
 // SRA (HL)
-func sram16(c *CPU, r16 byte, _ byte) {
+func sram16(c *CPU, r16 int, _ int) {
 	addr := c.Reg.R16(int(r16))
 	r := c.Bus.ReadByte(addr)
 	c.Bus.WriteByte(addr, _sra(c, r))
@@ -1358,12 +1358,12 @@ func _swap(c *CPU, v byte) byte {
 }
 
 // SWAP R
-func swapr(c *CPU, r byte, _ byte) {
+func swapr(c *CPU, r int, _ int) {
 	c.Reg.R[r] = _swap(c, c.Reg.R[r])
 }
 
 // SWAP (HL)
-func swapm16(c *CPU, r16 byte, _ byte) {
+func swapm16(c *CPU, r16 int, _ int) {
 	addr := c.Reg.R16(int(r16))
 	v := c.Bus.ReadByte(addr)
 	c.Bus.WriteByte(addr, _swap(c, v))
@@ -1385,19 +1385,19 @@ func _srl(c *CPU, v byte) byte {
 	return v
 }
 
-func srlr(c *CPU, r8 byte, _ byte) {
+func srlr(c *CPU, r8 int, _ int) {
 	r := c.Reg.R[r8]
 	c.Reg.R[r8] = _srl(c, r)
 }
 
 // SRA (HL)
-func srlm16(c *CPU, r16 byte, _ byte) {
+func srlm16(c *CPU, r16 int, _ int) {
 	addr := c.Reg.R16(int(r16))
 	r := c.Bus.ReadByte(addr)
 	c.Bus.WriteByte(addr, _srl(c, r))
 }
 
-func bitr(c *CPU, b byte, r8 byte) {
+func bitr(c *CPU, b int, r8 int) {
 	c.Reg.clearFlag(flagN)
 	c.Reg.setFlag(flagH)
 
@@ -1406,7 +1406,7 @@ func bitr(c *CPU, b byte, r8 byte) {
 	c.Reg.setFlagZ(util.Bit(r, int(b)))
 }
 
-func bitm16(c *CPU, b byte, r16 byte) {
+func bitm16(c *CPU, b int, r16 int) {
 	addr := c.Reg.R16(int(r16))
 	r := c.Bus.ReadByte(addr)
 
@@ -1416,22 +1416,22 @@ func bitm16(c *CPU, b byte, r16 byte) {
 	c.Reg.setFlagZ(util.Bit(r, int(b)))
 }
 
-func resr(c *CPU, b byte, r8 byte) {
+func resr(c *CPU, b int, r8 int) {
 	c.Reg.R[r8] = c.Reg.R[r8] & (^(1 << b))
 }
 
-func resm16(c *CPU, b byte, r16 byte) {
+func resm16(c *CPU, b int, r16 int) {
 	addr := c.Reg.R16(int(r16))
 	r := c.Bus.ReadByte(addr)
 
 	c.Bus.WriteByte(addr, r&(^(1 << b)))
 }
 
-func setr(c *CPU, b byte, r8 byte) {
+func setr(c *CPU, b int, r8 int) {
 	c.Reg.R[r8] = c.Reg.R[r8] | (1 << b)
 }
 
-func setm16(c *CPU, b byte, r16 byte) {
+func setm16(c *CPU, b int, r16 int) {
 	addr := c.Reg.R16(int(r16))
 	r := c.Bus.ReadByte(addr)
 

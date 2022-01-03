@@ -40,9 +40,7 @@ func (c *CPU) regreset() {
 	c.Reg.SP = 0xFFFE
 }
 
-func TestOpCode_nop(t *testing.T) {
-
-}
+func TestOpCode_nop(t *testing.T) {}
 
 // test 0x40-0x6F (except 0xX6, 0xXE)
 func TestOpCode_ldrr(t *testing.T) {
@@ -50,8 +48,8 @@ func TestOpCode_ldrr(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
-		r2     byte
+		r1     int
+		r2     int
 	}
 
 	tests := []struct {
@@ -233,7 +231,7 @@ func TestOpCode_ldrr(t *testing.T) {
 			c.regreset()
 			op := opCodes[tt.args.opcode]
 			want := c.Reg.R[tt.args.r2]
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, op.R1, tt.args.r1)
 			assert.Equal(t, op.R2, tt.args.r2)
@@ -248,8 +246,8 @@ func TestOpCode_ldrm(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
-		r2     byte
+		r1     int
+		r2     int
 	}
 
 	tests := []struct {
@@ -269,7 +267,7 @@ func TestOpCode_ldrm(t *testing.T) {
 			addr := types.Addr(0xFF03)
 			want := byte(0x12)
 			c.Bus.WriteByte(addr, want)
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, op.R1, tt.args.r1)
 			assert.Equal(t, op.R2, tt.args.r2)
@@ -283,8 +281,8 @@ func TestOpCode_ldrm16(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
-		r2     byte
+		r1     int
+		r2     int
 	}
 
 	tests := []struct {
@@ -348,7 +346,7 @@ func TestOpCode_ldrm16(t *testing.T) {
 			} else if op.R2 == HLD {
 				c.Reg.setHL(c.Reg.HL() + 1)
 			}
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, op.R1, tt.args.r1)
 			assert.Equal(t, op.R2, tt.args.r2)
@@ -362,7 +360,7 @@ func TestOpCode_ldrd(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
+		r1     int
 	}
 
 	tests := []struct {
@@ -405,7 +403,7 @@ func TestOpCode_ldrd(t *testing.T) {
 			op := opCodes[tt.args.opcode]
 			want := byte(0x20)
 			c.Bus.WriteByte(c.Reg.PC, want)
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, op.R1, tt.args.r1)
 			assert.Equal(t, want, c.Reg.R[op.R1])
@@ -418,7 +416,7 @@ func TestOpCode_ldra(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
+		r1     int
 	}
 
 	tests := []struct {
@@ -446,7 +444,7 @@ func TestOpCode_ldra(t *testing.T) {
 			c.Bus.WriteByte(addr, want)
 
 			// A = 0x34
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, op.R1, tt.args.r1)
 			assert.Equal(t, want, c.Reg.R[A])
@@ -459,7 +457,7 @@ func TestOpCode_ldra16(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
+		r1     int
 	}
 
 	tests := []struct {
@@ -485,7 +483,7 @@ func TestOpCode_ldra16(t *testing.T) {
 			c.Bus.WriteByte(c.Reg.PC+1, upper)
 			c.Bus.WriteByte(util.Byte2Addr(upper, lower), want)
 
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, op.R1, tt.args.r1)
 			assert.Equal(t, want, c.Reg.R[A])
@@ -498,7 +496,7 @@ func TestOpCode_ldr16d16(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
+		r1     int
 	}
 
 	tests := []struct {
@@ -530,7 +528,7 @@ func TestOpCode_ldr16d16(t *testing.T) {
 			want := byte(0x20)
 			c.Bus.WriteByte(c.Reg.PC, want)
 			c.Bus.WriteByte(c.Reg.PC+1, want+1)
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, op.R1, tt.args.r1)
 			assert.Equal(t, util.Byte2Addr(want+1, want), c.Reg.R16(int(tt.args.r1)))
@@ -543,8 +541,8 @@ func TestOpCode_ldr16r16(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
-		r2     byte
+		r1     int
+		r2     int
 	}
 
 	tests := []struct {
@@ -562,7 +560,7 @@ func TestOpCode_ldr16r16(t *testing.T) {
 			c.regreset()
 			op := opCodes[tt.args.opcode]
 			want := c.Reg.R16(int(tt.args.r2))
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, op.R1, tt.args.r1)
 			assert.Equal(t, op.R2, tt.args.r2)
@@ -576,8 +574,8 @@ func TestOpCode_ldr16r16d(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
-		r2     byte
+		r1     int
+		r2     int
 	}
 
 	tests := []struct {
@@ -604,7 +602,7 @@ func TestOpCode_ldr16r16d(t *testing.T) {
 				want := types.Addr(0x1EE1)
 				c.Reg.setR16(int(tt.args.r2), types.Addr(v2))
 				c.Bus.WriteByte(c.Reg.PC, d)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 
 				assert.Equal(t, want, c.Reg.R16(int(tt.args.r1)))
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
@@ -618,7 +616,7 @@ func TestOpCode_ldr16r16d(t *testing.T) {
 				want := types.Addr(0x2001)
 				c.Reg.setR16(int(tt.args.r2), types.Addr(v2))
 				c.Bus.WriteByte(c.Reg.PC, d)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 
 				assert.Equal(t, want, c.Reg.R16(int(tt.args.r1)))
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
@@ -632,7 +630,7 @@ func TestOpCode_ldr16r16d(t *testing.T) {
 				want := types.Addr(0x0001)
 				c.Reg.setR16(int(tt.args.r2), types.Addr(v2))
 				c.Bus.WriteByte(c.Reg.PC, d)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 
 				assert.Equal(t, want, c.Reg.R16(int(tt.args.r1)))
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
@@ -649,8 +647,8 @@ func TestOpCode_ldmr(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
-		r2     byte
+		r1     int
+		r2     int
 	}
 
 	tests := []struct {
@@ -670,7 +668,7 @@ func TestOpCode_ldmr(t *testing.T) {
 
 			addr := util.Byte2Addr(0xFF, c.Reg.R[tt.args.r1])
 			want := c.Reg.R[tt.args.r2]
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, op.R1, tt.args.r1)
 			assert.Equal(t, op.R2, tt.args.r2)
@@ -684,8 +682,8 @@ func TestOpCode_ldm16r(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
-		r2     byte
+		r1     int
+		r2     int
 	}
 
 	tests := []struct {
@@ -739,7 +737,7 @@ func TestOpCode_ldm16r(t *testing.T) {
 			c.regreset()
 			op := opCodes[tt.args.opcode]
 			want := c.Reg.R[tt.args.r2]
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, op.R1, tt.args.r1)
 			assert.Equal(t, op.R2, tt.args.r2)
@@ -759,7 +757,7 @@ func TestOpCode_ldm16d(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
+		r1     int
 	}
 
 	tests := []struct {
@@ -780,7 +778,7 @@ func TestOpCode_ldm16d(t *testing.T) {
 			want := byte(0x12)
 			c.Bus.WriteByte(c.Reg.PC, 0x12)
 
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, op.R1, tt.args.r1)
 			assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(tt.args.r1))))
@@ -793,7 +791,7 @@ func TestOpCode_ldar(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
+		r1     int
 	}
 
 	tests := []struct {
@@ -815,7 +813,7 @@ func TestOpCode_ldar(t *testing.T) {
 			want := byte(0x01)
 			c.Bus.WriteByte(c.Reg.PC, addr)
 
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, op.R2, tt.args.r1)
 			assert.Equal(t, want, c.Bus.ReadByte(util.Byte2Addr(0xFF, addr)))
@@ -828,7 +826,7 @@ func TestOpCode_lda16r(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
+		r1     int
 	}
 
 	tests := []struct {
@@ -852,7 +850,7 @@ func TestOpCode_lda16r(t *testing.T) {
 			c.Bus.WriteByte(c.Reg.PC, util.ExtractLower(addr))
 			c.Bus.WriteByte(c.Reg.PC+1, util.ExtractUpper(addr))
 
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, op.R2, tt.args.r1)
 			assert.Equal(t, want, c.Bus.ReadByte(addr))
@@ -865,7 +863,7 @@ func TestOpCode_lda16r16(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
+		r1     int
 	}
 
 	tests := []struct {
@@ -889,7 +887,7 @@ func TestOpCode_lda16r16(t *testing.T) {
 			c.Bus.WriteByte(c.Reg.PC, util.ExtractLower(addr))
 			c.Bus.WriteByte(c.Reg.PC+1, util.ExtractUpper(addr))
 
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, op.R2, tt.args.r1)
 			assert.Equal(t, util.ExtractLower(want), c.Bus.ReadByte(addr))
@@ -905,7 +903,7 @@ func TestOpCode_incr(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
+		r1     int
 	}
 
 	tests := []struct {
@@ -929,7 +927,7 @@ func TestOpCode_incr(t *testing.T) {
 			t.Run("when no carry", func(t *testing.T) {
 				c.Reg.R[tt.args.r1] = byte(0x10)
 				want := byte(0x11)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, tt.args.r1, op.R1)
 				assert.Equal(t, want, c.Reg.R[op.R1])
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
@@ -939,7 +937,7 @@ func TestOpCode_incr(t *testing.T) {
 			t.Run("when harf carry", func(t *testing.T) {
 				c.Reg.R[tt.args.r1] = byte(0x1F)
 				want := byte(0x20)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, tt.args.r1, op.R1)
 				assert.Equal(t, want, c.Reg.R[op.R1])
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
@@ -949,7 +947,7 @@ func TestOpCode_incr(t *testing.T) {
 			t.Run("when zero", func(t *testing.T) {
 				c.Reg.R[tt.args.r1] = byte(0xFF)
 				want := byte(0x00)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, tt.args.r1, op.R1)
 				assert.Equal(t, want, c.Reg.R[op.R1])
 				assert.Equal(t, true, c.Reg.isSet(flagZ))
@@ -965,7 +963,7 @@ func TestOpCode_incr16(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
+		r1     int
 	}
 
 	tests := []struct {
@@ -998,7 +996,7 @@ func TestOpCode_incr16(t *testing.T) {
 			c.Reg.setR16(int(op.R1), 0x1234)
 			want := types.Addr(0x1235)
 
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, tt.args.r1, op.R1)
 			assert.Equal(t, want, c.Reg.R16(int(op.R1)))
@@ -1011,7 +1009,7 @@ func TestOpCode_incm16(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
+		r1     int
 	}
 
 	tests := []struct {
@@ -1035,7 +1033,7 @@ func TestOpCode_incm16(t *testing.T) {
 			c.Bus.WriteByte(c.Reg.R16(int(tt.args.r1)), byte(0xFF))
 			want = byte(0x00)
 
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			act = c.Bus.ReadByte(c.Reg.R16(int(op.R1)))
 
@@ -1049,7 +1047,7 @@ func TestOpCode_incm16(t *testing.T) {
 			c.Bus.WriteByte(c.Reg.R16(int(tt.args.r1)), byte(0x00))
 			want = byte(0x01)
 
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			act = c.Bus.ReadByte(c.Reg.R16(int(op.R1)))
 
@@ -1067,7 +1065,7 @@ func TestOpCode_dec(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
+		r1     int
 	}
 
 	tests := []struct {
@@ -1093,7 +1091,7 @@ func TestOpCode_dec(t *testing.T) {
 				c.Reg.R[tt.args.r1] = byte(0x11)
 				c.Bus.WriteByte(c.Reg.R16(HL), byte(0x11))
 				want := byte(0x10)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, tt.args.r1, op.R1)
 				if strings.Contains(op.Mnemonic, "HL") {
 					assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(HL)))
@@ -1108,7 +1106,7 @@ func TestOpCode_dec(t *testing.T) {
 				c.Reg.R[tt.args.r1] = byte(0x10)
 				c.Bus.WriteByte(c.Reg.R16(HL), byte(0x10))
 				want := byte(0x0F)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, tt.args.r1, op.R1)
 				if strings.Contains(op.Mnemonic, "HL") {
 					assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(HL)))
@@ -1123,7 +1121,7 @@ func TestOpCode_dec(t *testing.T) {
 				c.Reg.R[tt.args.r1] = byte(0x01)
 				c.Bus.WriteByte(c.Reg.R16(HL), byte(0x01))
 				want := byte(0x00)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, tt.args.r1, op.R1)
 				if strings.Contains(op.Mnemonic, "HL") {
 					assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(HL)))
@@ -1143,7 +1141,7 @@ func TestOpCode_decr16(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
+		r1     int
 	}
 
 	tests := []struct {
@@ -1176,7 +1174,7 @@ func TestOpCode_decr16(t *testing.T) {
 			c.Reg.setR16(int(op.R1), 0x1234)
 			want := types.Addr(0x1233)
 
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, tt.args.r1, op.R1)
 			assert.Equal(t, want, c.Reg.R16(int(op.R1)))
@@ -1189,8 +1187,8 @@ func TestOpCode_addr(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
-		r2     byte
+		r1     int
+		r2     int
 	}
 
 	tests := []struct {
@@ -1241,7 +1239,7 @@ func TestOpCode_addr(t *testing.T) {
 				}
 				c.Reg.R[tt.args.r1] = 0xE1
 				c.Reg.R[tt.args.r2] = 0x0E
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0xEF), c.Reg.R[A])
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
@@ -1254,7 +1252,7 @@ func TestOpCode_addr(t *testing.T) {
 				}
 				c.Reg.R[tt.args.r1] = 0xE1
 				c.Reg.R[tt.args.r2] = 0x0F
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0xF0), c.Reg.R[A])
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
@@ -1267,7 +1265,7 @@ func TestOpCode_addr(t *testing.T) {
 				}
 				c.Reg.R[tt.args.r1] = 0xE1
 				c.Reg.R[tt.args.r2] = 0x1F
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0x00), c.Reg.R[A])
 				assert.Equal(t, true, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
@@ -1283,8 +1281,8 @@ func TestOpCode_addr16r16(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
-		r2     byte
+		r1     int
+		r2     int
 	}
 
 	tests := []struct {
@@ -1311,7 +1309,7 @@ func TestOpCode_addr16r16(t *testing.T) {
 				}
 				c.Reg.setR16(int(tt.args.r1), 0x00E1)
 				c.Reg.setR16(int(tt.args.r2), 0x000E)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, types.Addr(0x00EF), c.Reg.R16(int(op.R1)))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -1323,7 +1321,7 @@ func TestOpCode_addr16r16(t *testing.T) {
 				}
 				c.Reg.setR16(int(tt.args.r1), 0x0FF1)
 				c.Reg.setR16(int(tt.args.r2), 0x000F)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, types.Addr(0x1000), c.Reg.R16(int(op.R1)))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, true, c.Reg.isSet(flagH))
@@ -1335,7 +1333,7 @@ func TestOpCode_addr16r16(t *testing.T) {
 				}
 				c.Reg.setR16(int(tt.args.r1), 0xFFF1)
 				c.Reg.setR16(int(tt.args.r2), 0x000F)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, types.Addr(0x0000), c.Reg.R16(int(op.R1)))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, true, c.Reg.isSet(flagH))
@@ -1350,8 +1348,8 @@ func TestOpCode_adc(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
-		r2     byte
+		r1     int
+		r2     int
 	}
 
 	tests := []struct {
@@ -1390,7 +1388,7 @@ func TestOpCode_adc(t *testing.T) {
 					// d8
 					c.Bus.WriteByte(c.Reg.PC, 0x0D)
 
-					op.Handler(c, byte(op.R1), byte(op.R2))
+					op.Handler(c, op.R1, op.R2)
 					assert.Equal(t, byte(0xEF), c.Reg.R[A])
 					assert.Equal(t, false, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
@@ -1406,7 +1404,7 @@ func TestOpCode_adc(t *testing.T) {
 					// d8
 					c.Bus.WriteByte(c.Reg.PC, 0x0E)
 
-					op.Handler(c, byte(op.R1), byte(op.R2))
+					op.Handler(c, op.R1, op.R2)
 					assert.Equal(t, byte(0xEF), c.Reg.R[A])
 					assert.Equal(t, false, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
@@ -1424,7 +1422,7 @@ func TestOpCode_adc(t *testing.T) {
 					// d8
 					c.Bus.WriteByte(c.Reg.PC, 0x0F)
 
-					op.Handler(c, byte(op.R1), byte(op.R2))
+					op.Handler(c, op.R1, op.R2)
 					assert.Equal(t, byte(0xF1), c.Reg.R[A])
 					assert.Equal(t, false, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
@@ -1440,7 +1438,7 @@ func TestOpCode_adc(t *testing.T) {
 					// d8
 					c.Bus.WriteByte(c.Reg.PC, 0x0F)
 
-					op.Handler(c, byte(op.R1), byte(op.R2))
+					op.Handler(c, op.R1, op.R2)
 					assert.Equal(t, byte(0xF0), c.Reg.R[A])
 					assert.Equal(t, false, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
@@ -1458,7 +1456,7 @@ func TestOpCode_adc(t *testing.T) {
 					// d8
 					c.Bus.WriteByte(c.Reg.PC, 0x0E)
 
-					op.Handler(c, byte(op.R1), byte(op.R2))
+					op.Handler(c, op.R1, op.R2)
 					assert.Equal(t, byte(0x00), c.Reg.R[A])
 					assert.Equal(t, true, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
@@ -1474,7 +1472,7 @@ func TestOpCode_adc(t *testing.T) {
 					// d8
 					c.Bus.WriteByte(c.Reg.PC, 0x1F)
 
-					op.Handler(c, byte(op.R1), byte(op.R2))
+					op.Handler(c, op.R1, op.R2)
 					assert.Equal(t, byte(0x00), c.Reg.R[A])
 					assert.Equal(t, true, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
@@ -1491,7 +1489,7 @@ func TestOpCode_sub(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
+		r1     int
 	}
 
 	tests := []struct {
@@ -1528,7 +1526,7 @@ func TestOpCode_sub(t *testing.T) {
 				// d8
 				c.Bus.WriteByte(c.Reg.PC, 0x01)
 
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0xE0), c.Reg.R[A])
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, true, c.Reg.isSet(flagN))
@@ -1544,7 +1542,7 @@ func TestOpCode_sub(t *testing.T) {
 				// d8
 				c.Bus.WriteByte(c.Reg.PC, 0x02)
 
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0xDF), c.Reg.R[A])
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, true, c.Reg.isSet(flagN))
@@ -1560,7 +1558,7 @@ func TestOpCode_sub(t *testing.T) {
 				// d8
 				c.Bus.WriteByte(c.Reg.PC, 0xE1)
 
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0x00), c.Reg.R[A])
 				assert.Equal(t, true, c.Reg.isSet(flagZ))
 				assert.Equal(t, true, c.Reg.isSet(flagN))
@@ -1579,7 +1577,7 @@ func TestOpCode_sub(t *testing.T) {
 				// d8
 				c.Bus.WriteByte(c.Reg.PC, 0xE2)
 
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0xFF), c.Reg.R[A])
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, true, c.Reg.isSet(flagN))
@@ -1596,7 +1594,7 @@ func TestOpCode_and(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
+		r1     int
 	}
 
 	tests := []struct {
@@ -1632,7 +1630,7 @@ func TestOpCode_and(t *testing.T) {
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
 				}
 				c.Reg.R[tt.args.r1] = val
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0b00000000), c.Reg.R[A])
 			})
 			t.Run("when equal", func(t *testing.T) {
@@ -1644,7 +1642,7 @@ func TestOpCode_and(t *testing.T) {
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
 				}
 				c.Reg.R[tt.args.r1] = val
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0b11110000), c.Reg.R[A])
 			})
 			t.Run("when other", func(t *testing.T) {
@@ -1656,7 +1654,7 @@ func TestOpCode_and(t *testing.T) {
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
 				}
 				c.Reg.R[tt.args.r1] = val
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0b10100000), c.Reg.R[A])
 			})
 		})
@@ -1669,7 +1667,7 @@ func TestOpCode_or(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
+		r1     int
 	}
 
 	tests := []struct {
@@ -1704,7 +1702,7 @@ func TestOpCode_or(t *testing.T) {
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
 				}
 				c.Reg.R[tt.args.r1] = val
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0b11111111), c.Reg.R[A])
 			})
 			t.Run("when equal", func(t *testing.T) {
@@ -1715,7 +1713,7 @@ func TestOpCode_or(t *testing.T) {
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
 				}
 				c.Reg.R[tt.args.r1] = val
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0b11110000), c.Reg.R[A])
 			})
 			t.Run("when other", func(t *testing.T) {
@@ -1725,7 +1723,7 @@ func TestOpCode_or(t *testing.T) {
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
 				}
 				c.Reg.R[tt.args.r1] = val
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0b11110101), c.Reg.R[A])
 			})
 		})
@@ -1738,7 +1736,7 @@ func TestOpCode_xor(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
+		r1     int
 	}
 
 	tests := []struct {
@@ -1773,7 +1771,7 @@ func TestOpCode_xor(t *testing.T) {
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
 				}
 				c.Reg.R[tt.args.r1] = val
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0b11111111), c.Reg.R[A])
 			})
 			t.Run("when equal", func(t *testing.T) {
@@ -1784,7 +1782,7 @@ func TestOpCode_xor(t *testing.T) {
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
 				}
 				c.Reg.R[tt.args.r1] = val
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0b00000000), c.Reg.R[A])
 			})
 			t.Run("when other", func(t *testing.T) {
@@ -1794,7 +1792,7 @@ func TestOpCode_xor(t *testing.T) {
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
 				}
 				c.Reg.R[tt.args.r1] = val
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0b10100101), c.Reg.R[A])
 			})
 		})
@@ -1806,7 +1804,7 @@ func TestOpCode_cp(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		r1     byte
+		r1     int
 	}
 
 	tests := []struct {
@@ -1845,7 +1843,7 @@ func TestOpCode_cp(t *testing.T) {
 				// d8
 				c.Bus.WriteByte(c.Reg.PC, 0x12)
 
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, true, c.Reg.isSet(flagZ))
 				assert.Equal(t, true, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -1859,7 +1857,7 @@ func TestOpCode_cp(t *testing.T) {
 				// d8
 				c.Bus.WriteByte(c.Reg.PC, 0x13)
 
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, true, c.Reg.isSet(flagN))
 				assert.Equal(t, true, c.Reg.isSet(flagH))
@@ -1873,7 +1871,7 @@ func TestOpCode_cp(t *testing.T) {
 				// d8
 				c.Bus.WriteByte(c.Reg.PC, 0x03)
 
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, true, c.Reg.isSet(flagN))
 				assert.Equal(t, true, c.Reg.isSet(flagH))
@@ -1887,7 +1885,7 @@ func TestOpCode_cp(t *testing.T) {
 				// d8
 				c.Bus.WriteByte(c.Reg.PC, 0x02)
 
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, true, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -1903,7 +1901,7 @@ func TestOpCode_ret(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		flag   byte
+		flag   int
 	}
 
 	tests := []struct {
@@ -1927,7 +1925,7 @@ func TestOpCode_ret(t *testing.T) {
 			// upper
 			c.Bus.WriteByte(c.Reg.SP+1, 0x12)
 
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, types.Addr(0xFFFE), c.Reg.SP)
 			assert.Equal(t, types.Addr(0x1234), c.Reg.PC)
@@ -1940,7 +1938,7 @@ func TestOpCode_retf(t *testing.T) {
 
 	type args struct {
 		opcode byte
-		flag   byte
+		flag   int
 	}
 
 	tests := []struct {
@@ -1968,7 +1966,7 @@ func TestOpCode_retf(t *testing.T) {
 				c.Bus.WriteByte(c.Reg.SP, 0x34)
 				// upper
 				c.Bus.WriteByte(c.Reg.SP+1, 0x12)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				if strings.Contains(op.Mnemonic, "N") {
 					assert.Equal(t, types.Addr(0xFFFE), c.Reg.SP)
 					assert.Equal(t, types.Addr(0x1234), c.Reg.PC)
@@ -1985,7 +1983,7 @@ func TestOpCode_retf(t *testing.T) {
 				c.Bus.WriteByte(c.Reg.SP, 0x34)
 				// upper
 				c.Bus.WriteByte(c.Reg.SP+1, 0x12)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				if strings.Contains(op.Mnemonic, "N") {
 					assert.Equal(t, types.Addr(0xFFFC), c.Reg.SP)
 					assert.Equal(t, types.Addr(0x5678), c.Reg.PC)
@@ -2021,7 +2019,7 @@ func TestOpCode_jpa16(t *testing.T) {
 			want := tt.args.addr
 			c.Bus.WriteByte(c.Reg.PC, 0x34)
 			c.Bus.WriteByte(c.Reg.PC+1, 0x12)
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, want, c.Reg.PC)
 		})
@@ -2069,11 +2067,11 @@ func TestOpCode_jpfa16(t *testing.T) {
 			c.Bus.WriteByte(c.Reg.PC+1, 0x12)
 
 			if tt.args.value == 1 {
-				c.Reg.setFlag(byte(tt.args.flag))
+				c.Reg.setFlag(tt.args.flag)
 			} else {
-				c.Reg.clearFlag(byte(tt.args.flag))
+				c.Reg.clearFlag(tt.args.flag)
 			}
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, want, c.Reg.PC)
 		})
@@ -2121,11 +2119,11 @@ func TestOpCode_jpnfa16(t *testing.T) {
 			c.Bus.WriteByte(c.Reg.PC+1, 0x12)
 
 			if tt.args.value == 1 {
-				c.Reg.setFlag(byte(tt.args.flag))
+				c.Reg.setFlag(tt.args.flag)
 			} else {
-				c.Reg.clearFlag(byte(tt.args.flag))
+				c.Reg.clearFlag(tt.args.flag)
 			}
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, want, c.Reg.PC)
 		})
@@ -2155,7 +2153,7 @@ func TestOpCode_jpm16(t *testing.T) {
 			want := tt.args.addr
 			c.Reg.setR16(tt.args.r16, 0x1234)
 
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, want, c.Reg.PC)
 		})
@@ -2204,11 +2202,11 @@ func TestOpCode_jrnfr8(t *testing.T) {
 			c.Bus.WriteByte(c.Reg.PC, 0x10)
 
 			if tt.args.value == 1 {
-				c.Reg.setFlag(byte(tt.args.flag))
+				c.Reg.setFlag(tt.args.flag)
 			} else {
-				c.Reg.clearFlag(byte(tt.args.flag))
+				c.Reg.clearFlag(tt.args.flag)
 			}
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, want, c.Reg.PC)
 		})
@@ -2255,7 +2253,7 @@ func TestOpCode_push(t *testing.T) {
 			lower := util.ExtractLower(c.Reg.R16(int(op.R1)))
 			before_sp := c.Reg.SP
 
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, before_sp-2, c.Reg.SP)
 			assert.Equal(t, lower, c.Bus.ReadByte((c.Reg.SP)))
@@ -2302,7 +2300,7 @@ func TestOpCode_pop(t *testing.T) {
 			c.push(0x12) // upper
 			c.push(0x34) // lower
 
-			op.Handler(c, byte(op.R1), byte(op.R2))
+			op.Handler(c, op.R1, op.R2)
 
 			if op.R1 != AF {
 				assert.Equal(t, types.Addr(0x1234), c.Reg.R16(int(op.R1)))
@@ -2366,13 +2364,13 @@ func TestOpCode_rlc(t *testing.T) {
 			c.regreset()
 			op := cbOpCodes[tt.args.opcode]
 
-			assert.Equal(t, uint8(tt.args.r1), op.R1)
+			assert.Equal(t, tt.args.r1, op.R1)
 
 			t.Run("when bit7 = 1", func(t *testing.T) {
 				before := byte(0b10010000)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2390,7 +2388,7 @@ func TestOpCode_rlc(t *testing.T) {
 				before := byte(0b00000000)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, true, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2408,7 +2406,7 @@ func TestOpCode_rlc(t *testing.T) {
 				before := byte(0b00100000)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2477,13 +2475,13 @@ func TestOpCode_rrc(t *testing.T) {
 			c.regreset()
 			op := cbOpCodes[tt.args.opcode]
 
-			assert.Equal(t, uint8(tt.args.r1), op.R1)
+			assert.Equal(t, tt.args.r1, op.R1)
 
 			t.Run("when bit0 = 1", func(t *testing.T) {
 				before := byte(0b10010001)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2501,7 +2499,7 @@ func TestOpCode_rrc(t *testing.T) {
 				before := byte(0b00000000)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, true, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2519,7 +2517,7 @@ func TestOpCode_rrc(t *testing.T) {
 				before := byte(0b00100000)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2588,7 +2586,7 @@ func TestOpCode_rl(t *testing.T) {
 			c.regreset()
 			op := cbOpCodes[tt.args.opcode]
 
-			assert.Equal(t, uint8(tt.args.r1), op.R1)
+			assert.Equal(t, tt.args.r1, op.R1)
 
 			t.Run("when bit7 = 1", func(t *testing.T) {
 				before := byte(0b10010000)
@@ -2596,7 +2594,7 @@ func TestOpCode_rl(t *testing.T) {
 					c.Reg.R[tt.args.r1] = before
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
 					c.Reg.setFlag(flagC)
-					op.Handler(c, byte(op.R1), byte(op.R2))
+					op.Handler(c, op.R1, op.R2)
 					assert.Equal(t, false, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
 					assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2614,7 +2612,7 @@ func TestOpCode_rl(t *testing.T) {
 					c.Reg.R[tt.args.r1] = before
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
 					c.Reg.clearFlag(flagC)
-					op.Handler(c, byte(op.R1), byte(op.R2))
+					op.Handler(c, op.R1, op.R2)
 					assert.Equal(t, false, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
 					assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2635,7 +2633,7 @@ func TestOpCode_rl(t *testing.T) {
 					c.Reg.R[tt.args.r1] = before
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
 					c.Reg.setFlag(flagC)
-					op.Handler(c, byte(op.R1), byte(op.R2))
+					op.Handler(c, op.R1, op.R2)
 					assert.Equal(t, false, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
 					assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2653,7 +2651,7 @@ func TestOpCode_rl(t *testing.T) {
 					c.Reg.R[tt.args.r1] = before
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
 					c.Reg.clearFlag(flagC)
-					op.Handler(c, byte(op.R1), byte(op.R2))
+					op.Handler(c, op.R1, op.R2)
 					assert.Equal(t, true, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
 					assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2674,7 +2672,7 @@ func TestOpCode_rl(t *testing.T) {
 					c.Reg.R[tt.args.r1] = before
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
 					c.Reg.setFlag(flagC)
-					op.Handler(c, byte(op.R1), byte(op.R2))
+					op.Handler(c, op.R1, op.R2)
 					assert.Equal(t, false, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
 					assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2692,7 +2690,7 @@ func TestOpCode_rl(t *testing.T) {
 					c.Reg.R[tt.args.r1] = before
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
 					c.Reg.clearFlag(flagC)
-					op.Handler(c, byte(op.R1), byte(op.R2))
+					op.Handler(c, op.R1, op.R2)
 					assert.Equal(t, false, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
 					assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2762,7 +2760,7 @@ func TestOpCode_rr(t *testing.T) {
 			c.regreset()
 			op := cbOpCodes[tt.args.opcode]
 
-			assert.Equal(t, uint8(tt.args.r1), op.R1)
+			assert.Equal(t, tt.args.r1, op.R1)
 
 			t.Run("when bit0 = 1", func(t *testing.T) {
 				before := byte(0b10010001)
@@ -2770,7 +2768,7 @@ func TestOpCode_rr(t *testing.T) {
 					c.Reg.R[tt.args.r1] = before
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
 					c.Reg.setFlag(flagC)
-					op.Handler(c, byte(op.R1), byte(op.R2))
+					op.Handler(c, op.R1, op.R2)
 					assert.Equal(t, false, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
 					assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2788,7 +2786,7 @@ func TestOpCode_rr(t *testing.T) {
 					c.Reg.R[tt.args.r1] = before
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
 					c.Reg.clearFlag(flagC)
-					op.Handler(c, byte(op.R1), byte(op.R2))
+					op.Handler(c, op.R1, op.R2)
 					assert.Equal(t, false, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
 					assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2809,7 +2807,7 @@ func TestOpCode_rr(t *testing.T) {
 					c.Reg.R[tt.args.r1] = before
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
 					c.Reg.setFlag(flagC)
-					op.Handler(c, byte(op.R1), byte(op.R2))
+					op.Handler(c, op.R1, op.R2)
 					assert.Equal(t, false, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
 					assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2827,7 +2825,7 @@ func TestOpCode_rr(t *testing.T) {
 					c.Reg.R[tt.args.r1] = before
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
 					c.Reg.clearFlag(flagC)
-					op.Handler(c, byte(op.R1), byte(op.R2))
+					op.Handler(c, op.R1, op.R2)
 					assert.Equal(t, true, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
 					assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2848,7 +2846,7 @@ func TestOpCode_rr(t *testing.T) {
 					c.Reg.R[tt.args.r1] = before
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
 					c.Reg.setFlag(flagC)
-					op.Handler(c, byte(op.R1), byte(op.R2))
+					op.Handler(c, op.R1, op.R2)
 					assert.Equal(t, false, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
 					assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2866,7 +2864,7 @@ func TestOpCode_rr(t *testing.T) {
 					c.Reg.R[tt.args.r1] = before
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
 					c.Reg.clearFlag(flagC)
-					op.Handler(c, byte(op.R1), byte(op.R2))
+					op.Handler(c, op.R1, op.R2)
 					assert.Equal(t, false, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
 					assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2912,13 +2910,13 @@ func TestOpCode_sla(t *testing.T) {
 			c.regreset()
 			op := cbOpCodes[tt.args.opcode]
 
-			assert.Equal(t, uint8(tt.args.r1), op.R1)
+			assert.Equal(t, tt.args.r1, op.R1)
 
 			t.Run("when bit7 = 1", func(t *testing.T) {
 				before := byte(0b10010000)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2936,7 +2934,7 @@ func TestOpCode_sla(t *testing.T) {
 				before := byte(0b00000000)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, true, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -2954,7 +2952,7 @@ func TestOpCode_sla(t *testing.T) {
 				before := byte(0b00100000)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -3023,13 +3021,13 @@ func TestOpCode_sra(t *testing.T) {
 			c.regreset()
 			op := cbOpCodes[tt.args.opcode]
 
-			assert.Equal(t, uint8(tt.args.r1), op.R1)
+			assert.Equal(t, tt.args.r1, op.R1)
 
 			t.Run("when bit0 = 1", func(t *testing.T) {
 				before := byte(0b10010001)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -3047,7 +3045,7 @@ func TestOpCode_sra(t *testing.T) {
 				before := byte(0b00000000)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, true, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -3065,7 +3063,7 @@ func TestOpCode_sra(t *testing.T) {
 				before := byte(0b00100000)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -3134,13 +3132,13 @@ func TestOpCode_swap(t *testing.T) {
 			c.regreset()
 			op := cbOpCodes[tt.args.opcode]
 
-			assert.Equal(t, uint8(tt.args.r1), op.R1)
+			assert.Equal(t, tt.args.r1, op.R1)
 
 			t.Run("when != 0 ", func(t *testing.T) {
 				before := byte(0b10010100)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -3158,7 +3156,7 @@ func TestOpCode_swap(t *testing.T) {
 				before := byte(0b00000000)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, true, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -3227,13 +3225,13 @@ func TestOpCode_srl(t *testing.T) {
 			c.regreset()
 			op := cbOpCodes[tt.args.opcode]
 
-			assert.Equal(t, uint8(tt.args.r1), op.R1)
+			assert.Equal(t, tt.args.r1, op.R1)
 
 			t.Run("when bit0 = 1", func(t *testing.T) {
 				before := byte(0b10010001)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -3251,7 +3249,7 @@ func TestOpCode_srl(t *testing.T) {
 				before := byte(0b00000000)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, true, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -3269,7 +3267,7 @@ func TestOpCode_srl(t *testing.T) {
 				before := byte(0b00100000)
 				c.Reg.R[tt.args.r1] = before
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -3371,8 +3369,8 @@ func TestOpCode_bit(t *testing.T) {
 			c.regreset()
 			op := cbOpCodes[tt.args.opcode]
 
-			assert.Equal(t, uint8(tt.args.bit), op.R1)
-			assert.Equal(t, uint8(tt.args.r1), op.R2)
+			assert.Equal(t, tt.args.bit, op.R1)
+			assert.Equal(t, tt.args.r1, op.R2)
 
 			t.Run("when bitN = 1", func(t *testing.T) {
 				before := byte(0b00000000)
@@ -3380,7 +3378,7 @@ func TestOpCode_bit(t *testing.T) {
 				c.Reg.R[tt.args.r1] = before
 				// HL
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, true, c.Reg.isSet(flagH))
@@ -3390,7 +3388,7 @@ func TestOpCode_bit(t *testing.T) {
 				c.Reg.R[tt.args.r1] = before
 				// HL
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, true, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, true, c.Reg.isSet(flagH))
@@ -3483,8 +3481,8 @@ func TestOpCode_res(t *testing.T) {
 			c.regreset()
 			op := cbOpCodes[tt.args.opcode]
 
-			assert.Equal(t, uint8(tt.args.bit), op.R1)
-			assert.Equal(t, uint8(tt.args.r1), op.R2)
+			assert.Equal(t, tt.args.bit, op.R1)
+			assert.Equal(t, tt.args.r1, op.R2)
 
 			t.Run("when bitN = 1", func(t *testing.T) {
 				before := byte(0b00000000)
@@ -3492,7 +3490,7 @@ func TestOpCode_res(t *testing.T) {
 				c.Reg.R[tt.args.r1] = before
 				// HL
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				if !strings.Contains(op.Mnemonic, "HL") {
 					assert.Equal(t, byte(0), util.Bit(c.Reg.R[op.R2], int(op.R1)))
 				} else {
@@ -3504,7 +3502,7 @@ func TestOpCode_res(t *testing.T) {
 				c.Reg.R[tt.args.r1] = before
 				// HL
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				if !strings.Contains(op.Mnemonic, "HL") {
 					assert.Equal(t, byte(0), util.Bit(c.Reg.R[op.R2], int(op.R1)))
 				} else {
@@ -3599,8 +3597,8 @@ func TestOpCode_set(t *testing.T) {
 			c.regreset()
 			op := cbOpCodes[tt.args.opcode]
 
-			assert.Equal(t, uint8(tt.args.bit), op.R1)
-			assert.Equal(t, uint8(tt.args.r1), op.R2)
+			assert.Equal(t, tt.args.bit, op.R1)
+			assert.Equal(t, tt.args.r1, op.R2)
 
 			t.Run("when bitN = 1", func(t *testing.T) {
 				before := byte(0b00000000)
@@ -3608,7 +3606,7 @@ func TestOpCode_set(t *testing.T) {
 				c.Reg.R[tt.args.r1] = before
 				// HL
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				if !strings.Contains(op.Mnemonic, "HL") {
 					assert.Equal(t, byte(1), util.Bit(c.Reg.R[op.R2], int(op.R1)))
 				} else {
@@ -3620,7 +3618,7 @@ func TestOpCode_set(t *testing.T) {
 				c.Reg.R[tt.args.r1] = before
 				// HL
 				c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
-				op.Handler(c, byte(op.R1), byte(op.R2))
+				op.Handler(c, op.R1, op.R2)
 				if !strings.Contains(op.Mnemonic, "HL") {
 					assert.Equal(t, byte(1), util.Bit(c.Reg.R[op.R2], int(op.R1)))
 				} else {

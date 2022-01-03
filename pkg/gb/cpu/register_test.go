@@ -169,20 +169,20 @@ func TestRegister_Flags(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var got, want bool
-			r.setFlag(byte(tt.args.flag))
-			got = r.isSet(byte(tt.args.flag))
+			r.setFlag(tt.args.flag)
+			got = r.isSet(tt.args.flag)
 			want = true
 			if got != want {
 				t.Errorf("name = %s, actual = %v, want %v", tt.name, got, want)
 			}
-			r.clearFlag(byte(tt.args.flag))
-			got = r.isSet(byte(tt.args.flag))
+			r.clearFlag(tt.args.flag)
+			got = r.isSet(tt.args.flag)
 			want = false
 			if got != want {
 				t.Errorf("name = %s, actual = %v, want %v", tt.name, got, want)
 			}
-			r.setFlag(byte(tt.args.flag))
-			got = r.isSet(byte(tt.args.flag))
+			r.setFlag(tt.args.flag)
+			got = r.isSet(tt.args.flag)
 			want = true
 			if got != want {
 				t.Errorf("name = %s, actual = %v, want %v", tt.name, got, want)
