@@ -1074,34 +1074,13 @@ func TestOpCode_decr(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "DEC B",
-			args: args{0x05, B},
-		},
-		{
-			name: "DEC C",
-			args: args{0x0D, C},
-		},
-		{
-			name: "DEC D",
-			args: args{0x15, D},
-		},
-		{
-			name: "DEC E",
-			args: args{0x1D, E},
-		},
-		{
-			name: "DEC H",
-			args: args{0x25, H},
-		},
-		{
-			name: "DEC L",
-			args: args{0x2D, L},
-		},
-		{
-			name: "DEC A",
-			args: args{0x3D, A},
-		},
+		{name: "DEC B", args: args{0x05, B}},
+		{name: "DEC C", args: args{0x0D, C}},
+		{name: "DEC D", args: args{0x15, D}},
+		{name: "DEC E", args: args{0x1D, E}},
+		{name: "DEC H", args: args{0x25, H}},
+		{name: "DEC L", args: args{0x2D, L}},
+		{name: "DEC A", args: args{0x3D, A}},
 	}
 
 	for _, tt := range tests {
@@ -1109,30 +1088,36 @@ func TestOpCode_decr(t *testing.T) {
 			c.regreset()
 			op := opCodes[tt.args.opcode]
 
-			var want byte
-			// Not Min
-			c.Reg.R[tt.args.r1] = byte(0x01)
-			want = byte(0x00)
-
-			op.Handler(c, byte(op.R1), byte(op.R2))
-
-			assert.Equal(t, tt.args.r1, op.R1)
-			assert.Equal(t, want, c.Reg.R[op.R1])
-			assert.Equal(t, true, c.Reg.isSet(flagZ))
-			assert.Equal(t, true, c.Reg.isSet(flagN))
-			assert.Equal(t, false, c.Reg.isSet(flagH))
-
-			// Min
-			c.Reg.R[tt.args.r1] = byte(0x00)
-			want = byte(0xFF)
-
-			op.Handler(c, byte(op.R1), byte(op.R2))
-
-			assert.Equal(t, tt.args.r1, op.R1)
-			assert.Equal(t, want, c.Reg.R[op.R1])
-			assert.Equal(t, false, c.Reg.isSet(flagZ))
-			assert.Equal(t, true, c.Reg.isSet(flagN))
-			assert.Equal(t, true, c.Reg.isSet(flagH))
+			t.Run("when no carry", func(t *testing.T) {
+				c.Reg.R[tt.args.r1] = byte(0x11)
+				want := byte(0x10)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, tt.args.r1, op.R1)
+				assert.Equal(t, want, c.Reg.R[op.R1])
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
+				assert.Equal(t, true, c.Reg.isSet(flagN))
+				assert.Equal(t, false, c.Reg.isSet(flagH))
+			})
+			t.Run("when harf carry", func(t *testing.T) {
+				c.Reg.R[tt.args.r1] = byte(0x10)
+				want := byte(0x0F)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, tt.args.r1, op.R1)
+				assert.Equal(t, want, c.Reg.R[op.R1])
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
+				assert.Equal(t, true, c.Reg.isSet(flagN))
+				assert.Equal(t, true, c.Reg.isSet(flagH))
+			})
+			t.Run("when zero", func(t *testing.T) {
+				c.Reg.R[tt.args.r1] = byte(0x01)
+				want := byte(0x00)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				assert.Equal(t, tt.args.r1, op.R1)
+				assert.Equal(t, want, c.Reg.R[op.R1])
+				assert.Equal(t, true, c.Reg.isSet(flagZ))
+				assert.Equal(t, true, c.Reg.isSet(flagN))
+				assert.Equal(t, false, c.Reg.isSet(flagH))
+			})
 		})
 	}
 }
