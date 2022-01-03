@@ -56,174 +56,48 @@ func TestOpCode_ldrr(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "LD B, B",
-			args: args{0x40, B, B},
-		},
-		{
-			name: "LD B, C",
-			args: args{0x41, B, C},
-		},
-		{
-			name: "LD B, D",
-			args: args{0x42, B, D},
-		},
-		{
-			name: "LD B, E",
-			args: args{0x43, B, E},
-		},
-		{
-			name: "LD B, H",
-			args: args{0x44, B, H},
-		},
-		{
-			name: "LD B, L",
-			args: args{0x45, B, L},
-		},
-		{
-			name: "LD B, A",
-			args: args{0x47, B, A},
-		},
-		{
-			name: "LD C, B",
-			args: args{0x48, C, B},
-		},
-		{
-			name: "LD C, C",
-			args: args{0x49, C, C},
-		},
-		{
-			name: "LD C, D",
-			args: args{0x4A, C, D},
-		},
-		{
-			name: "LD C, E",
-			args: args{0x4B, C, E},
-		},
-		{
-			name: "LD C, H",
-			args: args{0x4C, C, H},
-		},
-		{
-			name: "LD C, L",
-			args: args{0x4D, C, L},
-		},
-		{
-			name: "LD C, A",
-			args: args{0x4F, C, A},
-		},
-		{
-			name: "LD D, B",
-			args: args{0x50, D, B},
-		},
-		{
-			name: "LD D, C",
-			args: args{0x51, D, C},
-		},
-		{
-			name: "LD D, D",
-			args: args{0x52, D, D},
-		},
-		{
-			name: "LD D, E",
-			args: args{0x53, D, E},
-		},
-		{
-			name: "LD D, H",
-			args: args{0x54, D, H},
-		},
-		{
-			name: "LD D, L",
-			args: args{0x55, D, L},
-		},
-		{
-			name: "LD D, A",
-			args: args{0x57, D, A},
-		},
-		{
-			name: "LD E, B",
-			args: args{0x58, E, B},
-		},
-		{
-			name: "LD E, C",
-			args: args{0x59, E, C},
-		},
-		{
-			name: "LD E, D",
-			args: args{0x5A, E, D},
-		},
-		{
-			name: "LD E, E",
-			args: args{0x5B, E, E},
-		},
-		{
-			name: "LD E, H",
-			args: args{0x5C, E, H},
-		},
-		{
-			name: "LD E, L",
-			args: args{0x5D, E, L},
-		},
-		{
-			name: "LD E, A",
-			args: args{0x5F, E, A},
-		},
-		{
-			name: "LD H, B",
-			args: args{0x60, H, B},
-		},
-		{
-			name: "LD H, C",
-			args: args{0x61, H, C},
-		},
-		{
-			name: "LD H, D",
-			args: args{0x62, H, D},
-		},
-		{
-			name: "LD H, E",
-			args: args{0x63, H, E},
-		},
-		{
-			name: "LD H, H",
-			args: args{0x64, H, H},
-		},
-		{
-			name: "LD H, L",
-			args: args{0x65, H, L},
-		},
-		{
-			name: "LD H, A",
-			args: args{0x67, H, A},
-		},
-		{
-			name: "LD L, B",
-			args: args{0x68, L, B},
-		},
-		{
-			name: "LD L, C",
-			args: args{0x69, L, C},
-		},
-		{
-			name: "LD L, D",
-			args: args{0x6A, L, D},
-		},
-		{
-			name: "LD L, E",
-			args: args{0x6B, L, E},
-		},
-		{
-			name: "LD L, H",
-			args: args{0x6C, L, H},
-		},
-		{
-			name: "LD L, L",
-			args: args{0x6D, L, L},
-		},
-		{
-			name: "LD L, A",
-			args: args{0x6F, L, A},
-		},
+		{name: "LD B, B", args: args{0x40, B, B}},
+		{name: "LD B, C", args: args{0x41, B, C}},
+		{name: "LD B, D", args: args{0x42, B, D}},
+		{name: "LD B, E", args: args{0x43, B, E}},
+		{name: "LD B, H", args: args{0x44, B, H}},
+		{name: "LD B, L", args: args{0x45, B, L}},
+		{name: "LD B, A", args: args{0x47, B, A}},
+		{name: "LD C, B", args: args{0x48, C, B}},
+		{name: "LD C, C", args: args{0x49, C, C}},
+		{name: "LD C, D", args: args{0x4A, C, D}},
+		{name: "LD C, E", args: args{0x4B, C, E}},
+		{name: "LD C, H", args: args{0x4C, C, H}},
+		{name: "LD C, L", args: args{0x4D, C, L}},
+		{name: "LD C, A", args: args{0x4F, C, A}},
+		{name: "LD D, B", args: args{0x50, D, B}},
+		{name: "LD D, C", args: args{0x51, D, C}},
+		{name: "LD D, D", args: args{0x52, D, D}},
+		{name: "LD D, E", args: args{0x53, D, E}},
+		{name: "LD D, H", args: args{0x54, D, H}},
+		{name: "LD D, L", args: args{0x55, D, L}},
+		{name: "LD D, A", args: args{0x57, D, A}},
+		{name: "LD E, B", args: args{0x58, E, B}},
+		{name: "LD E, C", args: args{0x59, E, C}},
+		{name: "LD E, D", args: args{0x5A, E, D}},
+		{name: "LD E, E", args: args{0x5B, E, E}},
+		{name: "LD E, H", args: args{0x5C, E, H}},
+		{name: "LD E, L", args: args{0x5D, E, L}},
+		{name: "LD E, A", args: args{0x5F, E, A}},
+		{name: "LD H, B", args: args{0x60, H, B}},
+		{name: "LD H, C", args: args{0x61, H, C}},
+		{name: "LD H, D", args: args{0x62, H, D}},
+		{name: "LD H, E", args: args{0x63, H, E}},
+		{name: "LD H, H", args: args{0x64, H, H}},
+		{name: "LD H, L", args: args{0x65, H, L}},
+		{name: "LD H, A", args: args{0x67, H, A}},
+		{name: "LD L, B", args: args{0x68, L, B}},
+		{name: "LD L, C", args: args{0x69, L, C}},
+		{name: "LD L, D", args: args{0x6A, L, D}},
+		{name: "LD L, E", args: args{0x6B, L, E}},
+		{name: "LD L, H", args: args{0x6C, L, H}},
+		{name: "LD L, L", args: args{0x6D, L, L}},
+		{name: "LD L, A", args: args{0x6F, L, A}},
 	}
 
 	for _, tt := range tests {
@@ -254,10 +128,7 @@ func TestOpCode_ldrm(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "LD A,(C)",
-			args: args{0xF2, A, C},
-		},
+		{name: "LD A,(C)", args: args{0xF2, A, C}},
 	}
 
 	for _, tt := range tests {
@@ -289,50 +160,17 @@ func TestOpCode_ldrm16(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "LD A, (BC)",
-			args: args{0x0A, A, BC},
-		},
-		{
-			name: "LD A, (DE)",
-			args: args{0x1A, A, DE},
-		},
-		{
-			name: "LD A, (HL+)",
-			args: args{0x2A, A, HLI},
-		},
-		{
-			name: "LD A, (HL-)",
-			args: args{0x3A, A, HLD},
-		},
-		{
-			name: "LD B, (HL)",
-			args: args{0x46, B, HL},
-		},
-		{
-			name: "LD C, (HL)",
-			args: args{0x4E, C, HL},
-		},
-		{
-			name: "LD D, (HL)",
-			args: args{0x56, D, HL},
-		},
-		{
-			name: "LD E, (HL)",
-			args: args{0x5E, E, HL},
-		},
-		{
-			name: "LD H, (HL)",
-			args: args{0x66, H, HL},
-		},
-		{
-			name: "LD L, (HL)",
-			args: args{0x6E, L, HL},
-		},
-		{
-			name: "LD A, (HL)",
-			args: args{0x7E, A, HL},
-		},
+		{name: "LD A, (BC)", args: args{0x0A, A, BC}},
+		{name: "LD A, (DE)", args: args{0x1A, A, DE}},
+		{name: "LD A, (HL+)", args: args{0x2A, A, HLI}},
+		{name: "LD A, (HL-)", args: args{0x3A, A, HLD}},
+		{name: "LD B, (HL)", args: args{0x46, B, HL}},
+		{name: "LD C, (HL)", args: args{0x4E, C, HL}},
+		{name: "LD D, (HL)", args: args{0x56, D, HL}},
+		{name: "LD E, (HL)", args: args{0x5E, E, HL}},
+		{name: "LD H, (HL)", args: args{0x66, H, HL}},
+		{name: "LD L, (HL)", args: args{0x6E, L, HL}},
+		{name: "LD A, (HL)", args: args{0x7E, A, HL}},
 	}
 
 	for _, tt := range tests {
@@ -367,34 +205,13 @@ func TestOpCode_ldrd(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "LD B, d8",
-			args: args{0x06, B},
-		},
-		{
-			name: "LD C, d8",
-			args: args{0x0E, C},
-		},
-		{
-			name: "LD D, d8",
-			args: args{0x16, D},
-		},
-		{
-			name: "LD E, d8",
-			args: args{0x1E, E},
-		},
-		{
-			name: "LD H, d8",
-			args: args{0x26, H},
-		},
-		{
-			name: "LD L, d8",
-			args: args{0x2E, L},
-		},
-		{
-			name: "LD A, d8",
-			args: args{0x3E, A},
-		},
+		{name: "LD B, d8", args: args{0x06, B}},
+		{name: "LD C, d8", args: args{0x0E, C}},
+		{name: "LD D, d8", args: args{0x16, D}},
+		{name: "LD E, d8", args: args{0x1E, E}},
+		{name: "LD H, d8", args: args{0x26, H}},
+		{name: "LD L, d8", args: args{0x2E, L}},
+		{name: "LD A, d8", args: args{0x3E, A}},
 	}
 
 	for _, tt := range tests {
@@ -423,10 +240,7 @@ func TestOpCode_ldra(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "LDH A,(a8)",
-			args: args{0xF0, A},
-		},
+		{name: "LDH A,(a8)", args: args{0xF0, A}},
 	}
 
 	for _, tt := range tests {
@@ -464,10 +278,7 @@ func TestOpCode_ldra16(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "LD A,(a16)",
-			args: args{0xFA, A},
-		},
+		{name: "LD A,(a16)", args: args{0xFA, A}},
 	}
 
 	for _, tt := range tests {
@@ -503,22 +314,10 @@ func TestOpCode_ldr16d16(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "LD BC, d16",
-			args: args{0x01, BC},
-		},
-		{
-			name: "LD DE, d16",
-			args: args{0x11, DE},
-		},
-		{
-			name: "LD HL, d16",
-			args: args{0x21, HL},
-		},
-		{
-			name: "LD SP, d16",
-			args: args{0x31, SP},
-		},
+		{name: "LD BC, d16", args: args{0x01, BC}},
+		{name: "LD DE, d16", args: args{0x11, DE}},
+		{name: "LD HL, d16", args: args{0x21, HL}},
+		{name: "LD SP, d16", args: args{0x31, SP}},
 	}
 
 	for _, tt := range tests {
@@ -549,10 +348,7 @@ func TestOpCode_ldr16r16(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "LD SP,HL",
-			args: args{0xF9, SP, HL},
-		},
+		{name: "LD SP,HL", args: args{0xF9, SP, HL}},
 	}
 
 	for _, tt := range tests {
@@ -582,10 +378,7 @@ func TestOpCode_ldr16r16d(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "LD HL,SP+r8",
-			args: args{0xF8, HL, SP},
-		},
+		{name: "LD HL,SP+r8", args: args{0xF8, HL, SP}},
 	}
 
 	for _, tt := range tests {
@@ -655,10 +448,7 @@ func TestOpCode_ldmr(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "LD (C), A",
-			args: args{0xE2, C, A},
-		},
+		{name: "LD (C), A", args: args{0xE2, C, A}},
 	}
 
 	for _, tt := range tests {
@@ -690,46 +480,16 @@ func TestOpCode_ldm16r(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "LD (BC), A",
-			args: args{0x02, BC, A},
-		},
-		{
-			name: "LD (DE), A",
-			args: args{0x12, DE, A},
-		},
-		{
-			name: "LD (HL+), A",
-			args: args{0x22, HLI, A},
-		},
-		{
-			name: "LD (HL-), A",
-			args: args{0x32, HLD, A},
-		},
-		{
-			name: "LD (HL), B",
-			args: args{0x70, HL, B},
-		},
-		{
-			name: "LD (HL), C",
-			args: args{0x71, HL, C},
-		},
-		{
-			name: "LD (HL), D",
-			args: args{0x72, HL, D},
-		},
-		{
-			name: "LD (HL), E",
-			args: args{0x73, HL, E},
-		},
-		{
-			name: "LD (HL), H",
-			args: args{0x74, HL, H},
-		},
-		{
-			name: "LD (HL), L",
-			args: args{0x75, HL, L},
-		},
+		{name: "LD (BC), A", args: args{0x02, BC, A}},
+		{name: "LD (DE), A", args: args{0x12, DE, A}},
+		{name: "LD (HL+), A", args: args{0x22, HLI, A}},
+		{name: "LD (HL-), A", args: args{0x32, HLD, A}},
+		{name: "LD (HL), B", args: args{0x70, HL, B}},
+		{name: "LD (HL), C", args: args{0x71, HL, C}},
+		{name: "LD (HL), D", args: args{0x72, HL, D}},
+		{name: "LD (HL), E", args: args{0x73, HL, E}},
+		{name: "LD (HL), H", args: args{0x74, HL, H}},
+		{name: "LD (HL), L", args: args{0x75, HL, L}},
 	}
 
 	for _, tt := range tests {
@@ -764,10 +524,7 @@ func TestOpCode_ldm16d(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "LD (HL),d8",
-			args: args{0x36, HL},
-		},
+		{name: "LD (HL),d8", args: args{0x36, HL}},
 	}
 
 	for _, tt := range tests {
@@ -798,10 +555,7 @@ func TestOpCode_ldar(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "LDH (a8),A",
-			args: args{0xE0, A},
-		},
+		{name: "LDH (a8),A", args: args{0xE0, A}},
 	}
 
 	for _, tt := range tests {
@@ -833,10 +587,7 @@ func TestOpCode_lda16r(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "LD (a16),A",
-			args: args{0xEA, A},
-		},
+		{name: "LD (a16),A", args: args{0xEA, A}},
 	}
 
 	for _, tt := range tests {
@@ -870,10 +621,7 @@ func TestOpCode_lda16r16(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "LD (a16),SP",
-			args: args{0x08, SP},
-		},
+		{name: "LD (a16),SP", args: args{0x08, SP}},
 	}
 
 	for _, tt := range tests {
@@ -970,22 +718,10 @@ func TestOpCode_incr16(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "INC BC",
-			args: args{0x03, BC},
-		},
-		{
-			name: "INC DE",
-			args: args{0x13, DE},
-		},
-		{
-			name: "INC HL",
-			args: args{0x23, HL},
-		},
-		{
-			name: "INC SP",
-			args: args{0x33, SP},
-		},
+		{name: "INC BC", args: args{0x03, BC}},
+		{name: "INC DE", args: args{0x13, DE}},
+		{name: "INC HL", args: args{0x23, HL}},
+		{name: "INC SP", args: args{0x33, SP}},
 	}
 
 	for _, tt := range tests {
@@ -1016,10 +752,7 @@ func TestOpCode_incm16(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "INC (HL)",
-			args: args{0x34, HL},
-		},
+		{name: "INC (HL)", args: args{0x34, HL}},
 	}
 
 	for _, tt := range tests {
@@ -1148,22 +881,10 @@ func TestOpCode_decr16(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "DEC BC",
-			args: args{0x0B, BC},
-		},
-		{
-			name: "DEC DE",
-			args: args{0x1B, DE},
-		},
-		{
-			name: "DEC HL",
-			args: args{0x2B, HL},
-		},
-		{
-			name: "DEC SP",
-			args: args{0x3B, SP},
-		},
+		{name: "DEC BC", args: args{0x0B, BC}},
+		{name: "DEC DE", args: args{0x1B, DE}},
+		{name: "DEC HL", args: args{0x2B, HL}},
+		{name: "DEC SP", args: args{0x3B, SP}},
 	}
 
 	for _, tt := range tests {
@@ -1195,34 +916,13 @@ func TestOpCode_addr(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "ADD A, B",
-			args: args{0x80, A, B},
-		},
-		{
-			name: "ADD A, C",
-			args: args{0x81, A, C},
-		},
-		{
-			name: "ADD A, D",
-			args: args{0x82, A, D},
-		},
-		{
-			name: "ADD A, E",
-			args: args{0x83, A, E},
-		},
-		{
-			name: "ADD A, H",
-			args: args{0x84, A, H},
-		},
-		{
-			name: "ADD A, L",
-			args: args{0x85, A, L},
-		},
-		{
-			name: "ADD A, A",
-			args: args{0x87, A, A},
-		},
+		{name: "ADD A, B", args: args{0x80, A, B}},
+		{name: "ADD A, C", args: args{0x81, A, C}},
+		{name: "ADD A, D", args: args{0x82, A, D}},
+		{name: "ADD A, E", args: args{0x83, A, E}},
+		{name: "ADD A, H", args: args{0x84, A, H}},
+		{name: "ADD A, L", args: args{0x85, A, L}},
+		{name: "ADD A, A", args: args{0x87, A, A}},
 	}
 
 	for _, tt := range tests {
@@ -2040,22 +1740,10 @@ func TestOpCode_jpfa16(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "JP Z, a16 when zero",
-			args: args{0xCA, flagZ, 0, 0x0100},
-		},
-		{
-			name: "JP Z, a16 when non zero",
-			args: args{0xCA, flagZ, 1, 0x1234},
-		},
-		{
-			name: "JP C, a16 when zero",
-			args: args{0xDA, flagC, 0, 0x0100},
-		},
-		{
-			name: "JP C, a16 when non zero",
-			args: args{0xDA, flagC, 1, 0x1234},
-		},
+		{name: "JP Z, a16 when zero", args: args{0xCA, flagZ, 0, 0x0100}},
+		{name: "JP Z, a16 when non zero", args: args{0xCA, flagZ, 1, 0x1234}},
+		{name: "JP C, a16 when zero", args: args{0xDA, flagC, 0, 0x0100}},
+		{name: "JP C, a16 when non zero", args: args{0xDA, flagC, 1, 0x1234}},
 	}
 
 	for _, tt := range tests {
@@ -2092,22 +1780,10 @@ func TestOpCode_jpnfa16(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "JP NZ, a16 when zero",
-			args: args{0xC2, flagZ, 0, 0x1234},
-		},
-		{
-			name: "JP NZ, a16 when non zero",
-			args: args{0xC2, flagZ, 1, 0x0100},
-		},
-		{
-			name: "JP NC, a16 when zero",
-			args: args{0xD2, flagC, 0, 0x1234},
-		},
-		{
-			name: "JP NC, a16 when non zero",
-			args: args{0xD2, flagC, 1, 0x0100},
-		},
+		{name: "JP NZ, a16 when zero", args: args{0xC2, flagZ, 0, 0x1234}},
+		{name: "JP NZ, a16 when non zero", args: args{0xC2, flagZ, 1, 0x0100}},
+		{name: "JP NC, a16 when zero", args: args{0xD2, flagC, 0, 0x1234}},
+		{name: "JP NC, a16 when non zero", args: args{0xD2, flagC, 1, 0x0100}},
 	}
 
 	for _, tt := range tests {
@@ -2176,22 +1852,10 @@ func TestOpCode_jrnfr8(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "JR NZ, r8 when zero",
-			args: args{0x20, flagZ, 0, 0x0111},
-		},
-		{
-			name: "JR NZ, r8 when not zero",
-			args: args{0x20, flagZ, 1, c.Reg.PC + 1},
-		},
-		{
-			name: "JR NC, r8 when zero",
-			args: args{0x30, flagC, 0, 0x0111},
-		},
-		{
-			name: "JR NC, r8 when not zero",
-			args: args{0x30, flagC, 1, c.Reg.PC + 1},
-		},
+		{name: "JR NZ, r8 when zero", args: args{0x20, flagZ, 0, 0x0111}},
+		{name: "JR NZ, r8 when not zero", args: args{0x20, flagZ, 1, c.Reg.PC + 1}},
+		{name: "JR NC, r8 when zero", args: args{0x30, flagC, 0, 0x0111}},
+		{name: "JR NC, r8 when not zero", args: args{0x30, flagC, 1, c.Reg.PC + 1}},
 	}
 
 	for _, tt := range tests {
@@ -2226,22 +1890,10 @@ func TestOpCode_push(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "PUSH BC",
-			args: args{0xC5, BC},
-		},
-		{
-			name: "PUSH DE",
-			args: args{0xD5, DE},
-		},
-		{
-			name: "PUSH HL",
-			args: args{0xE5, HL},
-		},
-		{
-			name: "PUSH AF",
-			args: args{0xF5, AF},
-		},
+		{name: "PUSH BC", args: args{0xC5, BC}},
+		{name: "PUSH DE", args: args{0xD5, DE}},
+		{name: "PUSH HL", args: args{0xE5, HL}},
+		{name: "PUSH AF", args: args{0xF5, AF}},
 	}
 
 	for _, tt := range tests {
@@ -2274,22 +1926,10 @@ func TestOpCode_pop(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "POP BC",
-			args: args{0xC1, BC},
-		},
-		{
-			name: "POP DE",
-			args: args{0xD1, DE},
-		},
-		{
-			name: "POP HL",
-			args: args{0xE1, HL},
-		},
-		{
-			name: "POP AF",
-			args: args{0xF1, AF},
-		},
+		{name: "POP BC", args: args{0xC1, BC}},
+		{name: "POP DE", args: args{0xD1, DE}},
+		{name: "POP HL", args: args{0xE1, HL}},
+		{name: "POP AF", args: args{0xF1, AF}},
 	}
 
 	for _, tt := range tests {
@@ -2325,38 +1965,14 @@ func TestOpCode_rlc(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "RLC B",
-			args: args{0x00, B},
-		},
-		{
-			name: "RLC C",
-			args: args{0x01, C},
-		},
-		{
-			name: "RLC D",
-			args: args{0x02, D},
-		},
-		{
-			name: "RLC E",
-			args: args{0x03, E},
-		},
-		{
-			name: "RLC H",
-			args: args{0x04, H},
-		},
-		{
-			name: "RLC L",
-			args: args{0x05, L},
-		},
-		{
-			name: "RLC HL",
-			args: args{0x06, HL},
-		},
-		{
-			name: "RLC A",
-			args: args{0x07, A},
-		},
+		{name: "RLC B", args: args{0x00, B}},
+		{name: "RLC C", args: args{0x01, C}},
+		{name: "RLC D", args: args{0x02, D}},
+		{name: "RLC E", args: args{0x03, E}},
+		{name: "RLC H", args: args{0x04, H}},
+		{name: "RLC L", args: args{0x05, L}},
+		{name: "RLC HL", args: args{0x06, HL}},
+		{name: "RLC A", args: args{0x07, A}},
 	}
 
 	for _, tt := range tests {
@@ -2436,38 +2052,14 @@ func TestOpCode_rrc(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "RRC B",
-			args: args{0x08, B},
-		},
-		{
-			name: "RRC C",
-			args: args{0x09, C},
-		},
-		{
-			name: "RRC D",
-			args: args{0x0A, D},
-		},
-		{
-			name: "RRC E",
-			args: args{0x0B, E},
-		},
-		{
-			name: "RRC H",
-			args: args{0x0C, H},
-		},
-		{
-			name: "RRC L",
-			args: args{0x0D, L},
-		},
-		{
-			name: "RRC HL",
-			args: args{0x0E, HL},
-		},
-		{
-			name: "RRC A",
-			args: args{0x0F, A},
-		},
+		{name: "RRC B", args: args{0x08, B}},
+		{name: "RRC C", args: args{0x09, C}},
+		{name: "RRC D", args: args{0x0A, D}},
+		{name: "RRC E", args: args{0x0B, E}},
+		{name: "RRC H", args: args{0x0C, H}},
+		{name: "RRC L", args: args{0x0D, L}},
+		{name: "RRC HL", args: args{0x0E, HL}},
+		{name: "RRC A", args: args{0x0F, A}},
 	}
 
 	for _, tt := range tests {
@@ -2547,38 +2139,14 @@ func TestOpCode_rl(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "RL B",
-			args: args{0x10, B},
-		},
-		{
-			name: "RL C",
-			args: args{0x11, C},
-		},
-		{
-			name: "RL D",
-			args: args{0x12, D},
-		},
-		{
-			name: "RL E",
-			args: args{0x13, E},
-		},
-		{
-			name: "RL H",
-			args: args{0x14, H},
-		},
-		{
-			name: "RL L",
-			args: args{0x15, L},
-		},
-		{
-			name: "RL HL",
-			args: args{0x16, HL},
-		},
-		{
-			name: "RL A",
-			args: args{0x17, A},
-		},
+		{name: "RL B", args: args{0x10, B}},
+		{name: "RL C", args: args{0x11, C}},
+		{name: "RL D", args: args{0x12, D}},
+		{name: "RL E", args: args{0x13, E}},
+		{name: "RL H", args: args{0x14, H}},
+		{name: "RL L", args: args{0x15, L}},
+		{name: "RL HL", args: args{0x16, HL}},
+		{name: "RL A", args: args{0x17, A}},
 	}
 
 	for _, tt := range tests {
@@ -2721,38 +2289,14 @@ func TestOpCode_rr(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "RR B",
-			args: args{0x18, B},
-		},
-		{
-			name: "RR C",
-			args: args{0x19, C},
-		},
-		{
-			name: "RR D",
-			args: args{0x1A, D},
-		},
-		{
-			name: "RR E",
-			args: args{0x1B, E},
-		},
-		{
-			name: "RR H",
-			args: args{0x1C, H},
-		},
-		{
-			name: "RR L",
-			args: args{0x1D, L},
-		},
-		{
-			name: "RR HL",
-			args: args{0x1E, HL},
-		},
-		{
-			name: "RR A",
-			args: args{0x1F, A},
-		},
+		{name: "RR B", args: args{0x18, B}},
+		{name: "RR C", args: args{0x19, C}},
+		{name: "RR D", args: args{0x1A, D}},
+		{name: "RR E", args: args{0x1B, E}},
+		{name: "RR H", args: args{0x1C, H}},
+		{name: "RR L", args: args{0x1D, L}},
+		{name: "RR HL", args: args{0x1E, HL}},
+		{name: "RR A", args: args{0x1F, A}},
 	}
 
 	for _, tt := range tests {
@@ -2982,38 +2526,14 @@ func TestOpCode_sra(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "SRA B",
-			args: args{0x28, B},
-		},
-		{
-			name: "SRA C",
-			args: args{0x29, C},
-		},
-		{
-			name: "SRA D",
-			args: args{0x2A, D},
-		},
-		{
-			name: "SRA E",
-			args: args{0x2B, E},
-		},
-		{
-			name: "SRA H",
-			args: args{0x2C, H},
-		},
-		{
-			name: "SRA L",
-			args: args{0x2D, L},
-		},
-		{
-			name: "SRA HL",
-			args: args{0x2E, HL},
-		},
-		{
-			name: "SRA A",
-			args: args{0x2F, A},
-		},
+		{name: "SRA B", args: args{0x28, B}},
+		{name: "SRA C", args: args{0x29, C}},
+		{name: "SRA D", args: args{0x2A, D}},
+		{name: "SRA E", args: args{0x2B, E}},
+		{name: "SRA H", args: args{0x2C, H}},
+		{name: "SRA L", args: args{0x2D, L}},
+		{name: "SRA HL", args: args{0x2E, HL}},
+		{name: "SRA A", args: args{0x2F, A}},
 	}
 
 	for _, tt := range tests {
@@ -3093,38 +2613,14 @@ func TestOpCode_swap(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "SWAP B",
-			args: args{0x30, B},
-		},
-		{
-			name: "SWAP C",
-			args: args{0x31, C},
-		},
-		{
-			name: "SWAP D",
-			args: args{0x32, D},
-		},
-		{
-			name: "SWAP E",
-			args: args{0x33, E},
-		},
-		{
-			name: "SWAP H",
-			args: args{0x34, H},
-		},
-		{
-			name: "SWAP L",
-			args: args{0x35, L},
-		},
-		{
-			name: "SWAP HL",
-			args: args{0x36, HL},
-		},
-		{
-			name: "SWAP A",
-			args: args{0x37, A},
-		},
+		{name: "SWAP B", args: args{0x30, B}},
+		{name: "SWAP C", args: args{0x31, C}},
+		{name: "SWAP D", args: args{0x32, D}},
+		{name: "SWAP E", args: args{0x33, E}},
+		{name: "SWAP H", args: args{0x34, H}},
+		{name: "SWAP L", args: args{0x35, L}},
+		{name: "SWAP HL", args: args{0x36, HL}},
+		{name: "SWAP A", args: args{0x37, A}},
 	}
 
 	for _, tt := range tests {
@@ -3186,38 +2682,14 @@ func TestOpCode_srl(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "SRL B",
-			args: args{0x38, B},
-		},
-		{
-			name: "SRL C",
-			args: args{0x39, C},
-		},
-		{
-			name: "SRL D",
-			args: args{0x3A, D},
-		},
-		{
-			name: "SRL E",
-			args: args{0x3B, E},
-		},
-		{
-			name: "SRL H",
-			args: args{0x3C, H},
-		},
-		{
-			name: "SRL L",
-			args: args{0x3D, L},
-		},
-		{
-			name: "SRL HL",
-			args: args{0x3E, HL},
-		},
-		{
-			name: "SRL A",
-			args: args{0x3F, A},
-		},
+		{name: "SRL B", args: args{0x38, B}},
+		{name: "SRL C", args: args{0x39, C}},
+		{name: "SRL D", args: args{0x3A, D}},
+		{name: "SRL E", args: args{0x3B, E}},
+		{name: "SRL H", args: args{0x3C, H}},
+		{name: "SRL L", args: args{0x3D, L}},
+		{name: "SRL HL", args: args{0x3E, HL}},
+		{name: "SRL A", args: args{0x3F, A}},
 	}
 
 	for _, tt := range tests {
