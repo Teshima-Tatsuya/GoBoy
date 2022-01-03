@@ -293,10 +293,10 @@ func nop(c *CPU, _ int, _ int) {}
 
 // func ldr(r, m, m16, d, a, a16)
 
-// LD R1, R2
-// Write R2 into R1
-func ldrr(c *CPU, R1 int, R2 int) {
-	c.Reg.R[R1] = c.Reg.R[R2]
+// LD r1,r2
+// Put value r2 into r1
+func ldrr(c *CPU, r1 int, r2 int) {
+	c.Reg.R[r1] = c.Reg.R[r2]
 }
 
 // LD r1, (r2)

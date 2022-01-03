@@ -189,7 +189,7 @@ func TestOpCode_ldrm16(t *testing.T) {
 
 			assert.Equal(t, tt.args.r1, op.R1)
 			assert.Equal(t, tt.args.r2, op.R2)
-			assert.Equal(t, want, c.Reg.R[tt.args.r1])
+			assert.Equal(t, want, c.Reg.R[op.R1])
 		})
 	}
 }
@@ -261,7 +261,7 @@ func TestOpCode_ldra(t *testing.T) {
 			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, tt.args.r1, op.R1)
-			assert.Equal(t, want, c.Reg.R[A])
+			assert.Equal(t, want, c.Reg.R[op.R1])
 		})
 	}
 }
@@ -330,7 +330,7 @@ func TestOpCode_ldr16d16(t *testing.T) {
 			op.Handler(c, op.R1, op.R2)
 
 			assert.Equal(t, tt.args.r1, op.R1)
-			assert.Equal(t, util.Byte2Addr(want+1, want), c.Reg.R16(tt.args.r1))
+			assert.Equal(t, util.Byte2Addr(want+1, want), c.Reg.R16(op.R1))
 		})
 	}
 }
@@ -360,7 +360,7 @@ func TestOpCode_ldr16r16(t *testing.T) {
 
 			assert.Equal(t, tt.args.r1, op.R1)
 			assert.Equal(t, tt.args.r2, op.R2)
-			assert.Equal(t, want, c.Reg.R16(tt.args.r1))
+			assert.Equal(t, want, c.Reg.R16(op.R1))
 		})
 	}
 }
@@ -903,7 +903,7 @@ func TestOpCode_decr16(t *testing.T) {
 	}
 }
 
-func TestOpCode_addr(t *testing.T) {
+func TestOpCode_add(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -922,7 +922,9 @@ func TestOpCode_addr(t *testing.T) {
 		{name: "ADD A, E", args: args{0x83, A, E}},
 		{name: "ADD A, H", args: args{0x84, A, H}},
 		{name: "ADD A, L", args: args{0x85, A, L}},
+		{name: "ADD A, HL", args: args{0x86, A, HL}},
 		{name: "ADD A, A", args: args{0x87, A, A}},
+		{name: "ADD A, d8", args: args{0xC6, A, 0}},
 	}
 
 	for _, tt := range tests {
@@ -932,13 +934,20 @@ func TestOpCode_addr(t *testing.T) {
 
 			assert.Equal(t, tt.args.r1, op.R1)
 			assert.Equal(t, tt.args.r2, op.R2)
+			if strings.Contains(op.Mnemonic, "A, A") {
+				t.Skip()
+			}
 
 			t.Run("when no carry", func(t *testing.T) {
-				if tt.args.r2 == A {
-					t.Skip()
-				}
 				c.Reg.R[tt.args.r1] = 0xE1
-				c.Reg.R[tt.args.r2] = 0x0E
+				setVal := byte(0x0E)
+				if strings.Contains(op.Mnemonic, "HL") {
+					c.Bus.WriteByte(c.Reg.R16(HL), setVal)
+				} else if strings.Contains(op.Mnemonic, "d8") {
+					c.Bus.WriteByte(c.Reg.PC, setVal)
+				} else {
+					c.Reg.R[tt.args.r2] = setVal
+				}
 				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0xEF), c.Reg.R[A])
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
@@ -947,11 +956,15 @@ func TestOpCode_addr(t *testing.T) {
 				assert.Equal(t, false, c.Reg.isSet(flagC))
 			})
 			t.Run("when Harf carry", func(t *testing.T) {
-				if tt.args.r2 == A {
-					t.Skip()
-				}
 				c.Reg.R[tt.args.r1] = 0xE1
-				c.Reg.R[tt.args.r2] = 0x0F
+				setVal := byte(0x0F)
+				if strings.Contains(op.Mnemonic, "HL") {
+					c.Bus.WriteByte(c.Reg.R16(HL), setVal)
+				} else if strings.Contains(op.Mnemonic, "d8") {
+					c.Bus.WriteByte(c.Reg.PC, setVal)
+				} else {
+					c.Reg.R[tt.args.r2] = setVal
+				}
 				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0xF0), c.Reg.R[A])
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
@@ -960,11 +973,15 @@ func TestOpCode_addr(t *testing.T) {
 				assert.Equal(t, false, c.Reg.isSet(flagC))
 			})
 			t.Run("when carry and zero", func(t *testing.T) {
-				if tt.args.r2 == A {
-					t.Skip()
-				}
 				c.Reg.R[tt.args.r1] = 0xE1
-				c.Reg.R[tt.args.r2] = 0x1F
+				setVal := byte(0x1F)
+				if strings.Contains(op.Mnemonic, "HL") {
+					c.Bus.WriteByte(c.Reg.R16(HL), setVal)
+				} else if strings.Contains(op.Mnemonic, "d8") {
+					c.Bus.WriteByte(c.Reg.PC, setVal)
+				} else {
+					c.Reg.R[tt.args.r2] = setVal
+				}
 				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0x00), c.Reg.R[A])
 				assert.Equal(t, true, c.Reg.isSet(flagZ))
