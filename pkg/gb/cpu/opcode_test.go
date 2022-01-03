@@ -1742,42 +1742,15 @@ func TestOpCode_or(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "OR B",
-			args: args{0xB0, B},
-		},
-		{
-			name: "OR C",
-			args: args{0xB1, C},
-		},
-		{
-			name: "OR D",
-			args: args{0xB2, D},
-		},
-		{
-			name: "OR E",
-			args: args{0xB3, E},
-		},
-		{
-			name: "OR H",
-			args: args{0xB4, H},
-		},
-		{
-			name: "OR L",
-			args: args{0xB5, L},
-		},
-		{
-			name: "OR (HL)",
-			args: args{0xB6, HL},
-		},
-		{
-			name: "OR A",
-			args: args{0xB7, A},
-		},
-		{
-			name: "OR d8",
-			args: args{0xF6, 0},
-		},
+		{name: "OR B", args: args{0xB0, B}},
+		{name: "OR C", args: args{0xB1, C}},
+		{name: "OR D", args: args{0xB2, D}},
+		{name: "OR E", args: args{0xB3, E}},
+		{name: "OR H", args: args{0xB4, H}},
+		{name: "OR L", args: args{0xB5, L}},
+		{name: "OR (HL)", args: args{0xB6, HL}},
+		{name: "OR A", args: args{0xB7, A}},
+		{name: "OR d8", args: args{0xF6, 0}},
 	}
 
 	for _, tt := range tests {
