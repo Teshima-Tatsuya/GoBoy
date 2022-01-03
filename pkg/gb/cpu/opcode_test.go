@@ -1291,22 +1291,10 @@ func TestOpCode_addr16r16(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "ADD HL,BC",
-			args: args{0x09, HL, BC},
-		},
-		{
-			name: "ADD HL,DE",
-			args: args{0x19, HL, DE},
-		},
-		{
-			name: "ADD HL,HL",
-			args: args{0x29, HL, HL},
-		},
-		{
-			name: "ADD HL,SP",
-			args: args{0x39, HL, SP},
-		},
+		{name: "ADD HL,BC", args: args{0x09, HL, BC}},
+		{name: "ADD HL,DE", args: args{0x19, HL, DE}},
+		{name: "ADD HL,HL", args: args{0x29, HL, HL}},
+		{name: "ADD HL,SP", args: args{0x39, HL, SP}},
 	}
 
 	for _, tt := range tests {
@@ -1348,7 +1336,7 @@ func TestOpCode_addr16r16(t *testing.T) {
 				c.Reg.setR16(int(tt.args.r1), 0xFFF1)
 				c.Reg.setR16(int(tt.args.r2), 0x000F)
 				op.Handler(c, byte(op.R1), byte(op.R2))
-				assert.Equal(t, types.Addr(0x00), c.Reg.R16(int(op.R1)))
+				assert.Equal(t, types.Addr(0x0000), c.Reg.R16(int(op.R1)))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, true, c.Reg.isSet(flagH))
 				assert.Equal(t, true, c.Reg.isSet(flagC))
@@ -1370,42 +1358,15 @@ func TestOpCode_adc(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "ADC A, B",
-			args: args{0x88, A, B},
-		},
-		{
-			name: "ADC A, C",
-			args: args{0x89, A, C},
-		},
-		{
-			name: "ADC A, D",
-			args: args{0x8A, A, D},
-		},
-		{
-			name: "ADC A, E",
-			args: args{0x8B, A, E},
-		},
-		{
-			name: "ADC A, H",
-			args: args{0x8C, A, H},
-		},
-		{
-			name: "ADC A, L",
-			args: args{0x8D, A, L},
-		},
-		{
-			name: "ADC A,(HL)",
-			args: args{0x8E, A, HL},
-		},
-		{
-			name: "ADC A, A",
-			args: args{0x8F, A, A},
-		},
-		{
-			name: "ADC A,d8",
-			args: args{0x8F, A, 0},
-		},
+		{name: "ADC A, B", args: args{0x88, A, B}},
+		{name: "ADC A, C", args: args{0x89, A, C}},
+		{name: "ADC A, D", args: args{0x8A, A, D}},
+		{name: "ADC A, E", args: args{0x8B, A, E}},
+		{name: "ADC A, H", args: args{0x8C, A, H}},
+		{name: "ADC A, L", args: args{0x8D, A, L}},
+		{name: "ADC A,(HL)", args: args{0x8E, A, HL}},
+		{name: "ADC A, A", args: args{0x8F, A, A}},
+		{name: "ADC A,d8", args: args{0x8F, A, 0}},
 	}
 
 	for _, tt := range tests {
@@ -1420,7 +1381,7 @@ func TestOpCode_adc(t *testing.T) {
 				t.Skip()
 			}
 			t.Run("when no carry", func(t *testing.T) {
-				t.Run("when and carry = 1", func(t *testing.T) {
+				t.Run("and carry = 1", func(t *testing.T) {
 					c.Reg.R[tt.args.r1] = 0xE1
 					c.Reg.R[tt.args.r2] = 0x0D
 					c.Reg.setFlag(flagC)
@@ -1436,7 +1397,7 @@ func TestOpCode_adc(t *testing.T) {
 					assert.Equal(t, false, c.Reg.isSet(flagH))
 					assert.Equal(t, false, c.Reg.isSet(flagC))
 				})
-				t.Run("when and carry = 0", func(t *testing.T) {
+				t.Run("and carry = 0", func(t *testing.T) {
 					c.Reg.R[tt.args.r1] = 0xE1
 					c.Reg.R[tt.args.r2] = 0x0E
 					c.Reg.clearFlag(flagC)
@@ -1454,7 +1415,7 @@ func TestOpCode_adc(t *testing.T) {
 				})
 			})
 			t.Run("when Harf carry", func(t *testing.T) {
-				t.Run("when and carry = 1", func(t *testing.T) {
+				t.Run("and carry = 1", func(t *testing.T) {
 					c.Reg.R[tt.args.r1] = 0xE1
 					c.Reg.R[tt.args.r2] = 0x0F
 					c.Reg.setFlag(flagC)
@@ -1470,7 +1431,7 @@ func TestOpCode_adc(t *testing.T) {
 					assert.Equal(t, true, c.Reg.isSet(flagH))
 					assert.Equal(t, false, c.Reg.isSet(flagC))
 				})
-				t.Run("when and carry = 0", func(t *testing.T) {
+				t.Run("and carry = 0", func(t *testing.T) {
 					c.Reg.R[tt.args.r1] = 0xE1
 					c.Reg.R[tt.args.r2] = 0x0F
 					c.Reg.clearFlag(flagC)
@@ -1488,21 +1449,21 @@ func TestOpCode_adc(t *testing.T) {
 				})
 			})
 			t.Run("when carry and zero", func(t *testing.T) {
-				t.Run("when and carry = 1", func(t *testing.T) {
-					c.Reg.R[tt.args.r1] = 0xE1
-					c.Reg.R[tt.args.r2] = 0x0F
+				t.Run("and carry = 1", func(t *testing.T) {
+					c.Reg.R[tt.args.r1] = 0xF1
+					c.Reg.R[tt.args.r2] = 0x0E
 					c.Reg.setFlag(flagC)
 					// (HL)
-					c.Bus.WriteByte(c.Reg.R16(HL), 0x0F)
+					c.Bus.WriteByte(c.Reg.R16(HL), 0x0E)
 					// d8
-					c.Bus.WriteByte(c.Reg.PC, 0x0F)
+					c.Bus.WriteByte(c.Reg.PC, 0x0E)
 
 					op.Handler(c, byte(op.R1), byte(op.R2))
-					assert.Equal(t, byte(0xF1), c.Reg.R[A])
-					assert.Equal(t, false, c.Reg.isSet(flagZ))
+					assert.Equal(t, byte(0x00), c.Reg.R[A])
+					assert.Equal(t, true, c.Reg.isSet(flagZ))
 					assert.Equal(t, false, c.Reg.isSet(flagN))
 					assert.Equal(t, true, c.Reg.isSet(flagH))
-					assert.Equal(t, false, c.Reg.isSet(flagC))
+					assert.Equal(t, true, c.Reg.isSet(flagC))
 				})
 				t.Run("when and carry = 0", func(t *testing.T) {
 					c.Reg.R[tt.args.r1] = 0xE1
@@ -1537,42 +1498,15 @@ func TestOpCode_sub(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "SUB B",
-			args: args{0x90, B},
-		},
-		{
-			name: "SUB C",
-			args: args{0x91, C},
-		},
-		{
-			name: "SUB D",
-			args: args{0x92, D},
-		},
-		{
-			name: "SUB E",
-			args: args{0x93, E},
-		},
-		{
-			name: "SUB H",
-			args: args{0x94, H},
-		},
-		{
-			name: "SUB L",
-			args: args{0x95, L},
-		},
-		{
-			name: "SUB (HL)",
-			args: args{0x96, HL},
-		},
-		{
-			name: "SUB A",
-			args: args{0x97, A},
-		},
-		{
-			name: "SUB d8",
-			args: args{0xD6, 0},
-		},
+		{name: "SUB B", args: args{0x90, B}},
+		{name: "SUB C", args: args{0x91, C}},
+		{name: "SUB D", args: args{0x92, D}},
+		{name: "SUB E", args: args{0x93, E}},
+		{name: "SUB H", args: args{0x94, H}},
+		{name: "SUB L", args: args{0x95, L}},
+		{name: "SUB (HL)", args: args{0x96, HL}},
+		{name: "SUB A", args: args{0x97, A}},
+		{name: "SUB d8", args: args{0xD6, 0}},
 	}
 
 	for _, tt := range tests {
@@ -1811,42 +1745,15 @@ func TestOpCode_xor(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "XOR B",
-			args: args{0xA8, B},
-		},
-		{
-			name: "XOR C",
-			args: args{0xA9, C},
-		},
-		{
-			name: "XOR D",
-			args: args{0xAA, D},
-		},
-		{
-			name: "XOR E",
-			args: args{0xAB, E},
-		},
-		{
-			name: "XOR H",
-			args: args{0xAC, H},
-		},
-		{
-			name: "XOR L",
-			args: args{0xAD, L},
-		},
-		{
-			name: "XOR (HL)",
-			args: args{0xAE, HL},
-		},
-		{
-			name: "XOR A",
-			args: args{0xAF, A},
-		},
-		{
-			name: "XOR d8",
-			args: args{0xEE, 0},
-		},
+		{name: "XOR B", args: args{0xA8, B}},
+		{name: "XOR C", args: args{0xA9, C}},
+		{name: "XOR D", args: args{0xAA, D}},
+		{name: "XOR E", args: args{0xAB, E}},
+		{name: "XOR H", args: args{0xAC, H}},
+		{name: "XOR L", args: args{0xAD, L}},
+		{name: "XOR (HL)", args: args{0xAE, HL}},
+		{name: "XOR A", args: args{0xAF, A}},
+		{name: "XOR d8", args: args{0xEE, 0}},
 	}
 
 	for _, tt := range tests {
@@ -1906,42 +1813,15 @@ func TestOpCode_cp(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "CP B",
-			args: args{0xB8, B},
-		},
-		{
-			name: "CP C",
-			args: args{0xB9, C},
-		},
-		{
-			name: "CP D",
-			args: args{0xBA, D},
-		},
-		{
-			name: "CP E",
-			args: args{0xBB, E},
-		},
-		{
-			name: "CP H",
-			args: args{0xBC, H},
-		},
-		{
-			name: "CP L",
-			args: args{0xBD, L},
-		},
-		{
-			name: "CP (HL)",
-			args: args{0xBE, HL},
-		},
-		{
-			name: "CP A",
-			args: args{0xBF, A},
-		},
-		{
-			name: "CP d8",
-			args: args{0xFE, 0},
-		},
+		{name: "CP B", args: args{0xB8, B}},
+		{name: "CP C", args: args{0xB9, C}},
+		{name: "CP D", args: args{0xBA, D}},
+		{name: "CP E", args: args{0xBB, E}},
+		{name: "CP H", args: args{0xBC, H}},
+		{name: "CP L", args: args{0xBD, L}},
+		{name: "CP (HL)", args: args{0xBE, HL}},
+		{name: "CP A", args: args{0xBF, A}},
+		{name: "CP d8", args: args{0xFE, 0}},
 	}
 
 	for _, tt := range tests {
@@ -2012,6 +1892,107 @@ func TestOpCode_cp(t *testing.T) {
 				assert.Equal(t, true, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
 				assert.Equal(t, false, c.Reg.isSet(flagC))
+			})
+		})
+	}
+}
+
+// -----ret----
+func TestOpCode_ret(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		flag   byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{name: "RET", args: args{0xC9, 0}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			assert.Equal(t, tt.args.flag, op.R1)
+
+			c.Reg.SP = 0xFFFC
+
+			// lower
+			c.Bus.WriteByte(c.Reg.SP, 0x34)
+			// upper
+			c.Bus.WriteByte(c.Reg.SP+1, 0x12)
+
+			op.Handler(c, byte(op.R1), byte(op.R2))
+
+			assert.Equal(t, types.Addr(0xFFFE), c.Reg.SP)
+			assert.Equal(t, types.Addr(0x1234), c.Reg.PC)
+		})
+	}
+}
+
+func TestOpCode_retf(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		flag   byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{name: "RET NZ", args: args{0xC0, flagZ}},
+		{name: "RET Z", args: args{0xC8, flagZ}},
+		{name: "RET NC", args: args{0xD0, flagC}},
+		{name: "RET Z", args: args{0xD8, flagC}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			assert.Equal(t, tt.args.flag, op.R1)
+
+			t.Run("when flag = 0", func(t *testing.T) {
+				c.Reg.PC = 0x5678
+				c.Reg.SP = 0xFFFC
+				c.Reg.clearFlag(tt.args.flag)
+				// lower
+				c.Bus.WriteByte(c.Reg.SP, 0x34)
+				// upper
+				c.Bus.WriteByte(c.Reg.SP+1, 0x12)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				if strings.Contains(op.Mnemonic, "N") {
+					assert.Equal(t, types.Addr(0xFFFE), c.Reg.SP)
+					assert.Equal(t, types.Addr(0x1234), c.Reg.PC)
+				} else {
+					assert.Equal(t, types.Addr(0xFFFC), c.Reg.SP)
+					assert.Equal(t, types.Addr(0x5678), c.Reg.PC)
+				}
+			})
+			t.Run("when flag = 1", func(t *testing.T) {
+				c.Reg.PC = 0x5678
+				c.Reg.SP = 0xFFFC
+				c.Reg.setFlag(tt.args.flag)
+				// lower
+				c.Bus.WriteByte(c.Reg.SP, 0x34)
+				// upper
+				c.Bus.WriteByte(c.Reg.SP+1, 0x12)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+				if strings.Contains(op.Mnemonic, "N") {
+					assert.Equal(t, types.Addr(0xFFFC), c.Reg.SP)
+					assert.Equal(t, types.Addr(0x5678), c.Reg.PC)
+				} else {
+					assert.Equal(t, types.Addr(0xFFFE), c.Reg.SP)
+					assert.Equal(t, types.Addr(0x1234), c.Reg.PC)
+				}
 			})
 		})
 	}
