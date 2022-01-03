@@ -318,7 +318,7 @@ func ldrd(c *CPU, r8 byte, _ byte) {
 
 // LDH R,(a8)
 func ldra(c *CPU, R1 byte, _ byte) {
-	c.Reg.R[R1] = c.Bus.ReadByte(types.Addr(0xff00 | types.Addr(c.fetch())))
+	c.Reg.R[R1] = c.Bus.ReadByte(util.Byte2Addr(byte(0xFF), c.fetch()))
 }
 
 func ldra16(c *CPU, R1 byte, _ byte) {
@@ -381,13 +381,15 @@ func ldm16d(c *CPU, R1 byte, R2 byte) {
 // func lda(r)
 
 func ldar(c *CPU, _ byte, R2 byte) {
-	c.Bus.WriteByte(util.Byte2Addr(0xFF, c.fetch()), c.Reg.R[R2])
+	addr := util.Byte2Addr(0xFF, c.fetch())
+	c.Bus.WriteByte(addr, c.Reg.R[R2])
 }
 
 // func lda16(r, r16)
 
 func lda16r(c *CPU, _ byte, R2 byte) {
-	c.Bus.WriteByte(c.fetch16(), c.Reg.R[R2])
+	addr := c.fetch16()
+	c.Bus.WriteByte(addr, c.Reg.R[R2])
 }
 
 func lda16r16(c *CPU, _ byte, R2 byte) {
@@ -395,18 +397,6 @@ func lda16r16(c *CPU, _ byte, R2 byte) {
 	r16 := c.Reg.R16(int(R2))
 	c.Bus.WriteByte(addr, util.ExtractLower(r16))
 	c.Bus.WriteByte(addr+1, util.ExtractUpper(r16))
-}
-
-func retf(c *CPU, R1 byte, _ byte) {
-	if c.Reg.isSet(R1) {
-		c.popPC()
-	}
-}
-
-func retnf(c *CPU, R1 byte, _ byte) {
-	if !c.Reg.isSet(R1) {
-		c.popPC()
-	}
 }
 
 // arithmetic
@@ -747,6 +737,18 @@ func subd8(c *CPU, _ byte, _ byte) {
 // ret
 func ret(c *CPU, _ byte, _ byte) {
 	c.popPC()
+}
+
+func retf(c *CPU, R1 byte, _ byte) {
+	if c.Reg.isSet(R1) {
+		c.popPC()
+	}
+}
+
+func retnf(c *CPU, R1 byte, _ byte) {
+	if !c.Reg.isSet(R1) {
+		c.popPC()
+	}
 }
 
 func reti(c *CPU, _ byte, _ byte) {
