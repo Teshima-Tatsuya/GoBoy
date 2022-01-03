@@ -1062,7 +1062,7 @@ func TestOpCode_incm16(t *testing.T) {
 	}
 }
 
-func TestOpCode_decr(t *testing.T) {
+func TestOpCode_dec(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -1080,6 +1080,7 @@ func TestOpCode_decr(t *testing.T) {
 		{name: "DEC E", args: args{0x1D, E}},
 		{name: "DEC H", args: args{0x25, H}},
 		{name: "DEC L", args: args{0x2D, L}},
+		{name: "DEC (HL)", args: args{0x35, HL}},
 		{name: "DEC A", args: args{0x3D, A}},
 	}
 
@@ -1090,30 +1091,45 @@ func TestOpCode_decr(t *testing.T) {
 
 			t.Run("when no carry", func(t *testing.T) {
 				c.Reg.R[tt.args.r1] = byte(0x11)
+				c.Bus.WriteByte(c.Reg.R16(HL), byte(0x11))
 				want := byte(0x10)
 				op.Handler(c, byte(op.R1), byte(op.R2))
 				assert.Equal(t, tt.args.r1, op.R1)
-				assert.Equal(t, want, c.Reg.R[op.R1])
+				if strings.Contains(op.Mnemonic, "HL") {
+					assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(HL)))
+				} else {
+					assert.Equal(t, want, c.Reg.R[op.R1])
+				}
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, true, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
 			})
 			t.Run("when harf carry", func(t *testing.T) {
 				c.Reg.R[tt.args.r1] = byte(0x10)
+				c.Bus.WriteByte(c.Reg.R16(HL), byte(0x10))
 				want := byte(0x0F)
 				op.Handler(c, byte(op.R1), byte(op.R2))
 				assert.Equal(t, tt.args.r1, op.R1)
-				assert.Equal(t, want, c.Reg.R[op.R1])
+				if strings.Contains(op.Mnemonic, "HL") {
+					assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(HL)))
+				} else {
+					assert.Equal(t, want, c.Reg.R[op.R1])
+				}
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, true, c.Reg.isSet(flagN))
 				assert.Equal(t, true, c.Reg.isSet(flagH))
 			})
 			t.Run("when zero", func(t *testing.T) {
 				c.Reg.R[tt.args.r1] = byte(0x01)
+				c.Bus.WriteByte(c.Reg.R16(HL), byte(0x01))
 				want := byte(0x00)
 				op.Handler(c, byte(op.R1), byte(op.R2))
 				assert.Equal(t, tt.args.r1, op.R1)
-				assert.Equal(t, want, c.Reg.R[op.R1])
+				if strings.Contains(op.Mnemonic, "HL") {
+					assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(HL)))
+				} else {
+					assert.Equal(t, want, c.Reg.R[op.R1])
+				}
 				assert.Equal(t, true, c.Reg.isSet(flagZ))
 				assert.Equal(t, true, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -1164,62 +1180,6 @@ func TestOpCode_decr16(t *testing.T) {
 
 			assert.Equal(t, tt.args.r1, op.R1)
 			assert.Equal(t, want, c.Reg.R16(int(op.R1)))
-		})
-	}
-}
-
-func TestOpCode_decm16(t *testing.T) {
-	c := setupCPU()
-
-	type args struct {
-		opcode byte
-		r1     byte
-	}
-
-	tests := []struct {
-		name string
-		args args
-	}{
-		{
-			name: "DEC (HL)",
-			args: args{0x35, HL},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c.regreset()
-			op := opCodes[tt.args.opcode]
-
-			var want, act byte
-
-			// zero
-			c.Bus.WriteByte(c.Reg.R16(int(tt.args.r1)), byte(0x01))
-			want = byte(0x00)
-
-			op.Handler(c, byte(op.R1), byte(op.R2))
-
-			act = c.Bus.ReadByte(c.Reg.R16(int(op.R1)))
-
-			assert.Equal(t, tt.args.r1, op.R1)
-			assert.Equal(t, want, act)
-			assert.Equal(t, true, c.Reg.isSet(flagZ))
-			assert.Equal(t, true, c.Reg.isSet(flagN))
-			assert.Equal(t, false, c.Reg.isSet(flagH))
-
-			// not zero
-			c.Bus.WriteByte(c.Reg.R16(int(tt.args.r1)), byte(0x00))
-			want = byte(0xFF)
-
-			op.Handler(c, byte(op.R1), byte(op.R2))
-
-			act = c.Bus.ReadByte(c.Reg.R16(int(op.R1)))
-
-			assert.Equal(t, tt.args.r1, op.R1)
-			assert.Equal(t, want, act)
-			assert.Equal(t, false, c.Reg.isSet(flagZ))
-			assert.Equal(t, true, c.Reg.isSet(flagN))
-			assert.Equal(t, true, c.Reg.isSet(flagH))
 		})
 	}
 }
