@@ -104,13 +104,14 @@ func TestOpCode_ldrr(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c.regreset()
 			op := opCodes[tt.args.opcode]
-			want := c.Reg.R[tt.args.r2]
+			want := byte(0x12)
+			c.Reg.R[tt.args.r2] = want
 			op.Handler(c, op.R1, op.R2)
 
-			assert.Equal(t, op.R1, tt.args.r1)
-			assert.Equal(t, op.R2, tt.args.r2)
-			assert.Equal(t, c.Reg.R[tt.args.r1], want)
-			assert.Equal(t, c.Reg.R[tt.args.r2], want)
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, tt.args.r2, op.R2)
+			assert.Equal(t, want, c.Reg.R[op.R1])
+			assert.Equal(t, want, c.Reg.R[op.R2])
 		})
 	}
 }
@@ -140,8 +141,8 @@ func TestOpCode_ldrm(t *testing.T) {
 			c.Bus.WriteByte(addr, want)
 			op.Handler(c, op.R1, op.R2)
 
-			assert.Equal(t, op.R1, tt.args.r1)
-			assert.Equal(t, op.R2, tt.args.r2)
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, tt.args.r2, op.R2)
 			assert.Equal(t, want, c.Reg.R[A])
 		})
 	}
@@ -178,7 +179,7 @@ func TestOpCode_ldrm16(t *testing.T) {
 			c.regreset()
 			op := opCodes[tt.args.opcode]
 			want := byte(0x20)
-			c.Bus.WriteByte(c.Reg.R16(int(tt.args.r2)), want)
+			c.Bus.WriteByte(c.Reg.R16(tt.args.r2), want)
 			if op.R2 == HLI {
 				c.Reg.setHL(c.Reg.HL() - 1)
 			} else if op.R2 == HLD {
@@ -186,8 +187,8 @@ func TestOpCode_ldrm16(t *testing.T) {
 			}
 			op.Handler(c, op.R1, op.R2)
 
-			assert.Equal(t, op.R1, tt.args.r1)
-			assert.Equal(t, op.R2, tt.args.r2)
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, tt.args.r2, op.R2)
 			assert.Equal(t, want, c.Reg.R[tt.args.r1])
 		})
 	}
@@ -222,7 +223,7 @@ func TestOpCode_ldrd(t *testing.T) {
 			c.Bus.WriteByte(c.Reg.PC, want)
 			op.Handler(c, op.R1, op.R2)
 
-			assert.Equal(t, op.R1, tt.args.r1)
+			assert.Equal(t, tt.args.r1, op.R1)
 			assert.Equal(t, want, c.Reg.R[op.R1])
 		})
 	}
@@ -251,7 +252,6 @@ func TestOpCode_ldra(t *testing.T) {
 			a8 := byte(0x12)
 			want := byte(0x34)
 
-			// $0100 = 0x12
 			c.Bus.WriteByte(c.Reg.PC, a8)
 
 			// $FF12 = 0x34
@@ -260,7 +260,7 @@ func TestOpCode_ldra(t *testing.T) {
 			// A = 0x34
 			op.Handler(c, op.R1, op.R2)
 
-			assert.Equal(t, op.R1, tt.args.r1)
+			assert.Equal(t, tt.args.r1, op.R1)
 			assert.Equal(t, want, c.Reg.R[A])
 		})
 	}
@@ -296,7 +296,7 @@ func TestOpCode_ldra16(t *testing.T) {
 
 			op.Handler(c, op.R1, op.R2)
 
-			assert.Equal(t, op.R1, tt.args.r1)
+			assert.Equal(t, tt.args.r1, op.R1)
 			assert.Equal(t, want, c.Reg.R[A])
 		})
 	}
@@ -329,8 +329,8 @@ func TestOpCode_ldr16d16(t *testing.T) {
 			c.Bus.WriteByte(c.Reg.PC+1, want+1)
 			op.Handler(c, op.R1, op.R2)
 
-			assert.Equal(t, op.R1, tt.args.r1)
-			assert.Equal(t, util.Byte2Addr(want+1, want), c.Reg.R16(int(tt.args.r1)))
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, util.Byte2Addr(want+1, want), c.Reg.R16(tt.args.r1))
 		})
 	}
 }
@@ -355,12 +355,12 @@ func TestOpCode_ldr16r16(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c.regreset()
 			op := opCodes[tt.args.opcode]
-			want := c.Reg.R16(int(tt.args.r2))
+			want := c.Reg.R16(tt.args.r2)
 			op.Handler(c, op.R1, op.R2)
 
-			assert.Equal(t, op.R1, tt.args.r1)
-			assert.Equal(t, op.R2, tt.args.r2)
-			assert.Equal(t, want, c.Reg.R16(int(tt.args.r1)))
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, tt.args.r2, op.R2)
+			assert.Equal(t, want, c.Reg.R16(tt.args.r1))
 		})
 	}
 }
@@ -386,18 +386,18 @@ func TestOpCode_ldr16r16d(t *testing.T) {
 			c.regreset()
 			op := opCodes[tt.args.opcode]
 
-			assert.Equal(t, op.R1, tt.args.r1)
-			assert.Equal(t, op.R2, tt.args.r2)
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, tt.args.r2, op.R2)
 
 			t.Run("when no carry", func(t *testing.T) {
 				v2 := 0x1E00
 				d := byte(0xE1)
 				want := types.Addr(0x1EE1)
-				c.Reg.setR16(int(tt.args.r2), types.Addr(v2))
+				c.Reg.setR16(tt.args.r2, types.Addr(v2))
 				c.Bus.WriteByte(c.Reg.PC, d)
 				op.Handler(c, op.R1, op.R2)
 
-				assert.Equal(t, want, c.Reg.R16(int(tt.args.r1)))
+				assert.Equal(t, want, c.Reg.R16(tt.args.r1))
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, false, c.Reg.isSet(flagH))
@@ -407,11 +407,11 @@ func TestOpCode_ldr16r16d(t *testing.T) {
 				v2 := 0x1F20
 				d := byte(0xE1)
 				want := types.Addr(0x2001)
-				c.Reg.setR16(int(tt.args.r2), types.Addr(v2))
+				c.Reg.setR16(tt.args.r2, types.Addr(v2))
 				c.Bus.WriteByte(c.Reg.PC, d)
 				op.Handler(c, op.R1, op.R2)
 
-				assert.Equal(t, want, c.Reg.R16(int(tt.args.r1)))
+				assert.Equal(t, want, c.Reg.R16(tt.args.r1))
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, true, c.Reg.isSet(flagH))
@@ -421,11 +421,11 @@ func TestOpCode_ldr16r16d(t *testing.T) {
 				v2 := 0xFF20
 				d := byte(0xE1)
 				want := types.Addr(0x0001)
-				c.Reg.setR16(int(tt.args.r2), types.Addr(v2))
+				c.Reg.setR16(tt.args.r2, types.Addr(v2))
 				c.Bus.WriteByte(c.Reg.PC, d)
 				op.Handler(c, op.R1, op.R2)
 
-				assert.Equal(t, want, c.Reg.R16(int(tt.args.r1)))
+				assert.Equal(t, want, c.Reg.R16(tt.args.r1))
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, true, c.Reg.isSet(flagH))
@@ -460,8 +460,8 @@ func TestOpCode_ldmr(t *testing.T) {
 			want := c.Reg.R[tt.args.r2]
 			op.Handler(c, op.R1, op.R2)
 
-			assert.Equal(t, op.R1, tt.args.r1)
-			assert.Equal(t, op.R2, tt.args.r2)
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, tt.args.r2, op.R2)
 			assert.Equal(t, want, c.Bus.ReadByte(addr))
 		})
 	}
@@ -499,14 +499,14 @@ func TestOpCode_ldm16r(t *testing.T) {
 			want := c.Reg.R[tt.args.r2]
 			op.Handler(c, op.R1, op.R2)
 
-			assert.Equal(t, op.R1, tt.args.r1)
-			assert.Equal(t, op.R2, tt.args.r2)
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, tt.args.r2, op.R2)
 			if op.R1 == HLI {
 				c.Reg.setHL(c.Reg.HL() - 1)
 			} else if op.R1 == HLD {
 				c.Reg.setHL(c.Reg.HL() + 1)
 			}
-			assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(tt.args.r1))))
+			assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(tt.args.r1)))
 			assert.Equal(t, want, c.Reg.R[tt.args.r2])
 		})
 	}
@@ -537,8 +537,8 @@ func TestOpCode_ldm16d(t *testing.T) {
 
 			op.Handler(c, op.R1, op.R2)
 
-			assert.Equal(t, op.R1, tt.args.r1)
-			assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(int(tt.args.r1))))
+			assert.Equal(t, tt.args.r1, op.R1)
+			assert.Equal(t, want, c.Bus.ReadByte(c.Reg.R16(tt.args.r1)))
 		})
 	}
 }
@@ -763,7 +763,7 @@ func TestOpCode_incm16(t *testing.T) {
 			var want, act byte
 
 			// zero
-			c.Bus.WriteByte(c.Reg.R16(int(tt.args.r1)), byte(0xFF))
+			c.Bus.WriteByte(c.Reg.R16(tt.args.r1), byte(0xFF))
 			want = byte(0x00)
 
 			op.Handler(c, op.R1, op.R2)
@@ -777,7 +777,7 @@ func TestOpCode_incm16(t *testing.T) {
 			assert.Equal(t, true, c.Reg.isSet(flagH))
 
 			// not zero
-			c.Bus.WriteByte(c.Reg.R16(int(tt.args.r1)), byte(0x00))
+			c.Bus.WriteByte(c.Reg.R16(tt.args.r1), byte(0x00))
 			want = byte(0x01)
 
 			op.Handler(c, op.R1, op.R2)
@@ -1007,8 +1007,8 @@ func TestOpCode_addr16r16(t *testing.T) {
 				if tt.args.r2 == HL {
 					t.Skip()
 				}
-				c.Reg.setR16(int(tt.args.r1), 0x00E1)
-				c.Reg.setR16(int(tt.args.r2), 0x000E)
+				c.Reg.setR16(tt.args.r1, 0x00E1)
+				c.Reg.setR16(tt.args.r2, 0x000E)
 				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, types.Addr(0x00EF), c.Reg.R16(int(op.R1)))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
@@ -1019,8 +1019,8 @@ func TestOpCode_addr16r16(t *testing.T) {
 				if tt.args.r2 == HL {
 					t.Skip()
 				}
-				c.Reg.setR16(int(tt.args.r1), 0x0FF1)
-				c.Reg.setR16(int(tt.args.r2), 0x000F)
+				c.Reg.setR16(tt.args.r1, 0x0FF1)
+				c.Reg.setR16(tt.args.r2, 0x000F)
 				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, types.Addr(0x1000), c.Reg.R16(int(op.R1)))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
@@ -1031,8 +1031,8 @@ func TestOpCode_addr16r16(t *testing.T) {
 				if tt.args.r2 == HL {
 					t.Skip()
 				}
-				c.Reg.setR16(int(tt.args.r1), 0xFFF1)
-				c.Reg.setR16(int(tt.args.r2), 0x000F)
+				c.Reg.setR16(tt.args.r1, 0xFFF1)
+				c.Reg.setR16(tt.args.r2, 0x000F)
 				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, types.Addr(0x0000), c.Reg.R16(int(op.R1)))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
