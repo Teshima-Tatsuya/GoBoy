@@ -336,18 +336,17 @@ func ldr16r16(c *CPU, R1 byte, R2 byte) {
 func ldr16r16d(c *CPU, R1 byte, R2 byte) {
 	d := c.fetch()
 	v := int32(c.Reg.R16(SP)) + int32(d) // Cast to int32 considers carry
-	carryBits := uint32(c.Reg.R16(SP)) ^ uint32(d) ^ uint32(v)
-	c.Reg.setR16(int(R1), c.Reg.R16(int(R2)))
+	c.Reg.setR16(int(R1), types.Addr(v))
 
-	c.Reg.setFlag(flagZ)
-	c.Reg.setFlag(flagN)
+	c.Reg.clearFlag(flagZ)
+	c.Reg.clearFlag(flagN)
 
-	if v < int32(c.Reg.SP) {
+	if v > 0xFFFF {
 		c.Reg.setFlag(flagC)
 	} else {
 		c.Reg.clearFlag(flagC)
 	}
-	if carryBits&0x1000 == 0x1000 {
+	if c.Reg.R16(SP)&0x0FFF+types.Addr(d) > 0x0FFF {
 		c.Reg.setFlag(flagH)
 	} else {
 		c.Reg.clearFlag(flagH)

@@ -571,6 +571,79 @@ func TestOpCode_ldr16r16(t *testing.T) {
 	}
 }
 
+func TestOpCode_ldr16r16d(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     byte
+		r2     byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "LD HL,SP+r8",
+			args: args{0xF8, HL, SP},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			assert.Equal(t, op.R1, tt.args.r1)
+			assert.Equal(t, op.R2, tt.args.r2)
+
+			t.Run("when no carry", func(t *testing.T) {
+				v2 := 0x1E00
+				d := byte(0xE1)
+				want := types.Addr(0x1EE1)
+				c.Reg.setR16(int(tt.args.r2), types.Addr(v2))
+				c.Bus.WriteByte(c.Reg.PC, d)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+
+				assert.Equal(t, want, c.Reg.R16(int(tt.args.r1)))
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, false, c.Reg.isSet(flagH))
+				assert.Equal(t, false, c.Reg.isSet(flagC))
+			})
+			t.Run("when half carry", func(t *testing.T) {
+				v2 := 0x1F20
+				d := byte(0xE1)
+				want := types.Addr(0x2001)
+				c.Reg.setR16(int(tt.args.r2), types.Addr(v2))
+				c.Bus.WriteByte(c.Reg.PC, d)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+
+				assert.Equal(t, want, c.Reg.R16(int(tt.args.r1)))
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, true, c.Reg.isSet(flagH))
+				assert.Equal(t, false, c.Reg.isSet(flagC))
+			})
+			t.Run("when carry", func(t *testing.T) {
+				v2 := 0xFF20
+				d := byte(0xE1)
+				want := types.Addr(0x0001)
+				c.Reg.setR16(int(tt.args.r2), types.Addr(v2))
+				c.Bus.WriteByte(c.Reg.PC, d)
+				op.Handler(c, byte(op.R1), byte(op.R2))
+
+				assert.Equal(t, want, c.Reg.R16(int(tt.args.r1)))
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, true, c.Reg.isSet(flagH))
+				assert.Equal(t, true, c.Reg.isSet(flagC))
+			})
+		})
+	}
+}
+
 func TestOpCode_ldmr(t *testing.T) {
 	c := setupCPU()
 
