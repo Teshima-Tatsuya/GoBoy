@@ -1838,6 +1838,42 @@ func TestOpCode_jpm16(t *testing.T) {
 
 // -----jr-----
 
+func TestOpCode_jrr8(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{name: "JR r8", args: args{0x18}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+			t.Run("when value is positive", func(t *testing.T) {
+				c.Reg.PC = 0x0100
+				c.Bus.WriteByte(c.Reg.PC, 0x10)
+				op.Handler(c, op.R1, op.R2)
+
+				assert.Equal(t, types.Addr(0x0111), c.Reg.PC)
+			})
+			t.Run("when value is negative", func(t *testing.T) {
+				c.Reg.PC = 0x0100
+				c.Bus.WriteByte(c.Reg.PC, 0xFE) // -2
+				op.Handler(c, op.R1, op.R2)
+
+				assert.Equal(t, types.Addr(0x00FF), c.Reg.PC)
+			})
+		})
+	}
+}
+
 func TestOpCode_jrnfr8(t *testing.T) {
 	c := setupCPU()
 

@@ -881,7 +881,6 @@ func callnf(c *CPU, flag int, _ int) {
 
 func stop(c *CPU, _ int, _ int) {
 	log.Debug("TODO: implement")
-	c.Reg.PC++
 }
 
 // desable interrupt
