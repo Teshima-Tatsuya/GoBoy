@@ -2001,6 +2001,82 @@ func TestOpCode_pop(t *testing.T) {
 	}
 }
 
+func TestOpCode_call(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		flag   int
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{name: "CALL NZ,a16", args: args{0xC4, flagZ}},
+		{name: "CALL Z,a16", args: args{0xCC, flagZ}},
+		{name: "CALL a16", args: args{0xCD, 0}},
+		{name: "CALL NC,a16", args: args{0xD4, flagC}},
+		{name: "CALL C,a16", args: args{0xDC, flagC}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			t.Run("when flag = 0", func(t *testing.T) {
+				c.Reg.PC = 0x5678
+				c.Reg.SP = 0xFFFC
+				c.Reg.clearFlag(tt.args.flag)
+				// lower
+				c.Bus.WriteByte(c.Reg.PC, 0x34)
+				// upper
+				c.Bus.WriteByte(c.Reg.PC+1, 0x12)
+				op.Handler(c, op.R1, op.R2)
+				if strings.Contains(op.Mnemonic, "CALL a16") {
+					assert.Equal(t, types.Addr(0x1234), c.Reg.PC)
+					assert.Equal(t, types.Addr(0xFFFA), c.Reg.SP)
+					assert.Equal(t, byte(0x7A), c.Bus.ReadByte(c.Reg.SP))
+					assert.Equal(t, byte(0x56), c.Bus.ReadByte(c.Reg.SP+1))
+				} else if strings.Contains(op.Mnemonic, "N") {
+					assert.Equal(t, types.Addr(0x1234), c.Reg.PC)
+					assert.Equal(t, types.Addr(0xFFFA), c.Reg.SP)
+					assert.Equal(t, byte(0x7A), c.Bus.ReadByte(c.Reg.SP))
+					assert.Equal(t, byte(0x56), c.Bus.ReadByte(c.Reg.SP+1))
+				} else {
+					assert.Equal(t, types.Addr(0x567A), c.Reg.PC)
+					assert.Equal(t, types.Addr(0xFFFC), c.Reg.SP)
+				}
+			})
+			t.Run("when flag = 1", func(t *testing.T) {
+				c.Reg.PC = 0x5678
+				c.Reg.SP = 0xFFFC
+				c.Reg.setFlag(tt.args.flag)
+				// lower
+				c.Bus.WriteByte(c.Reg.PC, 0x34)
+				// upper
+				c.Bus.WriteByte(c.Reg.PC+1, 0x12)
+				op.Handler(c, op.R1, op.R2)
+				if strings.Contains(op.Mnemonic, "CALL a16") {
+					assert.Equal(t, types.Addr(0x1234), c.Reg.PC)
+					assert.Equal(t, types.Addr(0xFFFA), c.Reg.SP)
+					assert.Equal(t, byte(0x7A), c.Bus.ReadByte(c.Reg.SP))
+					assert.Equal(t, byte(0x56), c.Bus.ReadByte(c.Reg.SP+1))
+				} else if strings.Contains(op.Mnemonic, "N") {
+					assert.Equal(t, types.Addr(0x567A), c.Reg.PC)
+					assert.Equal(t, types.Addr(0xFFFC), c.Reg.SP)
+				} else {
+					assert.Equal(t, types.Addr(0x1234), c.Reg.PC)
+					assert.Equal(t, types.Addr(0xFFFA), c.Reg.SP)
+					assert.Equal(t, byte(0x7A), c.Bus.ReadByte(c.Reg.SP))
+					assert.Equal(t, byte(0x56), c.Bus.ReadByte(c.Reg.SP+1))
+				}
+			})
+		})
+	}
+}
+
 // PREFIX CB
 
 func TestOpCode_rlc(t *testing.T) {
