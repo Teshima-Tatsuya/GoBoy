@@ -193,6 +193,6 @@ func (r *Register) isSet(flag int) bool {
 }
 
 func (r *Register) Dump() {
-	log.Info(fmt.Sprintf("Regs  A:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X", r.R[A], r.R[B], r.R[C], r.R[D], r.R[E], r.R[H], r.R[L]))
-	log.Info(fmt.Sprintf("Flags Z:%d N:%d H:%d C:%d", util.Bool2Int8(r.isSet(flagZ)), util.Bool2Int8(r.isSet(flagN)), util.Bool2Int8(r.isSet(flagH)), util.Bool2Int8(r.isSet(flagC))))
+	log.Info(fmt.Sprintf("    Regs  A:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X", r.R[A], r.R[B], r.R[C], r.R[D], r.R[E], r.R[H], r.R[L]))
+	log.Info(fmt.Sprintf("    Flags Z:%d N:%d H:%d C:%d", util.Bool2Int8(r.isSet(flagZ)), util.Bool2Int8(r.isSet(flagN)), util.Bool2Int8(r.isSet(flagH)), util.Bool2Int8(r.isSet(flagC))))
 }
