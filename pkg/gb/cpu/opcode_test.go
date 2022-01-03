@@ -2011,10 +2011,7 @@ func TestOpCode_jpa16(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "JP a16",
-			args: args{0xC3, 0x1234},
-		},
+		{name: "JP a16", args: args{0xC3, 0x1234}},
 	}
 
 	for _, tt := range tests {
@@ -2148,10 +2145,7 @@ func TestOpCode_jpm16(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "JP (HL)",
-			args: args{0xE9, HL, 0x34},
-		},
+		{name: "JP (HL)", args: args{0xE9, HL, 0x1234}},
 	}
 
 	for _, tt := range tests {
@@ -2159,7 +2153,7 @@ func TestOpCode_jpm16(t *testing.T) {
 			c.regreset()
 			op := opCodes[tt.args.opcode]
 			want := tt.args.addr
-			c.Bus.WriteByte(c.Reg.R16(tt.args.r16), 0x34)
+			c.Reg.setR16(tt.args.r16, 0x1234)
 
 			op.Handler(c, byte(op.R1), byte(op.R2))
 

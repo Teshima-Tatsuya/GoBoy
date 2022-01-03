@@ -786,7 +786,7 @@ func jpnfa16(c *CPU, flag byte, _ byte) {
 
 // JP (r16)
 func jpm16(c *CPU, R1 byte, _ byte) {
-	_jp(c, types.Addr(c.Bus.ReadByte(c.Reg.R16(int(R1)))))
+	_jp(c, c.Reg.R16(int(R1)))
 }
 
 // -----jr-----
