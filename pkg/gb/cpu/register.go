@@ -21,7 +21,7 @@ const (
 
 // @see https://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html
 const (
-	AF = iota
+	AF = iota + 8 // To prevent collide register index
 	BC
 	DE
 	HL
