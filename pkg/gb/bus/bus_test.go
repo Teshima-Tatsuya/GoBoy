@@ -36,10 +36,13 @@ func TestBus_CartReadWrite(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "Cart",
-			args: args{0x0000, 0x7FFF},
-		},
+		{name: "CART", args: args{0x0000, 0x7FFF}},
+		{name: "VRAM", args: args{0x8000, 0x9FFF}},
+		{name: "WRAM", args: args{0xC000, 0xCFFF}},
+		{name: "WRAM2", args: args{0xD000, 0xDFFF}},
+		{name: "ERAM", args: args{0xE000, 0xFDFF}},
+		{name: "IO", args: args{0xFF00, 0xFF7F}},
+		{name: "HRAM", args: args{0xFF80, 0xFFFE}},
 	}
 
 	for _, tt := range tests {

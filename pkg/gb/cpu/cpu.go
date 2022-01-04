@@ -80,5 +80,5 @@ func (c *CPU) popPC() {
 	lower := c.pop()
 	upper := c.pop()
 
-	c.Reg.PC = (types.Addr(upper) << 8) | types.Addr(lower)
+	c.Reg.PC = util.Byte2Addr(upper, lower)
 }

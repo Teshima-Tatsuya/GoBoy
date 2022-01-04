@@ -115,10 +115,12 @@ func TestCPU_pushpopPC(t *testing.T) {
 	want := types.Addr(0x1234)
 	c.Reg.PC = want
 
+	before_sp := c.Reg.SP
 	c.pushPC()
-	assert.Equal(util.ExtractLower(want), c.Bus.ReadByte(c.Reg.SP))
-	assert.Equal(util.ExtractUpper(want), c.Bus.ReadByte(c.Reg.SP+1))
+	assert.Equal(util.ExtractLower(want), c.Bus.ReadByte(before_sp-2))
+	assert.Equal(util.ExtractUpper(want), c.Bus.ReadByte(before_sp-1))
 
 	c.popPC()
 	assert.Equal(want, c.Reg.PC)
+	assert.Equal(before_sp, c.Reg.SP)
 }
