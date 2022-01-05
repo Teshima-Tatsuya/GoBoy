@@ -1,6 +1,7 @@
 package cpu
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -43,6 +44,14 @@ func Test01(t *testing.T) {
 	cpu := New(bus)
 
 	for {
+		if cpu.Bus.ReadByte(0xff02) == byte(0x81) {
+			d := cpu.Bus.ReadByte(0xff01)
+			fmt.Printf("%c", d)
+			cpu.Bus.WriteByte(0xff02, byte(0x00))
+		}
+		if cpu.Reg.PC == 0xcc5f {
+			break
+		}
 		cpu.Step()
 	}
 }
@@ -53,6 +62,14 @@ func Test06(t *testing.T) {
 	cpu := New(bus)
 
 	for {
+		if cpu.Bus.ReadByte(0xff02) == byte(0x81) {
+			d := cpu.Bus.ReadByte(0xff01)
+			fmt.Printf("%c", d)
+			cpu.Bus.WriteByte(0xff02, byte(0x00))
+		}
+		if cpu.Reg.PC == 0xcc5f {
+			break
+		}
 		cpu.Step()
 	}
 }

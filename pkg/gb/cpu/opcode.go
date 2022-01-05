@@ -839,13 +839,7 @@ func push(c *CPU, r16 int, _ int) {
 
 // -----pop------
 func pop(c *CPU, r16 int, _ int) {
-	var lower byte
-	if r16 != AF {
-		lower = c.pop()
-	} else {
-		lower = c.pop() & 0xf0 // extract only flag
-	}
-
+	lower := c.pop()
 	upper := c.pop()
 
 	c.Reg.setR16(int(r16), types.Addr(int16(upper)<<8|int16(lower)))
