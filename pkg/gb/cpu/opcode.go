@@ -170,14 +170,14 @@ var opCodes = []*OpCode{
 	{0x95, "SUB L", L, 0, 0, 1, subr},
 	{0x96, "SUB (HL)", HL, 0, 0, 2, subHL},
 	{0x97, "SUB A", A, 0, 0, 1, subr},
-	{0x98, "SBC A, B", A, B, 0, 1, notimplemented},
-	{0x99, "SBC A, C", A, C, 0, 1, notimplemented},
-	{0x9A, "SBC A, D", A, D, 0, 1, notimplemented},
-	{0x9B, "SBC A, E", A, E, 0, 1, notimplemented},
-	{0x9C, "SBC A, H", A, H, 0, 1, notimplemented},
-	{0x9D, "SBC A, L", A, L, 0, 1, notimplemented},
-	{0x9E, "SBC A, (HL)", A, HL, 0, 1, notimplemented},
-	{0x9F, "SBC A, A", A, A, 0, 1, notimplemented},
+	{0x98, "SBC A, B", A, B, 0, 1, sbcr},
+	{0x99, "SBC A, C", A, C, 0, 1, sbcr},
+	{0x9A, "SBC A, D", A, D, 0, 1, sbcr},
+	{0x9B, "SBC A, E", A, E, 0, 1, sbcr},
+	{0x9C, "SBC A, H", A, H, 0, 1, sbcr},
+	{0x9D, "SBC A, L", A, L, 0, 1, sbcr},
+	{0x9E, "SBC A, (HL)", A, HL, 0, 1, sbcm16},
+	{0x9F, "SBC A, A", A, A, 0, 1, sbcr},
 	{0xA0, "AND B", B, 0, 0, 1, andr},
 	{0xA1, "AND C", C, 0, 0, 1, andr},
 	{0xA2, "AND D", D, 0, 0, 1, andr},
@@ -240,7 +240,7 @@ var opCodes = []*OpCode{
 	{0xDB, "EMPTY", 0, 0, 0, 1, notimplemented},
 	{0xDC, "CALL C,a16", flagC, 0, 2, 3, callf},
 	{0xDD, "EMPTY", 0, 0, 0, 1, notimplemented},
-	{0xDE, "SBC A,d8", A, 0, 0, 1, notimplemented},
+	{0xDE, "SBC A,d8", A, 0, 0, 1, sbcd},
 	{0xDF, "RST 18H", 0x18, 0, 0, 1, rst},
 	{0xE0, "LDH (a8),A", 0, A, 0, 1, ldar},
 	{0xE1, "POP HL", HL, 0, 0, 3, pop},
@@ -732,6 +732,46 @@ func subHL(c *CPU, r16 int, _ int) {
 func subd8(c *CPU, _ int, _ int) {
 	r := c.fetch()
 	_sub(c, r)
+}
+
+func _sbc(c *CPU, r byte) {
+	a := c.Reg.R[A]
+	carry := c.Reg.isSet(flagC)
+
+	v := a - r - byte(util.Bool2Int8(carry))
+
+	if a&0x0F < r&0x0F+byte(util.Bool2Int8(carry)) {
+		c.Reg.setFlag(flagH)
+	} else {
+		c.Reg.clearFlag(flagH)
+	}
+
+	if a-r-byte(util.Bool2Int8(carry)) > a {
+		c.Reg.setFlag(flagC)
+	} else {
+		c.Reg.clearFlag(flagC)
+	}
+
+	c.Reg.clearFlag(flagN)
+
+	c.Reg.R[A] = v
+	c.Reg.setFlagZ(v)
+}
+
+// SBC A,R
+func sbcr(c *CPU, _ int, r2 int) {
+	r := c.Reg.R[r2]
+	_sbc(c, r)
+}
+
+func sbcm16(c *CPU, _ int, r2 int) {
+	r := c.Bus.ReadByte(c.Reg.R16(int(r2)))
+	_sbc(c, r)
+}
+
+func sbcd(c *CPU, _ int, _ int) {
+	r := c.fetch()
+	_sbc(c, r)
 }
 
 // ret
