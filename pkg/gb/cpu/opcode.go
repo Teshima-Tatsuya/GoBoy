@@ -25,7 +25,7 @@ var opCodes = []*OpCode{
 	{0x04, "INC B", B, 0, 0, 1, incr},
 	{0x05, "DEC B", B, 0, 0, 1, decr},
 	{0x06, "LD B,d8", B, 0, 1, 2, ldrd},
-	{0x07, "RLCA", 0, 0, 0, 1, notimplemented},
+	{0x07, "RLCA", A, 0, 0, 1, rlcr},
 	{0x08, "LD (a16),SP", 0, SP, 2, 5, lda16r16},
 	{0x09, "ADD HL,BC", HL, BC, 0, 2, addr16r16},
 	{0x0A, "LD A,(BC)", A, BC, 0, 2, ldrm16},
@@ -33,7 +33,7 @@ var opCodes = []*OpCode{
 	{0x0C, "INC C", C, 0, 1, 2, incr},
 	{0x0D, "DEC C", C, 0, 0, 1, decr},
 	{0x0E, "LD C,d8", C, 0, 1, 2, ldrd},
-	{0x0F, "RRCA", 0, 0, 0, 1, notimplemented},
+	{0x0F, "RRCA", A, 0, 0, 1, rrcr},
 	{0x10, "STOP 0", 0, 0, 0, 1, stop},
 	{0x11, "LD DE,d16", DE, 0, 2, 3, ldr16d16},
 	{0x12, "LD (DE),A", DE, A, 0, 2, ldm16r},
@@ -41,7 +41,7 @@ var opCodes = []*OpCode{
 	{0x14, "INC D", D, 0, 0, 1, incr},
 	{0x15, "DEC D", D, 0, 0, 1, decr},
 	{0x16, "LD D,d8", D, 0, 1, 2, ldrd},
-	{0x17, "RLA", 0, 0, 0, 1, notimplemented},
+	{0x17, "RLA", A, 0, 0, 1, rlr},
 	{0x18, "JR r8", 0, 0, 1, 3, jrr8},
 	{0x19, "ADD HL,DE", HL, DE, 0, 2, addr16r16},
 	{0x1A, "LD A,(DE)", A, DE, 0, 2, ldrm16},
@@ -57,7 +57,7 @@ var opCodes = []*OpCode{
 	{0x24, "INC H", H, 0, 0, 1, incr},
 	{0x25, "DEC H", H, 0, 0, 1, decr},
 	{0x26, "LD H,d8", H, 0, 1, 2, ldrd},
-	{0x27, "DAA", 0, 0, 0, 1, notimplemented},
+	{0x27, "DAA", 0, 0, 0, 1, daa},
 	{0x28, "JR Z,r8", flagZ, 0, 1, 2, jrfr8},
 	{0x29, "ADD HL,HL", HL, HL, 0, 2, addr16r16},
 	{0x2A, "LD A,(HL+)", A, HLI, 0, 2, ldrm16},
@@ -65,7 +65,7 @@ var opCodes = []*OpCode{
 	{0x2C, "INC L", L, 0, 0, 1, incr},
 	{0x2D, "DEC L", L, 0, 0, 1, decr},
 	{0x2E, "LD L,d8", L, 0, 0, 1, ldrd},
-	{0x2F, "CPL", 0, 0, 0, 1, notimplemented},
+	{0x2F, "CPL", 0, 0, 0, 1, cpl},
 	{0x30, "JR NC,r8", flagC, 0, 1, 2, jrnfr8},
 	{0x31, "LD SP,d16", SP, 0, 2, 3, ldr16d16},
 	{0x32, "LD (HL-),A", HLD, A, 0, 2, ldm16r},
@@ -73,7 +73,7 @@ var opCodes = []*OpCode{
 	{0x34, "INC (HL)", HL, 0, 0, 3, incm16},
 	{0x35, "DEC (HL)", HL, 0, 0, 3, decm16},
 	{0x36, "LD (HL),d8", HL, 0, 1, 3, ldm16d},
-	{0x37, "SCF", 0, 0, 0, 1, notimplemented},
+	{0x37, "SCF", 0, 0, 0, 1, scf},
 	{0x38, "JR C,r8", flagC, 0, 1, 2, jrfr8},
 	{0x39, "ADD HL,SP", HL, SP, 0, 2, addr16r16},
 	{0x3A, "LD A,(HL-)", A, HLD, 0, 2, ldrm16},
@@ -81,7 +81,7 @@ var opCodes = []*OpCode{
 	{0x3C, "INC A", A, 0, 0, 1, incr},
 	{0x3D, "DEC A", A, 0, 0, 1, decr},
 	{0x3E, "LD A,d8", A, 0, 1, 2, ldrd},
-	{0x3F, "CCF", 0, 0, 0, 1, notimplemented},
+	{0x3F, "CCF", 0, 0, 0, 1, ccf},
 	{0x40, "LD B, B", B, B, 0, 1, ldrr},
 	{0x41, "LD B, C", B, C, 0, 1, ldrr},
 	{0x42, "LD B, D", B, D, 0, 1, ldrr},
@@ -912,6 +912,55 @@ func callnf(c *CPU, flag int, _ int) {
 }
 
 // -----misc-----
+
+func cpl(c *CPU, _ int, _ int) {
+	c.Reg.R[A] = ^c.Reg.R[A]
+	c.Reg.setFlag(flagN)
+	c.Reg.setFlag(flagH)
+}
+
+func scf(c *CPU, _ int, _ int) {
+	c.Reg.setFlag(flagC)
+	c.Reg.clearFlag(flagN)
+	c.Reg.clearFlag(flagH)
+}
+
+func ccf(c *CPU, _ int, _ int) {
+	if c.Reg.isSet(flagC) {
+		c.Reg.clearFlag(flagC)
+		c.Reg.setFlag(flagH)
+	} else {
+		c.Reg.setFlag(flagC)
+		c.Reg.clearFlag(flagH)
+	}
+	c.Reg.clearFlag(flagN)
+}
+
+// @see https://donkeyhacks.zouri.jp/html/En-Us/snes/apu/spc700/daa.html
+func daa(c *CPU, _ int, _ int) {
+	a := c.Reg.R[A]
+	alow := a & 0x0F
+
+	var val uint32
+	val = uint32(a)
+
+	if alow >= 0x0A || c.Reg.isSet(flagH) {
+		val += 0x06
+	}
+
+	if (val>>4)&0x0F >= 0x0A || c.Reg.isSet(flagC) {
+		val += 0x60
+	}
+
+	if (val>>8)&0x01 == 0x01 {
+		c.Reg.setFlag(flagC)
+	}
+	c.Reg.clearFlag(flagN)
+	c.Reg.setFlagZ(byte(val))
+
+	c.Reg.R[A] = byte(val)
+
+}
 
 func stop(c *CPU, _ int, _ int) {
 	log.Debug("TODO: implement")

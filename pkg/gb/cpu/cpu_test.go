@@ -91,6 +91,23 @@ func Test07(t *testing.T) {
 		cpu.Step()
 	}
 }
+func Test09(t *testing.T) {
+	file := "../../../test/blargg/cpu_instrs/individual/09-op r,r.gb"
+	bus := setup(file)
+	cpu := New(bus)
+
+	for {
+		if cpu.Bus.ReadByte(0xff02) == byte(0x81) {
+			d := cpu.Bus.ReadByte(0xff01)
+			fmt.Printf("%c", d)
+			cpu.Bus.WriteByte(0xff02, byte(0x00))
+		}
+		if cpu.Reg.PC == 0xcc5f {
+			break
+		}
+		cpu.Step()
+	}
+}
 
 func Test10(t *testing.T) {
 	file := "../../../test/blargg/cpu_instrs/individual/10-bit ops.gb"
