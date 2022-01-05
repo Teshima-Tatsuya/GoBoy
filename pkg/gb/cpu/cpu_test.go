@@ -1,7 +1,6 @@
 package cpu
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -52,7 +51,6 @@ func testrom(t assert.TestingT, file string, passstr string) {
 			d := cpu.Bus.ReadByte(0xff01)
 			str += string(d)
 			cpu.Bus.WriteByte(0xff02, byte(0x00))
-			fmt.Printf("%c", d)
 		}
 
 		if strings.Contains(str, "Failed") ||

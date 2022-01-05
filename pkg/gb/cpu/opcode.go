@@ -766,17 +766,19 @@ func subd8(c *CPU, _ int, _ int) {
 
 func _sbc(c *CPU, r byte) {
 	a := c.Reg.R[A]
-	carry := c.Reg.isSet(flagC)
+	carry := util.Bool2Int8(c.Reg.isSet(flagC))
 
-	v := a - r - byte(util.Bool2Int8(carry))
+	v := a - (r + byte(carry))
 
-	if a&0x0F < r&0x0F+byte(util.Bool2Int8(carry)) {
+	value4, value16 := (a&0b1111)-((r&0b1111)+byte(carry)), uint16(a)-(uint16(r)+uint16(carry))
+
+	if util.Bit(value4, 4) == 0x01 {
 		c.Reg.setFlag(flagH)
 	} else {
 		c.Reg.clearFlag(flagH)
 	}
 
-	if a-r-byte(util.Bool2Int8(carry)) > a {
+	if (value16>>8)&0x01 == 0x01 {
 		c.Reg.setFlag(flagC)
 	} else {
 		c.Reg.clearFlag(flagC)
@@ -784,8 +786,8 @@ func _sbc(c *CPU, r byte) {
 
 	c.Reg.clearFlag(flagN)
 
-	c.Reg.R[A] = v
-	c.Reg.setFlagZ(v)
+	c.Reg.R[A] = byte(v)
+	c.Reg.setFlagZ(byte(v))
 }
 
 // SBC A,R
@@ -795,7 +797,7 @@ func sbcr(c *CPU, _ int, r2 int) {
 }
 
 func sbcm16(c *CPU, _ int, r2 int) {
-	r := c.Bus.ReadByte(c.Reg.R16(int(r2)))
+	r := c.getRegMem(r2)
 	_sbc(c, r)
 }
 

@@ -393,7 +393,7 @@ func TestOpCode_ldr16r16d(t *testing.T) {
 			t.Run("when no carry", func(t *testing.T) {
 				v2 := 0x1E00
 				d := byte(0xE1)
-				want := types.Addr(0x1EE1)
+				want := types.Addr(0x1DE1)
 				c.Reg.setR16(tt.args.r2, types.Addr(v2))
 				c.Bus.WriteByte(c.Reg.PC, d)
 				op.Handler(c, op.R1, op.R2)
