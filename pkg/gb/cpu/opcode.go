@@ -335,18 +335,20 @@ func ldr16r16(c *CPU, R1 int, R2 int) {
 // LD r1, r2+d
 func ldr16r16d(c *CPU, R1 int, R2 int) {
 	d := c.fetch()
-	v := int32(c.Reg.R16(SP)) + int32(d) // Cast to int32 considers carry
+	sp := c.Reg.R16(SP)
+	v := sp + types.Addr((int8(d)))
 	c.Reg.setR16(int(R1), types.Addr(v))
 
 	c.Reg.clearFlag(flagZ)
 	c.Reg.clearFlag(flagN)
+	carry := sp ^ types.Addr(d) ^ (sp + types.Addr(d))
 
-	if v > 0xFFFF {
+	if carry&0x100 == 0x100 {
 		c.Reg.setFlag(flagC)
 	} else {
 		c.Reg.clearFlag(flagC)
 	}
-	if c.Reg.R16(SP)&0x0FFF+types.Addr(d) > 0x0FFF {
+	if carry&0x10 == 0x10 {
 		c.Reg.setFlag(flagH)
 	} else {
 		c.Reg.clearFlag(flagH)
@@ -650,9 +652,26 @@ func addr16r16(c *CPU, r1 int, r2 int) {
 }
 
 func addr16d(c *CPU, r16 int, _ int) {
-	sp := c.Reg.R16(r16)
-	d := c.fetch()
-	c.Reg.setR16(int(r16), _addr16(c, sp, types.Addr(d)))
+	v1 := c.Reg.R16(r16)
+	v2 := c.fetch()
+
+	v := int32(v1) + int32(int8(v2)) // consider negative
+
+	c.Reg.clearFlag(flagN)
+
+	carry := v1 ^ types.Addr(v2) ^ (v1 + types.Addr(v2))
+
+	if carry&0x10 == 0x10 {
+		c.Reg.setFlag(flagH)
+	} else {
+		c.Reg.clearFlag(flagH)
+	}
+	if carry&0x100 == 0x100 {
+		c.Reg.setFlag(flagC)
+	} else {
+		c.Reg.clearFlag(flagC)
+	}
+	c.Reg.setR16(r16, types.Addr(v))
 	c.Reg.clearFlag(flagZ)
 }
 

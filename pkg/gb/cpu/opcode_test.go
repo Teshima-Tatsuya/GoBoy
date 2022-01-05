@@ -365,6 +365,7 @@ func TestOpCode_ldr16r16(t *testing.T) {
 	}
 }
 
+// TODO fix test
 func TestOpCode_ldr16r16d(t *testing.T) {
 	c := setupCPU()
 
@@ -1019,7 +1020,6 @@ func TestOpCode_addr16(t *testing.T) {
 		{name: "ADD HL,DE", args: args{0x19, HL, DE}},
 		{name: "ADD HL,HL", args: args{0x29, HL, HL}},
 		{name: "ADD HL,SP", args: args{0x39, HL, SP}},
-		{name: "ADD SP,r8", args: args{0xE8, SP, 0}},
 	}
 
 	for _, tt := range tests {
@@ -1030,10 +1030,11 @@ func TestOpCode_addr16(t *testing.T) {
 			assert.Equal(t, tt.args.r1, op.R1)
 			assert.Equal(t, tt.args.r2, op.R2)
 
+			if strings.Contains(op.Mnemonic, "HL,HL") {
+				t.Skip()
+			}
+
 			t.Run("when no carry", func(t *testing.T) {
-				if tt.args.r2 == HL {
-					t.Skip()
-				}
 				c.Reg.setR16(tt.args.r1, 0x00E1)
 				c.Reg.setR16(tt.args.r2, 0x000E)
 				op.Handler(c, op.R1, op.R2)
@@ -1043,9 +1044,6 @@ func TestOpCode_addr16(t *testing.T) {
 				assert.Equal(t, false, c.Reg.isSet(flagC))
 			})
 			t.Run("when Harf carry", func(t *testing.T) {
-				if tt.args.r2 == HL {
-					t.Skip()
-				}
 				c.Reg.setR16(tt.args.r1, 0x0FF1)
 				c.Reg.setR16(tt.args.r2, 0x000F)
 				op.Handler(c, op.R1, op.R2)
@@ -1055,9 +1053,6 @@ func TestOpCode_addr16(t *testing.T) {
 				assert.Equal(t, false, c.Reg.isSet(flagC))
 			})
 			t.Run("when carry and zero", func(t *testing.T) {
-				if tt.args.r2 == HL {
-					t.Skip()
-				}
 				c.Reg.setR16(tt.args.r1, 0xFFF1)
 				c.Reg.setR16(tt.args.r2, 0x000F)
 				op.Handler(c, op.R1, op.R2)
@@ -1065,6 +1060,94 @@ func TestOpCode_addr16(t *testing.T) {
 				assert.Equal(t, false, c.Reg.isSet(flagN))
 				assert.Equal(t, true, c.Reg.isSet(flagH))
 				assert.Equal(t, true, c.Reg.isSet(flagC))
+			})
+		})
+	}
+}
+
+// TODO Fix test
+func TestOpCode_addr16d(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		r1     int
+		r2     int
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{name: "ADD SP,r8", args: args{0xE8, SP, 0}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			assert.Equal(t, tt.args.r1, op.R1)
+
+			t.Run("when no carry", func(t *testing.T) {
+				c.Reg.setR16(tt.args.r1, 0x01E1)
+				c.Bus.WriteByte(c.Reg.PC, 0x0D)
+				op.Handler(c, op.R1, op.R2)
+				assert.Equal(t, types.Addr(0x01EE), c.Reg.R16(int(op.R1)))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, false, c.Reg.isSet(flagH))
+				assert.Equal(t, false, c.Reg.isSet(flagC))
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
+			})
+			t.Run("when Harf carry", func(t *testing.T) {
+				c.Reg.setR16(tt.args.r1, 0x0FD1)
+				c.Bus.WriteByte(c.Reg.PC, 0x0F)
+				op.Handler(c, op.R1, op.R2)
+				assert.Equal(t, types.Addr(0x0FE0), c.Reg.R16(int(op.R1)))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, true, c.Reg.isSet(flagH))
+				assert.Equal(t, false, c.Reg.isSet(flagC))
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
+			})
+			t.Run("when carry", func(t *testing.T) {
+				c.Reg.setR16(tt.args.r1, 0x0DF1)
+				c.Bus.WriteByte(c.Reg.PC, 0x0F)
+				op.Handler(c, op.R1, op.R2)
+				assert.Equal(t, types.Addr(0x0E00), c.Reg.R16(int(op.R1)))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, true, c.Reg.isSet(flagH))
+				assert.Equal(t, true, c.Reg.isSet(flagC))
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
+			})
+			t.Run("when negative no carry", func(t *testing.T) {
+				c.Reg.setR16(tt.args.r1, 0x0F81)
+				c.Bus.WriteByte(c.Reg.PC, 0x80)
+				op.Handler(c, op.R1, op.R2)
+				assert.Equal(t, types.Addr(0x0F01), c.Reg.R16(int(op.R1)))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, false, c.Reg.isSet(flagH))
+				assert.Equal(t, false, c.Reg.isSet(flagC))
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
+			})
+			t.Run("when negative half carry", func(t *testing.T) {
+				c.Reg.setR16(tt.args.r1, 0x0FD1) //4049
+				c.Bus.WriteByte(c.Reg.PC, 0x8F)  // -113
+				op.Handler(c, op.R1, op.R2)
+				assert.Equal(t, types.Addr(0x0F60), c.Reg.R16(int(op.R1))) // 3936
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, true, c.Reg.isSet(flagH))
+				assert.Equal(t, false, c.Reg.isSet(flagC))
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
+			})
+			t.Run("when negative carry", func(t *testing.T) {
+				c.Reg.setR16(tt.args.r1, 0x0FD1) //4049
+				c.Bus.WriteByte(c.Reg.PC, 0xE0)  // -32
+				op.Handler(c, op.R1, op.R2)
+				assert.Equal(t, types.Addr(0x0FB1), c.Reg.R16(int(op.R1))) // 4017
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, false, c.Reg.isSet(flagH))
+				assert.Equal(t, true, c.Reg.isSet(flagC))
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
 			})
 		})
 	}
