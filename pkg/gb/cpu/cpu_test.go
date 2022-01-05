@@ -39,26 +39,7 @@ func setup(file string) *bus.Bus {
 	return bus
 }
 
-func Test01(t *testing.T) {
-	file := "../../../test/blargg/cpu_instrs/individual/01-special.gb"
-	bus := setup(file)
-	cpu := New(bus)
-
-	for {
-		if cpu.Bus.ReadByte(0xff02) == byte(0x81) {
-			d := cpu.Bus.ReadByte(0xff01)
-			fmt.Printf("%c", d)
-			cpu.Bus.WriteByte(0xff02, byte(0x00))
-		}
-		if cpu.Reg.PC == 0xcc5f {
-			break
-		}
-		cpu.Step()
-	}
-}
-
-func Test06(t *testing.T) {
-	file := "../../../test/blargg/cpu_instrs/individual/06-ld r,r.gb"
+func testrom(t assert.TestingT, file string, passstr string) {
 	bus := setup(file)
 	cpu := New(bus)
 
@@ -81,78 +62,85 @@ func Test06(t *testing.T) {
 		cpu.Step()
 	}
 
-	assert.Equal(t, "06-ld r,r\n\n\nPassed", str)
+	assert.Equal(t, passstr, str)
+}
+
+func Test01(t *testing.T) {
+	file := "../../../test/blargg/cpu_instrs/individual/01-special.gb"
+	passstr := "01-special\n\n\nPassed"
+
+	testrom(t, file, passstr)
+
+}
+
+func Test02(t *testing.T) {
+	file := "../../../test/blargg/cpu_instrs/individual/02-interrupts.gb"
+	passstr := "02-interrupts\n\n\nPassed"
+
+	testrom(t, file, passstr)
+}
+
+func Test03(t *testing.T) {
+	file := "../../../test/blargg/cpu_instrs/individual/03-op sp,hl.gb"
+	passstr := "03-op sp,hl\n\n\nPassed"
+
+	testrom(t, file, passstr)
+}
+
+func Test04(t *testing.T) {
+	file := "../../../test/blargg/cpu_instrs/individual/04-op r,imm.gb"
+	passstr := "04-op r,imm\n\n\nPassed"
+
+	testrom(t, file, passstr)
+}
+
+func Test05(t *testing.T) {
+	file := "../../../test/blargg/cpu_instrs/individual/05-op rp.gb"
+	passstr := "05-op rp\n\n\nPassed"
+
+	testrom(t, file, passstr)
+}
+
+func Test06(t *testing.T) {
+	file := "../../../test/blargg/cpu_instrs/individual/06-ld r,r.gb"
+	passstr := "06-ld r,r\n\n\nPassed"
+
+	testrom(t, file, passstr)
 }
 
 func Test07(t *testing.T) {
 	file := "../../../test/blargg/cpu_instrs/individual/07-jr,jp,call,ret,rst.gb"
-	bus := setup(file)
-	cpu := New(bus)
+	passstr := "07-jr,jp,call,ret,rst\n\n\nPassed"
 
-	for {
-		if cpu.Bus.ReadByte(0xff02) == byte(0x81) {
-			d := cpu.Bus.ReadByte(0xff01)
-			fmt.Printf("%c", d)
-			cpu.Bus.WriteByte(0xff02, byte(0x00))
-		}
-		if cpu.Reg.PC == 0xcc5f {
-			break
-		}
-		cpu.Step()
-	}
+	testrom(t, file, passstr)
 }
+
+func Test08(t *testing.T) {
+	file := "../../../test/blargg/cpu_instrs/individual/08-misc instrs.gb"
+	passstr := "08-misc instrs\n\n\nPassed"
+
+	testrom(t, file, passstr)
+}
+
 func Test09(t *testing.T) {
 	file := "../../../test/blargg/cpu_instrs/individual/09-op r,r.gb"
-	bus := setup(file)
-	cpu := New(bus)
+	passstr := "09-op r,r\n\n\nPassed"
 
-	for {
-		if cpu.Bus.ReadByte(0xff02) == byte(0x81) {
-			d := cpu.Bus.ReadByte(0xff01)
-			fmt.Printf("%c", d)
-			cpu.Bus.WriteByte(0xff02, byte(0x00))
-		}
-		if cpu.Reg.PC == 0xcc5f {
-			break
-		}
-		cpu.Step()
-	}
+	testrom(t, file, passstr)
 }
 
 func Test10(t *testing.T) {
 	file := "../../../test/blargg/cpu_instrs/individual/10-bit ops.gb"
-	bus := setup(file)
-	cpu := New(bus)
+	passstr := "10-bit ops\n\n\nPassed"
 
-	for {
-		if cpu.Bus.ReadByte(0xff02) == byte(0x81) {
-			d := cpu.Bus.ReadByte(0xff01)
-			fmt.Printf("%c", d)
-			cpu.Bus.WriteByte(0xff02, byte(0x00))
-		}
-		if cpu.Reg.PC == 0xcc5f {
-			break
-		}
-		cpu.Step()
-	}
+	testrom(t, file, passstr)
 }
 
 func Test11(t *testing.T) {
 	file := "../../../test/blargg/cpu_instrs/individual/11-op a,(hl).gb"
-	bus := setup(file)
-	cpu := New(bus)
+	passstr := "11-op a,(hl)\n\n\nPassed"
 
-	for {
-		if cpu.Bus.ReadByte(0xff02) == byte(0x81) {
-			d := cpu.Bus.ReadByte(0xff01)
-			fmt.Printf("%c", d)
-			cpu.Bus.WriteByte(0xff02, byte(0x00))
-		}
-		if cpu.Reg.PC == 0xcc5f {
-			break
-		}
-		cpu.Step()
-	}
+	testrom(t, file, passstr)
 }
 
 func TestCPU_fetch(t *testing.T) {

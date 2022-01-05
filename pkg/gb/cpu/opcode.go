@@ -250,7 +250,7 @@ var opCodes = []*OpCode{
 	{0xE5, "PUSH HL", HL, 0, 0, 1, push},
 	{0xE6, "AND d8", 0, 0, 1, 2, andd8},
 	{0xE7, "RST 20H", 0x20, 0, 0, 1, rst},
-	{0xE8, "ADD SP,r8", SP, 0, 0, 1, notimplemented},
+	{0xE8, "ADD SP,r8", SP, 0, 0, 1, addr16d},
 	{0xE9, "JP (HL)", HL, 0, 0, 1, jpm16},
 	{0xEA, "LD (a16),A", 0, A, 0, 1, lda16r},
 	{0xEB, "EMPTY", 0, 0, 0, 1, notimplemented},
@@ -624,25 +624,36 @@ func addr(c *CPU, _ int, r8 int) {
 	_add(c, r)
 }
 
-func addr16r16(c *CPU, r1 int, r2 int) {
-	a := c.Reg.R16(int(r1))
-	b := c.Reg.R16(int(r2))
-	v := a + b
+func _addr16(c *CPU, v1 types.Addr, v2 types.Addr) types.Addr {
+	v := v1 + v2
 
 	c.Reg.clearFlag(flagN)
 
-	if (v^a^b)&0x1000 == 0x1000 {
+	if (v^v1^v2)&0x1000 == 0x1000 {
 		c.Reg.setFlag(flagH)
 	} else {
 		c.Reg.clearFlag(flagH)
 	}
-	if a+b < a {
+	if v1+v2 < v1 {
 		c.Reg.setFlag(flagC)
 	} else {
 		c.Reg.clearFlag(flagC)
 	}
 
-	c.Reg.setR16(int(r1), v)
+	return v
+}
+
+func addr16r16(c *CPU, r1 int, r2 int) {
+	a := c.Reg.R16(int(r1))
+	b := c.Reg.R16(int(r2))
+	c.Reg.setR16(int(r1), _addr16(c, a, b))
+}
+
+func addr16d(c *CPU, r16 int, _ int) {
+	sp := c.Reg.R16(r16)
+	d := c.fetch()
+	c.Reg.setR16(int(r16), _addr16(c, sp, types.Addr(d)))
+	c.Reg.clearFlag(flagZ)
 }
 
 func addHL(c *CPU, _ int, r16 int) {

@@ -1002,7 +1002,7 @@ func TestOpCode_add(t *testing.T) {
 	}
 }
 
-func TestOpCode_addr16r16(t *testing.T) {
+func TestOpCode_addr16(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
@@ -1019,6 +1019,7 @@ func TestOpCode_addr16r16(t *testing.T) {
 		{name: "ADD HL,DE", args: args{0x19, HL, DE}},
 		{name: "ADD HL,HL", args: args{0x29, HL, HL}},
 		{name: "ADD HL,SP", args: args{0x39, HL, SP}},
+		{name: "ADD SP,r8", args: args{0xE8, SP, 0}},
 	}
 
 	for _, tt := range tests {
