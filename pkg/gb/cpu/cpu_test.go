@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/bus"
@@ -61,17 +62,26 @@ func Test06(t *testing.T) {
 	bus := setup(file)
 	cpu := New(bus)
 
+	var str string
+
+	str = ""
+
 	for {
 		if cpu.Bus.ReadByte(0xff02) == byte(0x81) {
 			d := cpu.Bus.ReadByte(0xff01)
-			fmt.Printf("%c", d)
+			str += string(d)
 			cpu.Bus.WriteByte(0xff02, byte(0x00))
+			fmt.Printf("%c", d)
 		}
-		if cpu.Reg.PC == 0xcc5f {
+
+		if strings.Contains(str, "Failed") ||
+			strings.Contains(str, "Passed") {
 			break
 		}
 		cpu.Step()
 	}
+
+	assert.Equal(t, "06-ld r,r\n\n\nPassed", str)
 }
 
 func Test07(t *testing.T) {
