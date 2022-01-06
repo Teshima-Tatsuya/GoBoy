@@ -524,19 +524,7 @@ func _add(c *CPU, b byte) {
 	flag_c := carryBits&(1<<8) != 0
 
 	c.Reg.R[A] = byte(v)
-	c.Reg.clearFlag(flagN)
-	c.Reg.setFlagZ(byte(v))
-
-	if flag_h {
-		c.Reg.setFlag(flagH)
-	} else {
-		c.Reg.clearFlag(flagH)
-	}
-	if flag_c {
-		c.Reg.setFlag(flagC)
-	} else {
-		c.Reg.clearFlag(flagC)
-	}
+	c.Reg.setZNHC(byte(v) == 0, false, flag_h, flag_c)
 }
 
 func addr(c *CPU, _ int, r8 int) {
@@ -547,19 +535,7 @@ func addr(c *CPU, _ int, r8 int) {
 func _addr16(c *CPU, v1 types.Addr, v2 types.Addr) types.Addr {
 	v := v1 + v2
 
-	c.Reg.clearFlag(flagN)
-
-	if (v^v1^v2)&0x1000 == 0x1000 {
-		c.Reg.setFlag(flagH)
-	} else {
-		c.Reg.clearFlag(flagH)
-	}
-	if v1+v2 < v1 {
-		c.Reg.setFlag(flagC)
-	} else {
-		c.Reg.clearFlag(flagC)
-	}
-
+	c.Reg.setNHC(false, (v^v1^v2)&0x1000 == 0x1000, v < v1)
 	return v
 }
 
@@ -575,22 +551,10 @@ func addr16d(c *CPU, r16 int, _ int) {
 
 	v := int32(v1) + int32(int8(v2)) // consider negative
 
-	c.Reg.clearFlag(flagN)
-
 	carry := v1 ^ types.Addr(v2) ^ (v1 + types.Addr(v2))
 
-	if carry&0x10 == 0x10 {
-		c.Reg.setFlag(flagH)
-	} else {
-		c.Reg.clearFlag(flagH)
-	}
-	if carry&0x100 == 0x100 {
-		c.Reg.setFlag(flagC)
-	} else {
-		c.Reg.clearFlag(flagC)
-	}
 	c.Reg.setR16(r16, types.Addr(v))
-	c.Reg.clearFlag(flagZ)
+	c.Reg.setZNHC(false, false, carry&0x10 == 0x10, carry&0x100 == 0x100)
 }
 
 func addHL(c *CPU, _ int, r16 int) {
@@ -609,22 +573,10 @@ func _adc(c *CPU, r byte) {
 
 	v := a + r + byte(util.Bool2Int8(carry))
 
-	if a&0x0F+r&0x0F+byte(util.Bool2Int8(carry)) > 0x0F {
-		c.Reg.setFlag(flagH)
-	} else {
-		c.Reg.clearFlag(flagH)
-	}
-
-	if uint(a&0xFF)+uint(r&0xFF)+uint(util.Bool2Int8(carry)) > 0xFF {
-		c.Reg.setFlag(flagC)
-	} else {
-		c.Reg.clearFlag(flagC)
-	}
-
-	c.Reg.clearFlag(flagN)
-
 	c.Reg.R[A] = v
-	c.Reg.setFlagZ(v)
+	flag_h := a&0x0F+r&0x0F+byte(util.Bool2Int8(carry)) > 0x0F
+	flag_c := uint(a&0xFF)+uint(r&0xFF)+uint(util.Bool2Int8(carry)) > 0xFF
+	c.Reg.setZNHC(v == 0, false, flag_h, flag_c)
 }
 
 // ADC A,R
@@ -651,20 +603,7 @@ func _sub(c *CPU, b byte) {
 	flag_c := a < v
 
 	c.Reg.R[A] = v
-	c.Reg.setFlag(flagN)
-	c.Reg.setFlagZ(byte(v))
-
-	if flag_h {
-		c.Reg.setFlag(flagH)
-	} else {
-		c.Reg.clearFlag(flagH)
-	}
-
-	if flag_c {
-		c.Reg.setFlag(flagC)
-	} else {
-		c.Reg.clearFlag(flagC)
-	}
+	c.Reg.setZNHC(byte(v) == 0, true, flag_h, flag_c)
 }
 
 func subr(c *CPU, r8 int, _ int) {
@@ -687,58 +626,12 @@ func _sbc(c *CPU, r byte) {
 	carry := util.Bool2Int8(c.Reg.isSet(flagC))
 
 	v := a - (r + byte(carry))
-
-	if a&0x0F < r&0x0F+byte(carry) {
-		c.Reg.setFlag(flagH)
-	} else {
-		c.Reg.clearFlag(flagH)
-	}
-
-	if uint16(a) < uint16(r)+uint16(carry) {
-		c.Reg.setFlag(flagC)
-	} else {
-		c.Reg.clearFlag(flagC)
-	}
-	//	if (value16>>8)&0x01 == 0x01 {
-	//		c.Reg.setFlag(flagC)
-	//	} else {
-	//		c.Reg.clearFlag(flagC)
-	//	}
-
-	c.Reg.clearFlag(flagN)
-
 	c.Reg.R[A] = byte(v)
-	c.Reg.setFlagZ(byte(v))
+
+	flag_h := a&0x0F < r&0x0F+byte(carry)
+	flag_c := uint16(a) < uint16(r)+uint16(carry)
+	c.Reg.setZNHC(byte(v) == 0, false, flag_h, flag_c)
 }
-
-// func _sbc(c *CPU, r byte) {
-// 	a := c.Reg.R[A]
-// 	carry := util.Bool2Int8(c.Reg.isSet(flagC))
-
-// 	v := a - (r + byte(carry))
-
-// 	if a&0x0F < r&0x0F+byte(carry) {
-// 		c.Reg.setFlag(flagH)
-// 	} else {
-// 		c.Reg.clearFlag(flagH)
-// 	}
-
-// 	if uint16(a) < uint16(r)+uint16(carry) {
-// 		c.Reg.setFlag(flagC)
-// 	} else {
-// 		c.Reg.clearFlag(flagC)
-// 	}
-// 	//	if (value16>>8)&0x01 == 0x01 {
-// 	//		c.Reg.setFlag(flagC)
-// 	//	} else {
-// 	//		c.Reg.clearFlag(flagC)
-// 	//	}
-
-// 	c.Reg.clearFlag(flagN)
-
-// 	c.Reg.R[A] = byte(v)
-// 	c.Reg.setFlagZ(byte(v))
-// }
 
 // SBC A,R
 func sbcr(c *CPU, _ int, r2 int) {
@@ -897,24 +790,15 @@ func callnf(c *CPU, flag int, _ int) {
 
 func cpl(c *CPU, _ int, _ int) {
 	c.Reg.R[A] = ^c.Reg.R[A]
-	c.Reg.setFlag(flagN)
-	c.Reg.setFlag(flagH)
+	c.Reg.setNH(true, true)
 }
 
 func scf(c *CPU, _ int, _ int) {
-	c.Reg.setFlag(flagC)
-	c.Reg.clearFlag(flagN)
-	c.Reg.clearFlag(flagH)
+	c.Reg.setNHC(false, false, true)
 }
 
 func ccf(c *CPU, _ int, _ int) {
-	if c.Reg.isSet(flagC) {
-		c.Reg.clearFlag(flagC)
-	} else {
-		c.Reg.setFlag(flagC)
-	}
-	c.Reg.clearFlag(flagH)
-	c.Reg.clearFlag(flagN)
+	c.Reg.setNHC(false, false, !c.Reg.isSet(flagC))
 }
 
 // @see https://donkeyhacks.zouri.jp/html/En-Us/snes/apu/spc700/daa.html
@@ -933,14 +817,9 @@ func daa(c *CPU, _ int, _ int) {
 		val += 0x60
 	}
 
-	if (val>>8)&0x01 == 0x01 {
-		c.Reg.setFlag(flagC)
-	}
-	c.Reg.clearFlag(flagN)
-	c.Reg.setFlagZ(byte(val))
-
 	c.Reg.R[A] = byte(val)
-
+	flag_c := (val>>8)&0x01 == 0x01
+	c.Reg.setZHC(byte(val) == 0, false, flag_c)
 }
 
 func stop(c *CPU, _ int, _ int) {
@@ -1224,17 +1103,13 @@ var cbOpCodes = []*OpCode{
 
 func _rlc(c *CPU, v byte) byte {
 	// check Bit 7 is set
-	if v&0x80 == 0x80 {
-		c.Reg.setFlag(flagC)
+	flag_c := v&0x80 == 0x80
+	if flag_c {
 		v = v<<1 | 0x01
 	} else {
-		c.Reg.clearFlag(flagC)
 		v = v << 1
 	}
-
-	c.Reg.setFlagZ(v)
-	c.Reg.clearFlag(flagN)
-	c.Reg.clearFlag(flagH)
+	c.Reg.setZNHC(v == 0, false, false, flag_c)
 
 	return v
 }
@@ -1255,17 +1130,14 @@ func rlcm16(c *CPU, r16 int, _ int) {
 
 func _rrc(c *CPU, v byte) byte {
 	// check Bit 0 is set
-	if v&0x01 == 0x01 {
-		c.Reg.setFlag(flagC)
+	flag_c := v&0x01 == 0x01
+	if flag_c {
 		v = v>>1 | 0x80
 	} else {
-		c.Reg.clearFlag(flagC)
 		v = v >> 1
 	}
 
-	c.Reg.setFlagZ(v)
-	c.Reg.clearFlag(flagN)
-	c.Reg.clearFlag(flagH)
+	c.Reg.setZNHC(v == 0, false, false, flag_c)
 
 	return v
 }
@@ -1286,19 +1158,13 @@ func rrcm16(c *CPU, r16 int, _ int) {
 func _rl(c *CPU, v byte) byte {
 	beforeCarry := c.Reg.isSet(flagC)
 	// check Bit 0 is set
-	if v&0x80 == 0x80 {
-		c.Reg.setFlag(flagC)
-	} else {
-		c.Reg.clearFlag(flagC)
-	}
-
+	flag_c := v&0x80 == 0x80
 	v = v << 1
 	if beforeCarry {
 		v++
 	}
-	c.Reg.setFlagZ(v)
-	c.Reg.clearFlag(flagN)
-	c.Reg.clearFlag(flagH)
+
+	c.Reg.setZNHC(v == 0, false, false, flag_c)
 
 	return v
 }
@@ -1318,20 +1184,12 @@ func rlm16(c *CPU, r16 int, _ int) {
 
 func _rr(c *CPU, v byte) byte {
 	beforeCarry := c.Reg.isSet(flagC)
-	// check Bit 0 is set
-	if v&0x01 == 0x01 {
-		c.Reg.setFlag(flagC)
-	} else {
-		c.Reg.clearFlag(flagC)
-	}
-
+	flag_c := v&0x01 == 0x01
 	v = v >> 1
 	if beforeCarry {
 		v |= 0x80
 	}
-	c.Reg.setFlagZ(v)
-	c.Reg.clearFlag(flagN)
-	c.Reg.clearFlag(flagH)
+	c.Reg.setZNHC(v == 0, false, false, flag_c)
 
 	return v
 }
@@ -1350,17 +1208,10 @@ func rrm16(c *CPU, r16 int, _ int) {
 }
 
 func _sla(c *CPU, v byte) byte {
-	// check Bit 7 is set
-	if v&0x80 == 0x80 {
-		c.Reg.setFlag(flagC)
-	} else {
-		c.Reg.clearFlag(flagC)
-	}
+	flag_c := v&0x80 == 0x80
 
 	v = v << 1
-	c.Reg.setFlagZ(v)
-	c.Reg.clearFlag(flagN)
-	c.Reg.clearFlag(flagH)
+	c.Reg.setZNHC(v == 0, false, false, flag_c)
 
 	return v
 }
@@ -1379,17 +1230,10 @@ func slam16(c *CPU, r16 int, _ int) {
 }
 
 func _sra(c *CPU, v byte) byte {
-	// check Bit 0 is set
-	if v&0x01 == 0x01 {
-		c.Reg.setFlag(flagC)
-	} else {
-		c.Reg.clearFlag(flagC)
-	}
+	flag_c := v&0x01 == 0x01
 
 	v = v >> 1
-	c.Reg.setFlagZ(v)
-	c.Reg.clearFlag(flagN)
-	c.Reg.clearFlag(flagH)
+	c.Reg.setZNHC(v == 0, false, false, flag_c)
 
 	return v
 }
@@ -1412,10 +1256,7 @@ func _swap(c *CPU, v byte) byte {
 	lower := v & 0x0F
 
 	b := byte(lower<<4) | upper
-	c.Reg.setFlagZ(b)
-	c.Reg.clearFlag(flagN)
-	c.Reg.clearFlag(flagH)
-	c.Reg.clearFlag(flagC)
+	c.Reg.setZNHC(b == 0, false, false, false)
 
 	return b
 }
@@ -1433,17 +1274,10 @@ func swapm16(c *CPU, r16 int, _ int) {
 }
 
 func _srl(c *CPU, v byte) byte {
-	// check Bit 0 is set
-	if v&0x01 == 0x01 {
-		c.Reg.setFlag(flagC)
-	} else {
-		c.Reg.clearFlag(flagC)
-	}
+	flag_c := v&0x01 == 0x01
 
 	v = v >> 1
-	c.Reg.setFlagZ(v)
-	c.Reg.clearFlag(flagN)
-	c.Reg.clearFlag(flagH)
+	c.Reg.setZNHC(v == 0, false, false, flag_c)
 
 	return v
 }
@@ -1461,22 +1295,14 @@ func srlm16(c *CPU, r16 int, _ int) {
 }
 
 func bitr(c *CPU, b int, r8 int) {
-	c.Reg.clearFlag(flagN)
-	c.Reg.setFlag(flagH)
-
 	r := c.Reg.R[r8]
-
-	c.Reg.setFlagZ(util.Bit(r, int(b)))
+	c.Reg.setZNH(util.Bit(r, int(b)) == 0, false, true)
 }
 
 func bitm16(c *CPU, b int, r16 int) {
 	addr := c.Reg.R16(int(r16))
 	r := c.Bus.ReadByte(addr)
-
-	c.Reg.clearFlag(flagN)
-	c.Reg.setFlag(flagH)
-
-	c.Reg.setFlagZ(util.Bit(r, int(b)))
+	c.Reg.setZNH(util.Bit(r, int(b)) == 0, false, true)
 }
 
 func resr(c *CPU, b int, r8 int) {

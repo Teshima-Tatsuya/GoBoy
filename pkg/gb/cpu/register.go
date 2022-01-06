@@ -135,14 +135,6 @@ func (r *Register) setHL(value types.Addr) {
 	r.R[H], r.R[L] = byte(value>>8), byte(value)
 }
 
-func (r *Register) setFlagZ(v byte) {
-	if v == 0 {
-		r.setFlag(flagZ)
-	} else {
-		r.clearFlag(flagZ)
-	}
-}
-
 func (r *Register) setF(flag int, b bool) {
 	if b {
 		r.R[F] |= (1 << uint(flag))
@@ -156,6 +148,11 @@ func (r *Register) setNH(n, h bool) {
 	r.setF(flagH, h)
 }
 
+func (r *Register) setZHC(z, h, c bool) {
+	r.setF(flagZ, z)
+	r.setF(flagH, h)
+	r.setF(flagC, c)
+}
 func (r *Register) setZNH(z, n, h bool) {
 	r.setNH(n, h)
 	r.setF(flagZ, z)
@@ -169,32 +166,6 @@ func (r *Register) setNHC(n, h, c bool) {
 func (r *Register) setZNHC(z, n, h, c bool) {
 	r.setNHC(n, h, c)
 	r.setF(flagZ, z)
-}
-
-func (r *Register) setFlag(flag int) {
-	switch flag {
-	case flagZ:
-		r.R[F] = r.R[F] | (1 << uint(flagZ))
-	case flagN:
-		r.R[F] = r.R[F] | (1 << uint(flagN))
-	case flagH:
-		r.R[F] = r.R[F] | (1 << uint(flagH))
-	case flagC:
-		r.R[F] = r.R[F] | (1 << uint(flagC))
-	}
-}
-
-func (r *Register) clearFlag(flag int) {
-	switch flag {
-	case flagZ:
-		r.R[F] = r.R[F] & ^byte((uint(1 << uint(flagZ))))
-	case flagN:
-		r.R[F] = r.R[F] & ^byte((uint(1 << uint(flagN))))
-	case flagH:
-		r.R[F] = r.R[F] & ^byte((uint(1 << uint(flagH))))
-	case flagC:
-		r.R[F] = r.R[F] & ^byte((uint(1 << uint(flagC))))
-	}
 }
 
 func (r *Register) isSet(flag int) bool {
