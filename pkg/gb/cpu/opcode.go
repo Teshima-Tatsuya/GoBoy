@@ -339,20 +339,9 @@ func ldr16r16d(c *CPU, R1 int, R2 int) {
 	v := sp + types.Addr((int8(d)))
 	c.Reg.setR16(int(R1), types.Addr(v))
 
-	c.Reg.clearFlag(flagZ)
-	c.Reg.clearFlag(flagN)
 	carry := sp ^ types.Addr(d) ^ (sp + types.Addr(d))
 
-	if carry&0x100 == 0x100 {
-		c.Reg.setFlag(flagC)
-	} else {
-		c.Reg.clearFlag(flagC)
-	}
-	if carry&0x10 == 0x10 {
-		c.Reg.setFlag(flagH)
-	} else {
-		c.Reg.clearFlag(flagH)
-	}
+	c.Reg.setZNHC(false, false, carry&0x10 == 0x10, carry&0x100 == 0x100)
 }
 
 // LD r1, d16
@@ -406,21 +395,10 @@ func incr(c *CPU, r8 int, _ int) {
 	r := c.Reg.R[r8]
 
 	incremented := r + 0x01
-	c.Reg.clearFlag(flagN) // not subtract
-	if incremented == 0 {
-		c.Reg.setFlag(flagZ)
-	} else {
-		c.Reg.clearFlag(flagZ)
-	}
-
-	// Harf Carry
-	if (incremented^0x01^c.Reg.R[r8])&0x10 == 0x10 {
-		c.Reg.setFlag(flagH)
-	} else {
-		c.Reg.clearFlag(flagH)
-	}
-
 	c.Reg.R[r8] = incremented
+
+	h := (incremented^0x01^r)&0x10 == 0x10
+	c.Reg.setZNH(incremented == 0, false, h)
 }
 
 func incr16(c *CPU, r16 int, _ int) {
@@ -770,25 +748,57 @@ func _sbc(c *CPU, r byte) {
 
 	v := a - (r + byte(carry))
 
-	value4, value16 := (a&0b1111)-((r&0b1111)+byte(carry)), uint16(a)-(uint16(r)+uint16(carry))
-
-	if util.Bit(value4, 4) == 0x01 {
+	if a&0x0F < r&0x0F+byte(carry) {
 		c.Reg.setFlag(flagH)
 	} else {
 		c.Reg.clearFlag(flagH)
 	}
 
-	if (value16>>8)&0x01 == 0x01 {
+	if uint16(a) < uint16(r)+uint16(carry) {
 		c.Reg.setFlag(flagC)
 	} else {
 		c.Reg.clearFlag(flagC)
 	}
+	//	if (value16>>8)&0x01 == 0x01 {
+	//		c.Reg.setFlag(flagC)
+	//	} else {
+	//		c.Reg.clearFlag(flagC)
+	//	}
 
 	c.Reg.clearFlag(flagN)
 
 	c.Reg.R[A] = byte(v)
 	c.Reg.setFlagZ(byte(v))
 }
+
+// func _sbc(c *CPU, r byte) {
+// 	a := c.Reg.R[A]
+// 	carry := util.Bool2Int8(c.Reg.isSet(flagC))
+
+// 	v := a - (r + byte(carry))
+
+// 	if a&0x0F < r&0x0F+byte(carry) {
+// 		c.Reg.setFlag(flagH)
+// 	} else {
+// 		c.Reg.clearFlag(flagH)
+// 	}
+
+// 	if uint16(a) < uint16(r)+uint16(carry) {
+// 		c.Reg.setFlag(flagC)
+// 	} else {
+// 		c.Reg.clearFlag(flagC)
+// 	}
+// 	//	if (value16>>8)&0x01 == 0x01 {
+// 	//		c.Reg.setFlag(flagC)
+// 	//	} else {
+// 	//		c.Reg.clearFlag(flagC)
+// 	//	}
+
+// 	c.Reg.clearFlag(flagN)
+
+// 	c.Reg.R[A] = byte(v)
+// 	c.Reg.setFlagZ(byte(v))
+// }
 
 // SBC A,R
 func sbcr(c *CPU, _ int, r2 int) {
@@ -960,11 +970,10 @@ func scf(c *CPU, _ int, _ int) {
 func ccf(c *CPU, _ int, _ int) {
 	if c.Reg.isSet(flagC) {
 		c.Reg.clearFlag(flagC)
-		c.Reg.setFlag(flagH)
 	} else {
 		c.Reg.setFlag(flagC)
-		c.Reg.clearFlag(flagH)
 	}
+	c.Reg.clearFlag(flagH)
 	c.Reg.clearFlag(flagN)
 }
 

@@ -151,6 +151,34 @@ func (r *Register) setFlagZ(v byte) {
 	}
 }
 
+func (r *Register) setF(flag int, b bool) {
+	if b {
+		r.R[F] |= (1 << uint(flag))
+	} else {
+		r.R[F] &= ^(1 << uint(flag))
+	}
+}
+
+func (r *Register) setNH(n, h bool) {
+	r.setF(flagN, n)
+	r.setF(flagH, h)
+}
+
+func (r *Register) setZNH(z, n, h bool) {
+	r.setNH(n, h)
+	r.setF(flagZ, z)
+}
+
+func (r *Register) setNHC(n, h, c bool) {
+	r.setNH(n, h)
+	r.setF(flagC, c)
+}
+
+func (r *Register) setZNHC(z, n, h, c bool) {
+	r.setNHC(n, h, c)
+	r.setF(flagZ, z)
+}
+
 func (r *Register) setFlag(flag int) {
 	switch flag {
 	case flagZ:
@@ -178,18 +206,7 @@ func (r *Register) clearFlag(flag int) {
 }
 
 func (r *Register) isSet(flag int) bool {
-	switch flag {
-	case flagZ:
-		return r.R[F]&byte(1<<uint(flagZ)) == 1<<uint(flagZ)
-	case flagN:
-		return r.R[F]&byte(1<<uint(flagN)) == 1<<uint(flagN)
-	case flagH:
-		return r.R[F]&byte(1<<uint(flagH)) == 1<<uint(flagH)
-	case flagC:
-		return r.R[F]&byte(1<<uint(flagC)) == 1<<uint(flagC)
-	default:
-		panic("Unknown Flag")
-	}
+	return r.R[F]&byte(1<<uint(flag)) == 1<<uint(flag)
 }
 
 func (r *Register) Dump() {
