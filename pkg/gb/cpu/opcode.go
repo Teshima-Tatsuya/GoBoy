@@ -408,38 +408,19 @@ func incr16(c *CPU, r16 int, _ int) {
 func incm16(c *CPU, r16 int, _ int) {
 	d := c.Bus.ReadByte(c.Reg.R16(int(r16)))
 	v := d + 1
-	c.Reg.setFlagZ(v)
-	c.Reg.clearFlag(flagN)
 	carryBits := d ^ 1 ^ v
-
-	if carryBits&0x10 == 0x10 {
-		c.Reg.setFlag(flagH)
-	} else {
-		c.Reg.clearFlag(flagH)
-	}
-
 	c.Bus.WriteByte(c.Reg.R16(int(r16)), byte(v))
+
+	c.Reg.setZNH(v == 0, false, carryBits&0x10 == 0x10)
 }
 
 func decr(c *CPU, r8 int, _ int) {
 	r := c.Reg.R[r8]
-
 	decremented := r - 0x01
-	c.Reg.setFlag(flagN) // subtract
-	if decremented == 0 {
-		c.Reg.setFlag(flagZ)
-	} else {
-		c.Reg.clearFlag(flagZ)
-	}
-
-	// Harf Carry
-	if (decremented^0x01^c.Reg.R[r8])&0x10 == 0x10 {
-		c.Reg.setFlag(flagH)
-	} else {
-		c.Reg.clearFlag(flagH)
-	}
-
 	c.Reg.R[r8] = decremented
+
+	h := (decremented^0x01^r)&0x10 == 0x10
+	c.Reg.setZNH(decremented == 0, true, h)
 }
 
 func decr16(c *CPU, r16 int, _ int) {
@@ -449,30 +430,15 @@ func decr16(c *CPU, r16 int, _ int) {
 func decm16(c *CPU, r16 int, _ int) {
 	d := c.Bus.ReadByte(c.Reg.R16(int(r16)))
 	v := d - 1
-	c.Reg.setFlagZ(v)
-	c.Reg.setFlag(flagN)
 	carryBits := d ^ 1 ^ v
-
-	if carryBits&0x10 == 0x10 {
-		c.Reg.setFlag(flagH)
-	} else {
-		c.Reg.clearFlag(flagH)
-	}
-
 	c.Bus.WriteByte(c.Reg.R16(int(r16)), byte(v))
+
+	c.Reg.setZNH(v == 0, true, carryBits&0x10 == 0x10)
 }
 
 func _and(c *CPU, buf byte) {
 	c.Reg.R[A] &= buf
-
-	if c.Reg.R[A] == 0 {
-		c.Reg.setFlag(flagZ)
-	} else {
-		c.Reg.clearFlag(flagZ)
-	}
-	c.Reg.clearFlag(flagN)
-	c.Reg.setFlag(flagH)
-	c.Reg.clearFlag(flagC)
+	c.Reg.setZNHC(c.Reg.R[A] == 0, false, true, false)
 }
 
 func andr(c *CPU, r8 int, _ int) {
@@ -492,15 +458,7 @@ func andd8(c *CPU, _ int, _ int) {
 
 func _or(c *CPU, buf byte) {
 	c.Reg.R[A] |= buf
-
-	if c.Reg.R[A] == 0 {
-		c.Reg.setFlag(flagZ)
-	} else {
-		c.Reg.clearFlag(flagZ)
-	}
-	c.Reg.clearFlag(flagN)
-	c.Reg.clearFlag(flagH)
-	c.Reg.clearFlag(flagC)
+	c.Reg.setZNHC(c.Reg.R[A] == 0, false, true, false)
 }
 
 func orr(c *CPU, r8 int, _ int) {
@@ -520,15 +478,7 @@ func ord8(c *CPU, r8 int, _ int) {
 
 func _xor(c *CPU, buf byte) {
 	c.Reg.R[A] ^= buf
-
-	if c.Reg.R[A] == 0 {
-		c.Reg.setFlag(flagZ)
-	} else {
-		c.Reg.clearFlag(flagZ)
-	}
-	c.Reg.clearFlag(flagN)
-	c.Reg.clearFlag(flagH)
-	c.Reg.clearFlag(flagC)
+	c.Reg.setZNHC(c.Reg.R[A] == 0, false, true, false)
 }
 
 func xorr(c *CPU, r8 int, _ int) {
@@ -547,18 +497,8 @@ func xord8(c *CPU, _ int, _ int) {
 }
 
 func _cp(c *CPU, v byte) {
-	if c.Reg.R[A] == v {
-		c.Reg.setFlag(flagZ)
-	} else {
-		c.Reg.clearFlag(flagZ)
-	}
-	if c.Reg.R[A] < v {
-		c.Reg.setFlag(flagC)
-	} else {
-		c.Reg.clearFlag(flagC)
-	}
-	c.Reg.setFlagH(v)
-	c.Reg.setFlag(flagN)
+	a := c.Reg.R[A]
+	c.Reg.setZNHC(a == v, true, a&0x0F < v&0x0F, a < v)
 }
 
 func cpr(c *CPU, r8 int, _ int) {

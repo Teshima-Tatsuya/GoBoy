@@ -1612,7 +1612,7 @@ func TestOpCode_and(t *testing.T) {
 			op := opCodes[tt.args.opcode]
 			assert.Equal(t, tt.args.r1, op.R1)
 
-			if tt.args.r1 == A {
+			if strings.Contains(op.Mnemonic, "AND A") {
 				t.Skip()
 			}
 			t.Run("when oposite", func(t *testing.T) {
@@ -1690,7 +1690,7 @@ func TestOpCode_or(t *testing.T) {
 			op := opCodes[tt.args.opcode]
 			assert.Equal(t, tt.args.r1, op.R1)
 
-			if tt.args.r1 == A {
+			if strings.Contains(op.Mnemonic, "OR A") {
 				t.Skip()
 			}
 			t.Run("when oposite", func(t *testing.T) {
@@ -1769,7 +1769,7 @@ func TestOpCode_xor(t *testing.T) {
 			op := opCodes[tt.args.opcode]
 			assert.Equal(t, tt.args.r1, op.R1)
 
-			if tt.args.r1 == A {
+			if strings.Contains(op.Mnemonic, "XOR A") {
 				t.Skip()
 			}
 			t.Run("when oposite", func(t *testing.T) {
@@ -1850,7 +1850,7 @@ func TestOpCode_cp(t *testing.T) {
 
 			assert.Equal(t, tt.args.r1, op.R1)
 
-			if tt.args.r1 == A {
+			if strings.Contains(op.Mnemonic, "CP A") {
 				t.Skip()
 			}
 
