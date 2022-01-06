@@ -630,7 +630,7 @@ func _sbc(c *CPU, r byte) {
 
 	flag_h := a&0x0F < r&0x0F+byte(carry)
 	flag_c := uint16(a) < uint16(r)+uint16(carry)
-	c.Reg.setZNHC(byte(v) == 0, false, flag_h, flag_c)
+	c.Reg.setZNHC(byte(v) == 0, true, flag_h, flag_c)
 }
 
 // SBC A,R
