@@ -1706,6 +1706,10 @@ func TestOpCode_or(t *testing.T) {
 
 				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0b11111111), c.Reg.R[A])
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, false, c.Reg.isSet(flagH))
+				assert.Equal(t, false, c.Reg.isSet(flagC))
 			})
 			t.Run("when equal", func(t *testing.T) {
 				c.Reg.R[A] = 0b11110000
@@ -1720,6 +1724,10 @@ func TestOpCode_or(t *testing.T) {
 
 				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0b11110000), c.Reg.R[A])
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, false, c.Reg.isSet(flagH))
+				assert.Equal(t, false, c.Reg.isSet(flagC))
 			})
 			t.Run("when other", func(t *testing.T) {
 				c.Reg.R[A] = 0b11110000
@@ -1734,6 +1742,28 @@ func TestOpCode_or(t *testing.T) {
 
 				op.Handler(c, op.R1, op.R2)
 				assert.Equal(t, byte(0b11110101), c.Reg.R[A])
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, false, c.Reg.isSet(flagH))
+				assert.Equal(t, false, c.Reg.isSet(flagC))
+			})
+			t.Run("when zero", func(t *testing.T) {
+				c.Reg.R[A] = 0b00000000
+				val := byte(0b00000000)
+				if strings.Contains(op.Mnemonic, "HL") {
+					c.Bus.WriteByte(c.Reg.R16(int(HL)), val)
+				} else if strings.Contains(op.Mnemonic, "d8") {
+					c.Bus.WriteByte(c.Reg.PC, val)
+				} else {
+					c.Reg.R[tt.args.r1] = val
+				}
+
+				op.Handler(c, op.R1, op.R2)
+				assert.Equal(t, byte(0b00000000), c.Reg.R[A])
+				assert.Equal(t, true, c.Reg.isSet(flagZ))
+				assert.Equal(t, false, c.Reg.isSet(flagN))
+				assert.Equal(t, false, c.Reg.isSet(flagH))
+				assert.Equal(t, false, c.Reg.isSet(flagC))
 			})
 		})
 	}

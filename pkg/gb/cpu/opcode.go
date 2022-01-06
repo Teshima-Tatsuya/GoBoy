@@ -458,7 +458,7 @@ func andd8(c *CPU, _ int, _ int) {
 
 func _or(c *CPU, buf byte) {
 	c.Reg.R[A] |= buf
-	c.Reg.setZNHC(c.Reg.R[A] == 0, false, true, false)
+	c.Reg.setZNHC(c.Reg.R[A] == 0, false, false, false)
 }
 
 func orr(c *CPU, r8 int, _ int) {
