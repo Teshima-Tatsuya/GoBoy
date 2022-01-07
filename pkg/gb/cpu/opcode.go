@@ -33,7 +33,7 @@ var opCodes = []*OpCode{
 	{0x0C, "INC C", C, 0, 1, 2, incr},
 	{0x0D, "DEC C", C, 0, 0, 1, decr},
 	{0x0E, "LD C,d8", C, 0, 1, 2, ldrd},
-	{0x0F, "RRCA", A, 0, 0, 1, rrcr},
+	{0x0F, "RRCA", 0, 0, 0, 1, rrca},
 	{0x10, "STOP 0", 0, 0, 0, 1, stop},
 	{0x11, "LD DE,d16", DE, 0, 2, 3, ldr16d16},
 	{0x12, "LD (DE),A", DE, A, 0, 2, ldm16r},
@@ -41,7 +41,7 @@ var opCodes = []*OpCode{
 	{0x14, "INC D", D, 0, 0, 1, incr},
 	{0x15, "DEC D", D, 0, 0, 1, decr},
 	{0x16, "LD D,d8", D, 0, 1, 2, ldrd},
-	{0x17, "RLA", A, 0, 0, 1, rlr},
+	{0x17, "RLA", 0, 0, 0, 1, rla},
 	{0x18, "JR r8", 0, 0, 1, 3, jrr8},
 	{0x19, "ADD HL,DE", HL, DE, 0, 2, addr16r16},
 	{0x1A, "LD A,(DE)", A, DE, 0, 2, ldrm16},
@@ -49,7 +49,7 @@ var opCodes = []*OpCode{
 	{0x1C, "INC E", E, 0, 0, 1, incr},
 	{0x1D, "DEC E", E, 0, 0, 1, decr},
 	{0x1E, "LD E,d8", E, 0, 1, 2, ldrd},
-	{0x1F, "RRA", A, 0, 0, 1, rrr},
+	{0x1F, "RRA", 0, 0, 0, 1, rra},
 	{0x20, "JR NZ,r8", flagZ, 0, 1, 2, jrnfr8},
 	{0x21, "LD HL,d16", HL, 0, 2, 3, ldr16d16},
 	{0x22, "LD (HL+),A", HLI, A, 0, 2, ldm16r},
@@ -1148,6 +1148,13 @@ func _rrc(c *CPU, v byte) byte {
 	return v
 }
 
+// RRCA
+func rrca(c *CPU, _ int, _ int) {
+	r := c.Reg.R[A]
+	c.Reg.R[A] = _rrc(c, r)
+	c.Reg.setF(flagZ, false)
+}
+
 // RRC r
 func rrcr(c *CPU, r8 int, _ int) {
 	r := c.Reg.R[r8]
@@ -1175,6 +1182,13 @@ func _rl(c *CPU, v byte) byte {
 	return v
 }
 
+// RLA
+func rla(c *CPU, _ int, _ int) {
+	r := c.Reg.R[A]
+	c.Reg.R[A] = _rl(c, r)
+	c.Reg.setF(flagZ, false)
+}
+
 // RL r
 func rlr(c *CPU, r8 int, _ int) {
 	r := c.Reg.R[r8]
@@ -1198,6 +1212,13 @@ func _rr(c *CPU, v byte) byte {
 	c.Reg.setZNHC(v == 0, false, false, flag_c)
 
 	return v
+}
+
+// RRA
+func rra(c *CPU, _ int, _ int) {
+	r := c.Reg.R[A]
+	c.Reg.R[A] = _rr(c, r)
+	c.Reg.setF(flagZ, false)
 }
 
 // RR r
