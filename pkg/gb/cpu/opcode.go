@@ -807,23 +807,30 @@ func ccf(c *CPU, _ int, _ int) {
 
 // @see https://donkeyhacks.zouri.jp/html/En-Us/snes/apu/spc700/daa.html
 func daa(c *CPU, _ int, _ int) {
-	a := c.Reg.R[A]
-	alow := a & 0x0F
+	a := types.Addr(c.Reg.R[A])
 
-	var val uint32
-	val = uint32(a)
-
-	if alow >= 0x0A || c.Reg.isSet(flagH) {
-		val += 0x06
+	if !c.Reg.isSet(flagN) {
+		if a&0x0F >= 0x0A || c.Reg.isSet(flagH) {
+			a += 0x06
+		}
+		if a >= 0xA0 || c.Reg.isSet(flagC) {
+			a += 0x60
+		}
+	} else {
+		if c.Reg.isSet(flagH) {
+			a = (a - 0x06) & 0xFF
+		}
+		if c.Reg.isSet(flagC) {
+			a -= 0x60
+		}
 	}
 
-	if (val>>4)&0x0F >= 0x0A || c.Reg.isSet(flagC) {
-		val += 0x60
+	c.Reg.R[A] = byte(a)
+	c.Reg.setF(flagZ, byte(a) == 0)
+	c.Reg.setF(flagH, false)
+	if a&0x100 == 0x100 {
+		c.Reg.setF(flagC, true)
 	}
-
-	c.Reg.R[A] = byte(val)
-	flag_c := (val>>8)&0x01 == 0x01
-	c.Reg.setZHC(byte(val) == 0, false, flag_c)
 }
 
 func stop(c *CPU, _ int, _ int) {

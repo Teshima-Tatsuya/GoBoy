@@ -2423,6 +2423,85 @@ func TestOpCode_call(t *testing.T) {
 	}
 }
 
+func TestOpCode_daa(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{name: "DAA", args: args{0x27}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			t.Run("when low 4 bit greater than or equal A", func(t *testing.T) {
+				c.Reg.R[A] = 0x0A
+				c.Reg.setZNHC(false, false, false, false)
+				op.Handler(c, op.R1, op.R2)
+				assert.Equal(t, byte(0x10), c.Reg.R[A])
+				assert.Equal(t, false, c.Reg.isSet(flagZ))
+				assert.Equal(t, false, c.Reg.isSet(flagH))
+				assert.Equal(t, false, c.Reg.isSet(flagC))
+			})
+			t.Run("when low 4 bit less than A", func(t *testing.T) {
+				c.Reg.R[A] = 0x09
+				c.Reg.setZNHC(false, false, false, false)
+				t.Run("and Harf carry = 0", func(t *testing.T) {
+					op.Handler(c, op.R1, op.R2)
+					assert.Equal(t, byte(0x09), c.Reg.R[A])
+					assert.Equal(t, false, c.Reg.isSet(flagZ))
+					assert.Equal(t, false, c.Reg.isSet(flagH))
+					assert.Equal(t, false, c.Reg.isSet(flagC))
+				})
+				t.Run("and Harf carry = 1", func(t *testing.T) {
+					c.Reg.setF(flagH, true)
+					op.Handler(c, op.R1, op.R2)
+					assert.Equal(t, byte(0x0F), c.Reg.R[A])
+					assert.Equal(t, false, c.Reg.isSet(flagZ))
+					assert.Equal(t, false, c.Reg.isSet(flagH))
+					assert.Equal(t, false, c.Reg.isSet(flagC))
+				})
+			})
+			t.Run("when high 4 bit greater than or equal A", func(t *testing.T) {
+				c.Reg.R[A] = 0xA0
+				c.Reg.setZNHC(false, false, false, false)
+				op.Handler(c, op.R1, op.R2)
+				assert.Equal(t, byte(0x00), c.Reg.R[A])
+				assert.Equal(t, true, c.Reg.isSet(flagZ))
+				assert.Equal(t, false, c.Reg.isSet(flagH))
+				assert.Equal(t, true, c.Reg.isSet(flagC))
+			})
+			t.Run("when high 4 bit less than or equal A", func(t *testing.T) {
+				c.Reg.R[A] = 0x90
+				c.Reg.setZNHC(false, false, false, false)
+				t.Run("and Carry = 0", func(t *testing.T) {
+					op.Handler(c, op.R1, op.R2)
+					assert.Equal(t, byte(0x90), c.Reg.R[A])
+					assert.Equal(t, false, c.Reg.isSet(flagZ))
+					assert.Equal(t, false, c.Reg.isSet(flagH))
+					assert.Equal(t, false, c.Reg.isSet(flagC))
+				})
+				t.Run("and Carry = 1", func(t *testing.T) {
+					c.Reg.setF(flagC, true)
+					op.Handler(c, op.R1, op.R2)
+					assert.Equal(t, byte(0xF0), c.Reg.R[A])
+					assert.Equal(t, false, c.Reg.isSet(flagZ))
+					assert.Equal(t, false, c.Reg.isSet(flagH))
+					assert.Equal(t, true, c.Reg.isSet(flagC))
+				})
+			})
+		})
+	}
+}
+
 // PREFIX CB
 
 func TestOpCode_rlc(t *testing.T) {
