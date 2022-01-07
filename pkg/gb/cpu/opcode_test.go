@@ -3096,7 +3096,7 @@ func TestOpCode_sra(t *testing.T) {
 
 			assert.Equal(t, tt.args.r1, op.R1)
 
-			t.Run("when bit0 = 1", func(t *testing.T) {
+			t.Run("when bit0 = 1 and bit7 = 1", func(t *testing.T) {
 				before := byte(0b10010001)
 				if strings.Contains(op.Mnemonic, "HL") {
 					c.Bus.WriteByte(c.Reg.R16(int(HL)), before)
@@ -3110,7 +3110,7 @@ func TestOpCode_sra(t *testing.T) {
 				assert.Equal(t, false, c.Reg.isSet(flagH))
 				assert.Equal(t, true, c.Reg.isSet(flagC))
 
-				want := byte(0b01001000)
+				want := byte(0b11001000)
 
 				if tt.name != "SRA HL" {
 					assert.Equal(t, want, c.Reg.R[op.R1])

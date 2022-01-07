@@ -1258,8 +1258,12 @@ func slam16(c *CPU, r16 int, _ int) {
 
 func _sra(c *CPU, v byte) byte {
 	flag_c := v&0x01 == 0x01
+	bit7 := util.Bit(v, 7)
 
 	v = v >> 1
+	if bit7 == 1 {
+		v |= 1 << 7
+	}
 	c.Reg.setZNHC(v == 0, false, false, flag_c)
 
 	return v
