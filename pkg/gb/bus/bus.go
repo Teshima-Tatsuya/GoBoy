@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/ie"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/irq"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/ram"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
@@ -18,10 +18,10 @@ type Bus struct {
 	HRAM  *ram.RAM
 	ERAM  *ram.RAM
 	IO    *io.IO
-	IE    *ie.IE
+	IRQ   *irq.IRQ
 }
 
-func New(cart *cartridge.Cartridge, vram *ram.RAM, wram *ram.RAM, wram2 *ram.RAM, hram *ram.RAM, io *io.IO, ie *ie.IE) *Bus {
+func New(cart *cartridge.Cartridge, vram *ram.RAM, wram *ram.RAM, wram2 *ram.RAM, hram *ram.RAM, io *io.IO, irq *irq.IRQ) *Bus {
 	eram := ram.New(wram.Size)
 	return &Bus{
 		Cart:  cart,
@@ -31,7 +31,7 @@ func New(cart *cartridge.Cartridge, vram *ram.RAM, wram *ram.RAM, wram2 *ram.RAM
 		HRAM:  hram,
 		ERAM:  eram,
 		IO:    io,
-		IE:    ie,
+		IRQ:   irq,
 	}
 }
 
@@ -48,12 +48,14 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 		return b.WRAM2.Read(addr - 0xD000)
 	case addr >= 0xE000 && addr <= 0xFDFF:
 		return b.ERAM.Read(addr - 0xE000)
+	case addr == 0xFF0F:
+		return b.IRQ.Read(addr - 0xFF00)
 	case addr >= 0xFF00 && addr <= 0xFF7F:
 		return b.IO.Read(addr - 0xFF00)
 	case addr >= 0xFF80 && addr <= 0xFFFE:
 		return b.HRAM.Read(addr - 0xFF80)
 	case addr == 0xFFFF:
-		return b.IE.Read()
+		return b.IRQ.Read(addr - 0xFF00)
 	default:
 		panic(fmt.Sprintf("Non Supported Read Addr 0x%4d", addr))
 	}
@@ -76,12 +78,14 @@ func (b *Bus) WriteByte(addr types.Addr, value byte) {
 		b.WRAM2.Write(addr-0xD000, value)
 	case addr >= 0xE000 && addr <= 0xFDFF:
 		b.ERAM.Write(addr-0xE000, value)
+	case addr == 0xFF0F:
+		b.IRQ.Write(addr-0xFF00, value)
 	case addr >= 0xFF00 && addr <= 0xFF7F:
 		b.IO.Write(addr-0xFF00, value)
 	case addr >= 0xFF80 && addr <= 0xFFFE:
 		b.HRAM.Write(addr-0xFF80, value)
 	case addr == 0xFFFF:
-		b.IE.Write(value)
+		b.IRQ.Write(addr-0xFF00, value)
 	default:
 		panic(fmt.Sprintf("Addr:0x%4x is not implemented", addr))
 	}

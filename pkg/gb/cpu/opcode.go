@@ -839,12 +839,12 @@ func stop(c *CPU, _ int, _ int) {
 
 // desable interrupt
 func di(c *CPU, _ int, _ int) {
-	log.Debug("TODO: implement")
+	c.IRQ.Disable()
 }
 
 // enable interrupt
 func ei(c *CPU, _ int, _ int) {
-	log.Debug("TODO: implement")
+	c.IRQ.Enable()
 }
 
 func notimplemented(c *CPU, _ int, _ int) {

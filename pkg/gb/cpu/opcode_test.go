@@ -6,8 +6,8 @@ import (
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/bus"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/ie"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/irq"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/ram"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/util"
@@ -22,10 +22,10 @@ func setupCPU() *CPU {
 	wram2 := ram.New(0x2000)
 	hram := ram.New(0x0080)
 	io := io.New(0x0080)
-	ie := ie.New()
-	bus := bus.New(cart, vram, wram, wram2, hram, io, ie)
+	irq := irq.New()
+	bus := bus.New(cart, vram, wram, wram2, hram, io, irq)
 
-	return New(bus)
+	return New(bus, irq)
 }
 
 func (c *CPU) regreset() {

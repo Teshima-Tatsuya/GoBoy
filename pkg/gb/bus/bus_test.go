@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/ie"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/irq"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/ram"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 	"github.com/stretchr/testify/assert"
@@ -18,9 +18,9 @@ func setup() *Bus {
 	wram := ram.New(0x2000)
 	wram2 := ram.New(0x2000)
 	hram := ram.New(0x0080)
-	io := io.New(0x0080)
-	ie := ie.New()
-	bus := New(cart, vram, wram, wram2, hram, io, ie)
+	irq := irq.New()
+	io := io.New(0x2000)
+	bus := New(cart, vram, wram, wram2, hram, io, irq)
 
 	return bus
 }
@@ -41,7 +41,7 @@ func TestBus_CartReadWrite(t *testing.T) {
 		{name: "WRAM", args: args{0xC000, 0xCFFF}},
 		{name: "WRAM2", args: args{0xD000, 0xDFFF}},
 		{name: "ERAM", args: args{0xE000, 0xFDFF}},
-		{name: "IO", args: args{0xFF00, 0xFF7F}},
+		{name: "IRQ", args: args{0xFF00, 0xFF7F}},
 		{name: "HRAM", args: args{0xFF80, 0xFFFE}},
 	}
 
