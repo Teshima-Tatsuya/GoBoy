@@ -757,6 +757,10 @@ func pop(c *CPU, r16 int, _ int) {
 	lower := c.pop()
 	upper := c.pop()
 
+	if r16 == AF {
+		lower &= 0xF0
+	}
+
 	c.Reg.setR16(int(r16), types.Addr(int16(upper)<<8|int16(lower)))
 }
 

@@ -2338,8 +2338,11 @@ func TestOpCode_pop(t *testing.T) {
 			c.push(0x34) // lower
 
 			op.Handler(c, op.R1, op.R2)
-
-			assert.Equal(t, types.Addr(0x1234), c.Reg.R16(int(op.R1)))
+			if strings.Contains(op.Mnemonic, "AF") {
+				assert.Equal(t, types.Addr(0x1230), c.Reg.R16(int(op.R1)))
+			} else {
+				assert.Equal(t, types.Addr(0x1234), c.Reg.R16(int(op.R1)))
+			}
 		})
 	}
 }
