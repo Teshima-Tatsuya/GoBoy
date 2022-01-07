@@ -478,7 +478,7 @@ func ord8(c *CPU, r8 int, _ int) {
 
 func _xor(c *CPU, buf byte) {
 	c.Reg.R[A] ^= buf
-	c.Reg.setZNHC(c.Reg.R[A] == 0, false, true, false)
+	c.Reg.setZNHC(c.Reg.R[A] == 0, false, false, false)
 }
 
 func xorr(c *CPU, r8 int, _ int) {
