@@ -25,7 +25,7 @@ var opCodes = []*OpCode{
 	{0x04, "INC B", B, 0, 0, 1, incr},
 	{0x05, "DEC B", B, 0, 0, 1, decr},
 	{0x06, "LD B,d8", B, 0, 1, 2, ldrd},
-	{0x07, "RLCA", A, 0, 0, 1, rlcr},
+	{0x07, "RLCA", 0, 0, 0, 1, rlca},
 	{0x08, "LD (a16),SP", 0, SP, 2, 5, lda16r16},
 	{0x09, "ADD HL,BC", HL, BC, 0, 2, addr16r16},
 	{0x0A, "LD A,(BC)", A, BC, 0, 2, ldrm16},
@@ -1114,11 +1114,17 @@ func _rlc(c *CPU, v byte) byte {
 	return v
 }
 
+// RLCA
+func rlca(c *CPU, _ int, _ int) {
+	r := c.Reg.R[A]
+	c.Reg.R[A] = _rlc(c, r)
+	c.Reg.setF(flagZ, false)
+}
+
 // RLC r
 func rlcr(c *CPU, r8 int, _ int) {
 	r := c.Reg.R[r8]
 	c.Reg.R[r8] = _rlc(c, r)
-
 }
 
 // RLC (HL)
