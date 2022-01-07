@@ -668,8 +668,7 @@ func retnf(c *CPU, R1 int, _ int) {
 
 func reti(c *CPU, _ int, _ int) {
 	c.popPC()
-
-	// TODO irq enable
+	c.IRQ.Enable()
 }
 
 // -----jp-----
@@ -738,7 +737,6 @@ func jrnfr8(c *CPU, flag int, _ int) {
 // RST n
 // push and jump to n
 func rst(c *CPU, n int, _ int) {
-	log.Debug("TODO: implement")
 	c.pushPC()
 	c.Reg.PC = types.Addr(n)
 }
