@@ -1,12 +1,11 @@
 package bus
 
 import (
-	"fmt"
-
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/irq"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/ram"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/video"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
 
@@ -17,12 +16,14 @@ type Bus struct {
 	WRAM2 *ram.RAM
 	HRAM  *ram.RAM
 	ERAM  *ram.RAM
+	OAM   *video.OAM
 	IO    *io.IO
 	IRQ   *irq.IRQ
 }
 
 func New(cart *cartridge.Cartridge, vram *ram.RAM, wram *ram.RAM, wram2 *ram.RAM, hram *ram.RAM, io *io.IO, irq *irq.IRQ) *Bus {
 	eram := ram.New(wram.Size)
+	oam := video.NewOAM()
 	return &Bus{
 		Cart:  cart,
 		VRAM:  vram,
@@ -30,6 +31,7 @@ func New(cart *cartridge.Cartridge, vram *ram.RAM, wram *ram.RAM, wram2 *ram.RAM
 		WRAM2: wram2,
 		HRAM:  hram,
 		ERAM:  eram,
+		OAM:   oam,
 		IO:    io,
 		IRQ:   irq,
 	}
@@ -48,6 +50,8 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 		return b.WRAM2.Read(addr - 0xD000)
 	case addr >= 0xE000 && addr <= 0xFDFF:
 		return b.ERAM.Read(addr - 0xE000)
+	case addr >= 0xFE00 && addr <= 0xFE9F:
+		return b.OAM.Read(addr - 0xFE00)
 	case addr == 0xFF0F:
 		return b.IRQ.Read(addr - 0xFF00)
 	case addr >= 0xFF00 && addr <= 0xFF7F:
@@ -57,8 +61,10 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 	case addr == 0xFFFF:
 		return b.IRQ.Read(addr - 0xFF00)
 	default:
-		panic(fmt.Sprintf("Non Supported Read Addr 0x%4d", addr))
+		// panic(fmt.Sprintf("Non Supported Read Addr 0x%4d", addr))
 	}
+
+	return 0
 }
 
 func (b *Bus) ReadAddr(addr types.Addr) types.Addr {
@@ -78,6 +84,8 @@ func (b *Bus) WriteByte(addr types.Addr, value byte) {
 		b.WRAM2.Write(addr-0xD000, value)
 	case addr >= 0xE000 && addr <= 0xFDFF:
 		b.ERAM.Write(addr-0xE000, value)
+	case addr >= 0xFE00 && addr <= 0xFE9F:
+		b.OAM.Write(addr-0xFE00, value)
 	case addr == 0xFF0F:
 		b.IRQ.Write(addr-0xFF00, value)
 	case addr >= 0xFF00 && addr <= 0xFF7F:
@@ -87,6 +95,6 @@ func (b *Bus) WriteByte(addr types.Addr, value byte) {
 	case addr == 0xFFFF:
 		b.IRQ.Write(addr-0xFF00, value)
 	default:
-		panic(fmt.Sprintf("Addr:0x%4x is not implemented", addr))
+		// panic(fmt.Sprintf("Addr:0x%4x is not implemented", addr))
 	}
 }
