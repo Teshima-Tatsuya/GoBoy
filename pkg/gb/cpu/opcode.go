@@ -717,7 +717,7 @@ func jrr8(c *CPU, _ int, _ int) {
 // r8 is a signed data, which are added to PC
 func jrfr8(c *CPU, flag int, _ int) {
 	n := c.fetch()
-	// flag is not set
+	// flag is set
 	if c.Reg.isSet(flag) {
 		_jr(c, int8(n))
 	}

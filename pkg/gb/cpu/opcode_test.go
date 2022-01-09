@@ -2157,8 +2157,8 @@ func TestOpCode_jpnfa16(t *testing.T) {
 		name string
 		args args
 	}{
-		{name: "JP NZ, a16 when zero", args: args{0xC2, flagZ}},
-		{name: "JP NC, a16 when zero", args: args{0xD2, flagC}},
+		{name: "JP NZ", args: args{0xC2, flagZ}},
+		{name: "JP NC", args: args{0xD2, flagC}},
 	}
 
 	for _, tt := range tests {
@@ -2259,37 +2259,100 @@ func TestOpCode_jrr8(t *testing.T) {
 	}
 }
 
-func TestOpCode_jrnfr8(t *testing.T) {
+func TestOpCode_jrfr8(t *testing.T) {
 	c := setupCPU()
 
 	type args struct {
 		opcode byte
 		flag   int
-		value  bool
-		addr   types.Addr
 	}
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		{name: "JR NZ, r8 when zero", args: args{0x20, flagZ, false, 0x0111}},
-		{name: "JR NZ, r8 when not zero", args: args{0x20, flagZ, true, c.Reg.PC + 1}},
-		{name: "JR NC, r8 when zero", args: args{0x30, flagC, false, 0x0111}},
-		{name: "JR NC, r8 when not zero", args: args{0x30, flagC, true, c.Reg.PC + 1}},
+		{name: "JR Z", args: args{0x28, flagZ}},
+		{name: "JR C", args: args{0x38, flagC}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c.regreset()
 			op := opCodes[tt.args.opcode]
-			want := tt.args.addr
-			c.Bus.WriteByte(c.Reg.PC, 0x10)
+			t.Run("when flag = 1", func(t *testing.T) {
+				c.Reg.setF(tt.args.flag, true)
+				t.Run("when value is positive", func(t *testing.T) {
+					c.Reg.PC = 0x0100
+					c.Bus.WriteByte(c.Reg.PC, 0x10)
+					op.Handler(c, op.R1, op.R2)
 
-			c.Reg.setF(tt.args.flag, tt.args.value)
-			op.Handler(c, op.R1, op.R2)
+					assert.Equal(t, types.Addr(0x0111), c.Reg.PC)
+				})
+				t.Run("when value is negative", func(t *testing.T) {
+					c.Reg.PC = 0x0100
+					c.Bus.WriteByte(c.Reg.PC, 0xFE) // -2
+					op.Handler(c, op.R1, op.R2)
 
-			assert.Equal(t, want, c.Reg.PC)
+					assert.Equal(t, types.Addr(0x00FF), c.Reg.PC)
+				})
+			})
+			t.Run("when flag = 0", func(t *testing.T) {
+				c.Reg.setF(tt.args.flag, false)
+				c.Reg.PC = 0x0100
+				c.Bus.WriteByte(c.Reg.PC, 0x10)
+				op.Handler(c, op.R1, op.R2)
+
+				assert.Equal(t, types.Addr(0x0101), c.Reg.PC)
+			})
+		})
+	}
+}
+
+func TestOpCode_jrnfr8(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		flag   int
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{name: "JR NZ", args: args{0x20, flagZ}},
+		{name: "JR NC", args: args{0x30, flagC}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+			t.Run("when flag = 0", func(t *testing.T) {
+				c.Reg.setF(tt.args.flag, false)
+				t.Run("when value is positive", func(t *testing.T) {
+					c.Reg.PC = 0x0100
+					c.Bus.WriteByte(c.Reg.PC, 0x10)
+					op.Handler(c, op.R1, op.R2)
+
+					assert.Equal(t, types.Addr(0x0111), c.Reg.PC)
+				})
+				t.Run("when value is negative", func(t *testing.T) {
+					c.Reg.PC = 0x0100
+					c.Bus.WriteByte(c.Reg.PC, 0xFE) // -2
+					op.Handler(c, op.R1, op.R2)
+
+					assert.Equal(t, types.Addr(0x00FF), c.Reg.PC)
+				})
+			})
+			t.Run("when flag =1", func(t *testing.T) {
+				c.Reg.setF(tt.args.flag, true)
+				c.Reg.PC = 0x0100
+				c.Bus.WriteByte(c.Reg.PC, 0x10)
+				op.Handler(c, op.R1, op.R2)
+
+				assert.Equal(t, types.Addr(0x0101), c.Reg.PC)
+			})
 		})
 	}
 }
