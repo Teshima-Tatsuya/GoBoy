@@ -547,11 +547,11 @@ func addr16r16(c *CPU, r1 int, r2 int) {
 
 func addr16d(c *CPU, r16 int, _ int) {
 	v1 := c.Reg.R16(r16)
-	v2 := c.fetch()
+	v2 := int8(c.fetch())
 
-	v := int32(v1) + int32(int8(v2)) // consider negative
+	v := uint32(v1) + uint32(v2)
 
-	carry := v1 ^ types.Addr(v2) ^ (v1 + types.Addr(v2))
+	carry := uint32(v1) ^ uint32(v2) ^ v
 
 	c.Reg.setR16(r16, types.Addr(v))
 	c.Reg.setZNHC(false, false, carry&0x10 == 0x10, carry&0x100 == 0x100)

@@ -148,11 +148,6 @@ func (r *Register) setNH(n, h bool) {
 	r.setF(flagH, h)
 }
 
-func (r *Register) setZHC(z, h, c bool) {
-	r.setF(flagZ, z)
-	r.setF(flagH, h)
-	r.setF(flagC, c)
-}
 func (r *Register) setZNH(z, n, h bool) {
 	r.setNH(n, h)
 	r.setF(flagZ, z)
