@@ -2105,32 +2105,42 @@ func TestOpCode_jpfa16(t *testing.T) {
 	type args struct {
 		opcode byte
 		flag   int
-		value  bool
-		addr   types.Addr
 	}
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		{name: "JP Z, a16 when zero", args: args{0xCA, flagZ, false, 0x0100}},
-		{name: "JP Z, a16 when non zero", args: args{0xCA, flagZ, true, 0x1234}},
-		{name: "JP C, a16 when zero", args: args{0xDA, flagC, false, 0x0100}},
-		{name: "JP C, a16 when non zero", args: args{0xDA, flagC, true, 0x1234}},
+		{name: "JP Z", args: args{0xCA, flagZ}},
+		{name: "JP C", args: args{0xDA, flagC}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c.regreset()
 			op := opCodes[tt.args.opcode]
-			want := tt.args.addr
-			c.Bus.WriteByte(c.Reg.PC, 0x34)
-			c.Bus.WriteByte(c.Reg.PC+1, 0x12)
+			t.Run("when flag = 0", func(t *testing.T) {
+				c.Reg.PC = 0x0100
+				want := types.Addr(0x0100)
+				c.Bus.WriteByte(c.Reg.PC, 0x34)
+				c.Bus.WriteByte(c.Reg.PC+1, 0x12)
 
-			c.Reg.setF(tt.args.flag, tt.args.value)
-			op.Handler(c, op.R1, op.R2)
+				c.Reg.setF(tt.args.flag, false)
+				op.Handler(c, op.R1, op.R2)
 
-			assert.Equal(t, want, c.Reg.PC)
+				assert.Equal(t, want, c.Reg.PC)
+			})
+			t.Run("when flag = 1", func(t *testing.T) {
+				c.Reg.PC = 0x0100
+				want := types.Addr(0x1234)
+				c.Bus.WriteByte(c.Reg.PC, 0x34)
+				c.Bus.WriteByte(c.Reg.PC+1, 0x12)
+
+				c.Reg.setF(tt.args.flag, true)
+				op.Handler(c, op.R1, op.R2)
+
+				assert.Equal(t, want, c.Reg.PC)
+			})
 		})
 	}
 }
@@ -2141,32 +2151,42 @@ func TestOpCode_jpnfa16(t *testing.T) {
 	type args struct {
 		opcode byte
 		flag   int
-		value  bool
-		addr   types.Addr
 	}
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		{name: "JP NZ, a16 when zero", args: args{0xC2, flagZ, false, 0x1234}},
-		{name: "JP NZ, a16 when non zero", args: args{0xC2, flagZ, true, 0x0100}},
-		{name: "JP NC, a16 when zero", args: args{0xD2, flagC, false, 0x1234}},
-		{name: "JP NC, a16 when non zero", args: args{0xD2, flagC, true, 0x0100}},
+		{name: "JP NZ, a16 when zero", args: args{0xC2, flagZ}},
+		{name: "JP NC, a16 when zero", args: args{0xD2, flagC}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c.regreset()
 			op := opCodes[tt.args.opcode]
-			want := tt.args.addr
-			c.Bus.WriteByte(c.Reg.PC, 0x34)
-			c.Bus.WriteByte(c.Reg.PC+1, 0x12)
+			t.Run("when flag = 0", func(t *testing.T) {
+				c.Reg.PC = 0x0100
+				want := types.Addr(0x1234)
+				c.Bus.WriteByte(c.Reg.PC, 0x34)
+				c.Bus.WriteByte(c.Reg.PC+1, 0x12)
 
-			c.Reg.setF(tt.args.flag, tt.args.value)
-			op.Handler(c, op.R1, op.R2)
+				c.Reg.setF(tt.args.flag, false)
+				op.Handler(c, op.R1, op.R2)
 
-			assert.Equal(t, want, c.Reg.PC)
+				assert.Equal(t, want, c.Reg.PC)
+			})
+			t.Run("when flag = 1", func(t *testing.T) {
+				c.Reg.PC = 0x0100
+				want := types.Addr(0x0100)
+				c.Bus.WriteByte(c.Reg.PC, 0x34)
+				c.Bus.WriteByte(c.Reg.PC+1, 0x12)
+
+				c.Reg.setF(tt.args.flag, true)
+				op.Handler(c, op.R1, op.R2)
+
+				assert.Equal(t, want, c.Reg.PC)
+			})
 		})
 	}
 }
