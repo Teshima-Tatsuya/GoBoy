@@ -2357,6 +2357,45 @@ func TestOpCode_jrnfr8(t *testing.T) {
 	}
 }
 
+func TestOpCode_rst(t *testing.T) {
+	c := setupCPU()
+
+	type args struct {
+		opcode byte
+		addr   byte
+	}
+
+	tests := []struct {
+		name string
+		args args
+	}{
+		{name: "RST 00H", args: args{0xC7, 0x00}},
+		{name: "RST 08H", args: args{0xCF, 0x08}},
+		{name: "RST 10H", args: args{0xD7, 0x10}},
+		{name: "RST 18H", args: args{0xDF, 0x18}},
+		{name: "RST 20H", args: args{0xE7, 0x20}},
+		{name: "RST 28H", args: args{0xEF, 0x28}},
+		{name: "RST 30H", args: args{0xF7, 0x30}},
+		{name: "RST 38H", args: args{0xFF, 0x38}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c.regreset()
+			op := opCodes[tt.args.opcode]
+
+			c.Reg.PC = 0x1234
+
+			op.Handler(c, op.R1, op.R2)
+
+			assert.Equal(t, int(tt.args.addr), op.R1)
+			assert.Equal(t, byte(0x34), c.Bus.ReadByte(c.Reg.SP))
+			assert.Equal(t, byte(0x12), c.Bus.ReadByte(c.Reg.SP+1))
+			assert.Equal(t, util.Byte2Addr(0x00, tt.args.addr), c.Reg.PC)
+		})
+	}
+}
+
 // ----push----
 func TestOpCode_push(t *testing.T) {
 	c := setupCPU()
