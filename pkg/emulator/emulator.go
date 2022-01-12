@@ -1,4 +1,4 @@
-package goboy
+package emulator
 
 import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb"

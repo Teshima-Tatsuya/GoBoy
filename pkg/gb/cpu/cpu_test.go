@@ -141,6 +141,13 @@ func Test11(t *testing.T) {
 	testrom(t, file, passstr)
 }
 
+func TestTiming(t *testing.T) {
+	file := "../../../test/blargg/instr_timing/instr_timing.gb"
+	passstr := "instr_timing\n\n\nPassed"
+
+	testrom(t, file, passstr)
+}
+
 func TestCPU_fetch(t *testing.T) {
 	file := "../../../test/blargg/cpu_instrs/individual/06-ld r,r.gb"
 	bus, irq := setup(file)

@@ -2,6 +2,15 @@ package irq
 
 import "github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 
+// @see https://gbdev.io/pandocs/Interrupts.html#ffff---ie---interrupt-enable-rw
+const (
+	VBlank   = 0x40
+	LCD_STAT = 0x48
+	Timer    = 0x50
+	Serial   = 0x58
+	Joypad   = 0x60
+)
+
 type IRQ struct {
 	IF  byte
 	IE  byte
@@ -27,6 +36,10 @@ func (i *IRQ) SetIE(v byte) {
 func (i *IRQ) Enable() {
 	i.IME = true
 	i.SetIF(0x60)
+}
+
+func (i *IRQ) Enabled() bool {
+	return i.IME
 }
 
 func (i *IRQ) Disable() {

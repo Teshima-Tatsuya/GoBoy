@@ -5,8 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/goboy"
-
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/emulator"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -18,7 +17,7 @@ func main() {
 		os.Exit(-1)
 	}
 
-	gb := goboy.New(romData)
+	gb := emulator.New(romData)
 
 	if err := ebiten.RunGame(gb); err != nil {
 		log.Fatal(err)

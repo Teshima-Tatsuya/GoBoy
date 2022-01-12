@@ -3,7 +3,7 @@ BINDIR := ./build
 
 .PHONY: build
 build:
-	@go build -tags macos -o $(BINDIR)/darwin-amd64/$(NAME)
+	@go build -tags macos -o $(BINDIR)/darwin-amd64/$(NAME) ./cmd/
 
 .PHONY: clean
 clean:
