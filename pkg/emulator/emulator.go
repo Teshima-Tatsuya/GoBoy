@@ -7,18 +7,18 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-type GoBoy struct {
+type Emulator struct {
 	RomData []byte
 	GB      *gb.GB
 }
 
-func New(romData []byte) *GoBoy {
+func New(romData []byte) *Emulator {
 	ebiten.SetWindowSize(640, 480)
 	ebiten.SetWindowTitle("60fps")
 	ebiten.SetWindowSize(160*4, 144*4)
 
 	gb := gb.NewGB(romData)
-	g := &GoBoy{
+	g := &Emulator{
 		RomData: romData,
 		GB:      gb,
 	}
@@ -28,24 +28,23 @@ func New(romData []byte) *GoBoy {
 	return g
 }
 
-func (gb *GoBoy) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+func (e *Emulator) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	// @see https://gbdev.io/pandocs/Rendering.html
 	return 160, 144
 }
 
-func (gb *GoBoy) Update() error {
-	if gb.RomData[0xff02] == 0x81 {
-		log.Info(string(gb.RomData[0xff01]))
-		gb.RomData[0xff02] = 0x0
+func (e *Emulator) Update() error {
+	if e.RomData[0xff02] == 0x81 {
+		log.Info(string(e.RomData[0xff01]))
+		e.RomData[0xff02] = 0x0
 	}
 	return nil
 }
 
-func (gb *GoBoy) Draw(screen *ebiten.Image) {
+func (e *Emulator) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrint(screen, "hello, world")
-	if gb.RomData[0xff02] == 0x81 {
-		log.Info(string(gb.RomData[0xff01]))
-		gb.RomData[0xff02] = 0x0
+	if e.RomData[0xff02] == 0x81 {
+		log.Info(string(e.RomData[0xff01]))
+		e.RomData[0xff02] = 0x0
 	}
-	//	screen.ReplacePixels(gb.GB.Draw())
 }
