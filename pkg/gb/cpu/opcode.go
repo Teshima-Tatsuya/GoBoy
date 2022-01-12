@@ -136,7 +136,7 @@ var opCodes = []*OpCode{
 	{0x73, "LD (HL), E", HL, E, 0, 2, ldm16r},
 	{0x74, "LD (HL), H", HL, H, 0, 2, ldm16r},
 	{0x75, "LD (HL), L", HL, L, 0, 2, ldm16r},
-	{0x76, "HALT", 0, 0, 0, 1, notimplemented},
+	{0x76, "HALT", 0, 0, 0, 1, halt},
 	{0x77, "LD (HL), A", HL, A, 0, 2, ldm16r},
 	{0x78, "LD A, B", A, B, 0, 1, ldrr},
 	{0x79, "LD A, C", A, C, 0, 1, ldrr},
@@ -843,6 +843,10 @@ func di(c *CPU, _ int, _ int) {
 // enable interrupt
 func ei(c *CPU, _ int, _ int) {
 	c.IRQ.Enable()
+}
+
+func halt(c *CPU, _ int, _ int) {
+	c.Halt = true
 }
 
 func notimplemented(c *CPU, _ int, _ int) {

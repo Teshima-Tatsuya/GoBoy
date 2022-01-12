@@ -8,15 +8,17 @@ import (
 )
 
 type CPU struct {
-	Reg Register
-	Bus bus.IO
-	IRQ *irq.IRQ
+	Reg  Register
+	Bus  bus.IO
+	IRQ  *irq.IRQ
+	Halt bool
 }
 
 func New(bus bus.IO, irq *irq.IRQ) *CPU {
 	c := &CPU{
-		Bus: bus,
-		IRQ: irq,
+		Bus:  bus,
+		IRQ:  irq,
+		Halt: false,
 	}
 
 	c.Reg.reset()

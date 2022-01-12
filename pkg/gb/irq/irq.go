@@ -4,11 +4,11 @@ import "github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 
 // @see https://gbdev.io/pandocs/Interrupts.html#ffff---ie---interrupt-enable-rw
 const (
-	VBlank   = 0x40
-	LCD_STAT = 0x48
-	Timer    = 0x50
-	Serial   = 0x58
-	Joypad   = 0x60
+	VBlank   types.Addr = 0x0040
+	LCD_STAT types.Addr = 0x0048
+	Timer    types.Addr = 0x0050
+	Serial   types.Addr = 0x0058
+	Joypad   types.Addr = 0x0060
 )
 
 type IRQ struct {
@@ -31,6 +31,11 @@ func (i *IRQ) SetIF(v byte) {
 
 func (i *IRQ) SetIE(v byte) {
 	i.Write(0x0F, v)
+}
+
+// if any irq is enable
+func (i *IRQ) Has() bool {
+	return i.IF&i.IE != 0x00
 }
 
 func (i *IRQ) Enable() {

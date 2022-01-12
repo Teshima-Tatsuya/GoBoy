@@ -17,9 +17,9 @@ func main() {
 		os.Exit(-1)
 	}
 
-	gb := emulator.New(romData)
+	e := emulator.New(romData)
 
-	if err := ebiten.RunGame(gb); err != nil {
+	if err := ebiten.RunGame(e); err != nil {
 		log.Fatal(err)
 	}
 }

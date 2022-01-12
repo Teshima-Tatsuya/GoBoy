@@ -18,14 +18,12 @@ func New(romData []byte) *Emulator {
 	ebiten.SetWindowSize(160*4, 144*4)
 
 	gb := gb.NewGB(romData)
-	g := &Emulator{
+	e := &Emulator{
 		RomData: romData,
 		GB:      gb,
 	}
 
-	log.Info(string(g.RomData[0xff01]))
-
-	return g
+	return e
 }
 
 func (e *Emulator) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
