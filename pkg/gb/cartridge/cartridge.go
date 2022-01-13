@@ -46,6 +46,7 @@ func New(romData []byte) *Cartridge {
 		Title:        string(title),
 		CGBFlag:      cgbflag,
 		SGBFlag:      sgbflag,
+		Type:         romData[0x0147],
 		ROMSize:      romData[0x0148],
 		RAMSize:      getRamSize(romData[0x0149]),
 		ROMData:      romData,
