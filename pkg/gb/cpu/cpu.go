@@ -27,6 +27,17 @@ func New(bus bus.IO, irq *irq.IRQ) *CPU {
 }
 
 func (c *CPU) Step() int {
+	if c.Halt {
+		if c.IRQ.Has() {
+			c.Halt = false
+		}
+
+		return 1
+	}
+
+	if c.interrupt() {
+		return 1
+	}
 	opcode := c.fetch()
 
 	var op *OpCode
@@ -38,51 +49,7 @@ func (c *CPU) Step() int {
 		op = opCodes[opcode]
 	}
 
-	// log.Info(fmt.Sprintf("0x%02X:\"%s\" PC 0x%04X, SP 0x%04X, 0x%02X 0x%02X", op.Code, op.Mnemonic, c.Reg.PC-1, c.Reg.SP, c.Bus.ReadByte(c.Reg.PC), c.Bus.ReadByte(c.Reg.PC+1)))
-	// if strings.Contains(op.Mnemonic, "(BC") {
-	// 	log.Info(fmt.Sprintf(" (BC) = %02X", c.getRegMem(BC)))
-	// } else if strings.Contains(op.Mnemonic, "(DE)") {
-	// 	log.Info(fmt.Sprintf(" (DE) = %02X", c.getRegMem(DE)))
-	// } else if strings.Contains(op.Mnemonic, "(HL") {
-	// 	log.Info(fmt.Sprintf(" (HL) = %02X", c.getRegMem(HL)))
-	// } else if strings.Contains(op.Mnemonic, "(AF") {
-	// 	log.Info(fmt.Sprintf(" (AF) = %02X", c.getRegMem(AF)))
-	// } else if strings.Contains(op.Mnemonic, "(a16") {
-	// 	lower := c.Bus.ReadByte(c.Reg.PC)
-	// 	upper := c.Bus.ReadByte(c.Reg.PC + 1)
-	// 	log.Info(fmt.Sprintf(" (a16) = %02X", c.Bus.ReadByte(util.Byte2Addr(upper, lower))))
-	// } else if strings.Contains(op.Mnemonic, "(a8") {
-	// 	lower := c.Bus.ReadByte(c.Reg.PC)
-	// 	upper := byte(0xFF)
-	// 	log.Info(fmt.Sprintf(" (a8) = %02X", c.Bus.ReadByte(util.Byte2Addr(upper, lower))))
-	// }
-
-	// c.Reg.Dump()
 	op.Handler(c, op.R1, op.R2)
-	// if strings.Contains(op.Mnemonic, "(BC") {
-	// 	log.Info(fmt.Sprintf(" (BC) = %02X", c.getRegMem(BC)))
-	// } else if strings.Contains(op.Mnemonic, "(DE)") {
-	// 	log.Info(fmt.Sprintf(" (DE) = %02X", c.getRegMem(DE)))
-	// } else if strings.Contains(op.Mnemonic, "(HL+") {
-	// 	log.Info(fmt.Sprintf(" (HL) = %02X", c.Bus.ReadByte(c.Reg.R16(HL)-1)))
-	// } else if strings.Contains(op.Mnemonic, "(HL-") {
-	// 	log.Info(fmt.Sprintf(" (HL) = %02X", c.Bus.ReadByte(c.Reg.R16(HL)+1)))
-	// } else if strings.Contains(op.Mnemonic, "(HL") {
-	// 	log.Info(fmt.Sprintf(" (HL) = %02X", c.getRegMem(HL)))
-	// } else if strings.Contains(op.Mnemonic, "(AF") {
-	// 	log.Info(fmt.Sprintf(" (AF) = %02X", c.getRegMem(AF)))
-	// } else if strings.Contains(op.Mnemonic, "(a16") {
-	// 	lower := c.Bus.ReadByte(c.Reg.PC - 2)
-	// 	upper := c.Bus.ReadByte(c.Reg.PC - 1)
-	// 	log.Info(fmt.Sprintf(" (a16) = %02X", c.Bus.ReadByte(util.Byte2Addr(upper, lower))))
-	// } else if strings.Contains(op.Mnemonic, "(a8") {
-	// 	lower := c.Bus.ReadByte(c.Reg.PC - 1)
-	// 	upper := byte(0xFF)
-	// 	log.Info(fmt.Sprintf(" (a8) = %02X", c.Bus.ReadByte(util.Byte2Addr(upper, lower))))
-	// }
-
-	// fmt.Println()
-
 	return 0
 }
 
@@ -128,4 +95,17 @@ func (c *CPU) getRegMem(r16 int) byte {
 	d := c.Bus.ReadByte(r)
 
 	return d
+}
+
+func (c *CPU) interrupt() bool {
+	if !c.IRQ.Enabled() || !c.IRQ.Has() {
+		return false
+	}
+
+	addr := c.IRQ.InterruptAddr()
+	c.pushPC()
+	c.Reg.PC = addr
+	c.IRQ.Disable()
+
+	return true
 }

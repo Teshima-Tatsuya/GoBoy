@@ -23,6 +23,15 @@ func Bool2Int8(v bool) int8 {
 }
 
 // Extrct v bit
-func Bit(v byte, b int) byte {
-	return (v >> b) & 0x01
+func Bit(v byte, i int) byte {
+	return (v >> i) & 0x01
+}
+
+func SetBit(v byte, i int, b bool) byte {
+	if b {
+		v = v | 1<<i
+	} else {
+		v = v & ^(1 << i)
+	}
+	return v
 }
