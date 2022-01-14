@@ -11,7 +11,7 @@ type CartridgeType byte
 // ROM Type
 // @see https://gbdev.io/pandocs/The_Cartridge_Header.html#0147---cartridge-type
 const (
-	ROM = iota
+	NO_MBC = iota
 	MBC1
 	MBC2
 	MBC3
@@ -55,6 +55,7 @@ type Cartridge struct {
 	// game supports SGB functions
 	SGBFlag bool
 	Type    byte
+	ROM     *ROM
 	ROMSize int
 	RAMSize int
 	ROMData []byte
@@ -103,7 +104,7 @@ func getRamSize(s byte) int {
 func getType(t byte) byte {
 	switch t {
 	case 0x00:
-		return ROM
+		return NO_MBC
 	case 0x01, 0x02, 0x03:
 		return MBC1
 	case 0x05, 0x06:
@@ -148,4 +149,15 @@ func (c *Cartridge) ReadByte(addr types.Addr) byte {
 
 func (c *Cartridge) WriteByte(addr types.Addr, value byte) {
 	c.ROMData[addr] = value
+}
+
+// load romData to ROM
+func (c *Cartridge) loadRom(romData []byte) {
+	bankSize := int(c.Bank.Size)
+
+	for bank := 0; bank < bankSize; bank++ {
+		for i := 0; i < 0x4000; i++ {
+			c.ROM.Buf[bank][i] = romData[bank*0x4000+i]
+		}
+	}
 }
