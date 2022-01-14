@@ -58,6 +58,7 @@ type Cartridge struct {
 	ROMSize int
 	RAMSize int
 	ROMData []byte
+	Bank    *Bank
 }
 
 func New(romData []byte) *Cartridge {
@@ -66,6 +67,7 @@ func New(romData []byte) *Cartridge {
 
 	cgbflag := romData[0x0143] == 0x80 || romData[0x0143] == 0xC0
 	sgbflag := romData[0x0146] != 0x00
+	romSize := getRomSize(romData[0x0148])
 
 	return &Cartridge{
 		NintendoLogo: nintendLogo,
@@ -73,9 +75,10 @@ func New(romData []byte) *Cartridge {
 		CGBFlag:      cgbflag,
 		SGBFlag:      sgbflag,
 		Type:         getType(romData[0x0147]),
-		ROMSize:      getRomSize(romData[0x0148]),
+		ROMSize:      romSize,
 		RAMSize:      getRamSize(romData[0x0149]),
 		ROMData:      romData,
+		Bank:         NewBank(romSize),
 	}
 }
 

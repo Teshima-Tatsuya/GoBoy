@@ -2,12 +2,12 @@ package cartridge
 
 type Bank struct {
 	Current byte
-	Size    byte
+	Size    uint16
 }
 
-func NewBank(size byte) *Bank {
+func NewBank(romSize int) *Bank {
 	return &Bank{
 		Current: 0x00,
-		Size:    size,
+		Size:    uint16(romSize / (16 * 1024)),
 	}
 }
