@@ -70,7 +70,7 @@ func New(romData []byte) *Cartridge {
 	sgbflag := romData[0x0146] != 0x00
 	romSize := getRomSize(romData[0x0148])
 
-	return &Cartridge{
+	c := &Cartridge{
 		NintendoLogo: nintendLogo,
 		Title:        string(title),
 		CGBFlag:      cgbflag,
@@ -81,6 +81,10 @@ func New(romData []byte) *Cartridge {
 		ROMData:      romData,
 		Bank:         NewBank(romSize),
 	}
+
+	c.loadRom(romData)
+
+	return c
 }
 
 func getRamSize(s byte) int {
@@ -143,19 +147,36 @@ func validateCheckSum(romData []byte) bool {
 	return true
 }
 
+// TODO Read RAM
 func (c *Cartridge) ReadByte(addr types.Addr) byte {
+	switch {
+	case addr < 0x4000:
+		// Bank 0
+		return c.ROM.Buf[0][addr]
+	case 0x4000 <= addr && addr < 0x8000:
+		return c.ROM.Buf[c.Bank.Current][addr-0x4000]
+	}
 	return c.ROMData[addr]
 }
 
 func (c *Cartridge) WriteByte(addr types.Addr, value byte) {
+	switch {
+	// @see https://gbdev.io/pandocs/MBC1.html#2000-3fff---rom-bank-number-write-only
+	case 0x2000 <= addr && addr <= 0x3FFF:
+		if c.Type == MBC1 {
+			c.ROM.Bank = value & 0x1F
+		}
+	}
 	c.ROMData[addr] = value
 }
 
 // load romData to ROM
 func (c *Cartridge) loadRom(romData []byte) {
 	bankSize := int(c.Bank.Size)
+	c.ROM.Buf = make([][]byte, bankSize)
 
 	for bank := 0; bank < bankSize; bank++ {
+		c.ROM.Buf[bank] = make([]byte, 0x4000)
 		for i := 0; i < 0x4000; i++ {
 			c.ROM.Buf[bank][i] = romData[bank*0x4000+i]
 		}
