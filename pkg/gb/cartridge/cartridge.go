@@ -3,6 +3,7 @@ package cartridge
 import (
 	"fmt"
 
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/memory"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
 
@@ -35,6 +36,12 @@ const (
 	ROM_8192KB
 )
 
+// Mode
+const (
+	SimpleROMBankingMode                 = 0x00
+	RAMBankingModeAdvancedROMBankingMode = 0x01
+)
+
 // RAM Size
 // @see https://gbdev.io/pandocs/The_Cartridge_Header.html#0149---ram-size
 const (
@@ -55,10 +62,12 @@ type Cartridge struct {
 	// game supports SGB functions
 	SGBFlag bool
 	Type    byte
-	ROM     *ROM
+	ROM     *memory.ROM
+	RAM     *memory.RAM
 	ROMSize int
 	RAMSize int
 	ROMData []byte
+	Mode    byte
 	Bank    *Bank
 }
 
@@ -79,6 +88,7 @@ func New(romData []byte) *Cartridge {
 		ROMSize:      romSize,
 		RAMSize:      getRamSize(romData[0x0149]),
 		ROMData:      romData,
+		Mode:         0x00,
 		Bank:         NewBank(romSize),
 	}
 
@@ -165,6 +175,15 @@ func (c *Cartridge) WriteByte(addr types.Addr, value byte) {
 	case 0x2000 <= addr && addr <= 0x3FFF:
 		if c.Type == MBC1 {
 			c.ROM.Bank = value & 0x1F
+		}
+	case 0x4000 <= addr && addr <= 0x5FFF:
+		if c.Type == MBC1 {
+			c.Mode = value
+		}
+	// @see https://gbdev.io/pandocs/MBC1.html#6000-7fff---banking-mode-select-write-only
+	case 0x6000 <= addr && addr <= 0x7FFF:
+		if c.Type == MBC1 {
+			c.Mode = value
 		}
 	}
 	c.ROMData[addr] = value

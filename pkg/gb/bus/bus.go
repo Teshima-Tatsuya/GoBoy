@@ -4,33 +4,33 @@ import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/irq"
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/ram"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/memory"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/video"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
 
 type Bus struct {
 	Cart  *cartridge.Cartridge
-	VRAM  *ram.RAM
-	WRAM  *ram.RAM
-	WRAM2 *ram.RAM
-	HRAM  *ram.RAM
-	ERAM  *ram.RAM
+	VRAM  *memory.RAM
+	WRAM  *memory.RAM
+	WRAM2 *memory.RAM
+	HRAM  *memory.RAM
+	ERAM  *memory.RAM
 	OAM   *video.OAM
 	IO    *io.IO
 	IRQ   *irq.IRQ
 }
 
-func New(cart *cartridge.Cartridge, vram *ram.RAM, wram *ram.RAM, wram2 *ram.RAM, hram *ram.RAM, io *io.IO, irq *irq.IRQ) *Bus {
-	eram := ram.New(wram.Size)
+func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *memory.RAM, hmemory *memory.RAM, io *io.IO, irq *irq.IRQ) *Bus {
+	ememory := memory.NewRAM(wram.Size)
 	oam := video.NewOAM()
 	return &Bus{
 		Cart:  cart,
 		VRAM:  vram,
 		WRAM:  wram,
 		WRAM2: wram2,
-		HRAM:  hram,
-		ERAM:  eram,
+		HRAM:  hmemory,
+		ERAM:  ememory,
 		OAM:   oam,
 		IO:    io,
 		IRQ:   irq,

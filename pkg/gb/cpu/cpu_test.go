@@ -11,7 +11,7 @@ import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/irq"
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/ram"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/memory"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/util"
 	"github.com/stretchr/testify/assert"
@@ -27,10 +27,10 @@ func setup(file string) (*bus.Bus, *irq.IRQ) {
 	}
 
 	cart := cartridge.New(romData)
-	vram := ram.New(0x2000)
-	wram := ram.New(0x2000)
-	wram2 := ram.New(0x2000)
-	hram := ram.New(0x0080)
+	vram := memory.NewRAM(0x2000)
+	wram := memory.NewRAM(0x2000)
+	wram2 := memory.NewRAM(0x2000)
+	hram := memory.NewRAM(0x0080)
 	io := io.New(0x0080)
 	irq := irq.New()
 	bus := bus.New(cart, vram, wram, wram2, hram, io, irq)
