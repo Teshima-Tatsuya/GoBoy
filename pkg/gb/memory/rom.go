@@ -1,8 +1,17 @@
 package memory
 
+// ROM is a readonly memory
 type ROM struct {
-	// bank is 1-256
-	Bank uint8
-	// buf is 16kb(0x4000-0x7FFF)
-	Buf [][]byte
+	Buf []byte
+}
+
+func NewROM(data []byte) *ROM {
+	return &ROM{
+		Buf: data,
+	}
+}
+
+// max ROM size is 8MB > uint16
+func (r *ROM) Read(addr uint32) byte {
+	return r.Buf[addr]
 }
