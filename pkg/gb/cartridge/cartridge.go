@@ -72,7 +72,6 @@ func New(romData []byte) *Cartridge {
 		CGBFlag:      cgbflag,
 		SGBFlag:      sgbflag,
 		Type:         getType(romData[0x0147]),
-		Mode:         0x00,
 	}
 
 	switch c.Type {
@@ -125,10 +124,6 @@ func getType(t byte) byte {
 		errMsg := fmt.Sprintf("Non Supported type 0x%02X", t)
 		panic(errMsg)
 	}
-}
-
-func getRomSize(s byte) int {
-	return ROM_32KB << int(s)
 }
 
 func validateCheckSum(romData []byte) bool {
