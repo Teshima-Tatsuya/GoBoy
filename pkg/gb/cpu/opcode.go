@@ -685,16 +685,18 @@ func jpa16(c *CPU, _ int, _ int) {
 // JP flag, a16
 // jump when flag = 1
 func jpfa16(c *CPU, flag int, _ int) {
+	addr := c.fetch16()
 	if c.Reg.isSet(flag) {
-		_jp(c, c.fetch16())
+		_jp(c, addr)
 	}
 }
 
 // JP Nflag, a16
 // jump when flag = 0
 func jpnfa16(c *CPU, flag int, _ int) {
+	addr := c.fetch16()
 	if !c.Reg.isSet(flag) {
-		_jp(c, c.fetch16())
+		_jp(c, addr)
 	}
 }
 

@@ -76,7 +76,6 @@ func (i *IRQ) InterruptAddr() types.Addr {
 
 func (i *IRQ) Enable() {
 	i.IME = true
-	i.SetIF(0x60)
 }
 
 func (i *IRQ) Enabled() bool {
@@ -85,15 +84,14 @@ func (i *IRQ) Enabled() bool {
 
 func (i *IRQ) Disable() {
 	i.IME = false
-	i.SetIF(0x00)
 }
 
 func (i *IRQ) Write(addr types.Addr, v byte) {
 	switch addr {
 	case 0xFF:
-		i.IF = v
-	case 0x0F:
 		i.IE = v
+	case 0x0F:
+		i.IF = v
 	default:
 		panic("Can't Write addr")
 	}
