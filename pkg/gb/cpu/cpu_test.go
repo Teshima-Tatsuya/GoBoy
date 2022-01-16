@@ -62,6 +62,14 @@ func testrom(t assert.TestingT, file string, passstr string) {
 	assert.Equal(t, passstr, str)
 }
 
+func TestCPU_Blargg_cpu_instrs(t *testing.T) {
+	file := "../../../test/blargg/cpu_instrs/cpu_instrs.gb"
+	passstr := "cpu_instrs\n\n01:ok  02:ok  03:ok  04:ok  05:ok  06:ok  07:ok  08:ok  09:ok  10:ok  11:ok  \n\nPassed"
+
+	testrom(t, file, passstr)
+
+}
+
 func Test01(t *testing.T) {
 	file := "../../../test/blargg/cpu_instrs/individual/01-special.gb"
 	passstr := "01-special\n\n\nPassed"
