@@ -144,7 +144,7 @@ var opCodes = []*OpCode{
 	{0x7B, "LD A, E", A, E, 0, 1, ldrr},
 	{0x7C, "LD A, H", A, H, 0, 1, ldrr},
 	{0x7D, "LD A, L", A, L, 0, 1, ldrr},
-	{0x7E, "LD A, HL", A, HL, 0, 2, ldrm16},
+	{0x7E, "LD A, (HL)", A, HL, 0, 2, ldrm16},
 	{0x7F, "LD A, A", A, A, 0, 1, ldrr},
 	{0x80, "ADD A, B", A, B, 0, 1, addr},
 	{0x81, "ADD A, C", A, C, 0, 1, addr},
