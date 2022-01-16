@@ -3,7 +3,6 @@ package bus
 import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/irq"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/memory"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/video"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
@@ -18,10 +17,10 @@ type Bus struct {
 	ERAM  *memory.RAM
 	OAM   *video.OAM
 	IO    *io.IO
-	IRQ   *irq.IRQ
+	IRQ   *io.IRQ
 }
 
-func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *memory.RAM, hram *memory.RAM, io *io.IO, irq *irq.IRQ) *Bus {
+func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *memory.RAM, hram *memory.RAM, io *io.IO, irq *io.IRQ) *Bus {
 	eram := memory.NewRAM(0x2000)
 	oam := video.NewOAM()
 	return &Bus{
@@ -37,7 +36,6 @@ func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *m
 	}
 }
 
-// TODO: IF, IE
 func (b *Bus) ReadByte(addr types.Addr) byte {
 	switch {
 	case addr >= 0x0000 && addr <= 0x7FFF:

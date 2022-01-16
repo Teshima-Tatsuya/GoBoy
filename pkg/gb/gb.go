@@ -2,8 +2,8 @@ package gb
 
 import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/memory"
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/timer"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/video"
 )
 
@@ -16,7 +16,7 @@ type GB struct {
 	HRAM *memory.RAM
 
 	Video *video.Video
-	Timer *timer.Timer
+	Timer *io.Timer
 }
 
 func NewGB(romData []byte) *GB {
@@ -25,7 +25,7 @@ func NewGB(romData []byte) *GB {
 		VRAM:      memory.NewRAM(0x2000),
 		WRAM:      memory.NewRAM(0x2000),
 		HRAM:      memory.NewRAM(0x0080),
-		Timer:     timer.NewTimer(),
+		Timer:     io.NewTimer(),
 	}
 
 	return gb

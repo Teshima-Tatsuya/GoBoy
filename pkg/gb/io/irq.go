@@ -1,4 +1,4 @@
-package irq
+package io
 
 import (
 	"fmt"
@@ -16,11 +16,11 @@ const (
 )
 
 const (
-	VBlank   byte = 0x01
-	LCD_STAT byte = 0x02
-	Timer    byte = 0x04
-	Serial   byte = 0x08
-	Joypad   byte = 0x10
+	VBlankFlag   byte = 0x01
+	LCD_STATFlag byte = 0x02
+	TimerFlag    byte = 0x04
+	SerialFlag   byte = 0x08
+	JoypadFlag   byte = 0x10
 )
 
 type IRQ struct {
@@ -29,7 +29,7 @@ type IRQ struct {
 	IME bool
 }
 
-func New() *IRQ {
+func NewIRQ() *IRQ {
 	return &IRQ{
 		IF:  0x00,
 		IE:  0x00,
@@ -54,20 +54,20 @@ func (i *IRQ) Has() bool {
 func (i *IRQ) InterruptAddr() types.Addr {
 	idx := i.IF & i.IE
 	switch {
-	case idx&VBlank != 0:
-		i.IF &= ^VBlank
+	case idx&VBlankFlag != 0:
+		i.IF &= ^VBlankFlag
 		return VBlankAddr
-	case idx&LCD_STAT != 0:
-		i.IF &= ^LCD_STAT
+	case idx&LCD_STATFlag != 0:
+		i.IF &= ^LCD_STATFlag
 		return LCD_STATAddr
-	case idx&Timer != 0:
-		i.IF &= ^Timer
+	case idx&TimerFlag != 0:
+		i.IF &= ^TimerFlag
 		return TimerAddr
-	case idx&Serial != 0:
-		i.IF &= ^Serial
+	case idx&SerialFlag != 0:
+		i.IF &= ^SerialFlag
 		return SerialAddr
-	case idx&Joypad != 0:
-		i.IF &= ^Joypad
+	case idx&JoypadFlag != 0:
+		i.IF &= ^JoypadFlag
 		return JoypadAddr
 	default:
 		panic(fmt.Sprintf("Non Supported idx 0x%02x", idx))

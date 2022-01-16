@@ -7,7 +7,6 @@ import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/bus"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/irq"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/memory"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/util"
@@ -21,9 +20,9 @@ func setupCPU() *CPU {
 	wram := memory.NewRAM(0x2000)
 	wram2 := memory.NewRAM(0x2000)
 	hram := memory.NewRAM(0x0080)
-	io := io.New(0x0080)
-	irq := irq.New()
-	bus := bus.New(cart, vram, wram, wram2, hram, io, irq)
+	io_ := io.New(0x0080)
+	irq := io.NewIRQ()
+	bus := bus.New(cart, vram, wram, wram2, hram, io_, irq)
 
 	return New(bus, irq)
 }

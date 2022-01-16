@@ -1,4 +1,4 @@
-package timer
+package io
 
 import (
 	"fmt"

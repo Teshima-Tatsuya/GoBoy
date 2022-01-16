@@ -1,7 +1,7 @@
 package cpu
 
 import (
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/irq"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/interfaces/bus"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/util"
@@ -10,11 +10,11 @@ import (
 type CPU struct {
 	Reg  Register
 	Bus  bus.IO
-	IRQ  *irq.IRQ
+	IRQ  *io.IRQ
 	Halt bool
 }
 
-func New(bus bus.IO, irq *irq.IRQ) *CPU {
+func New(bus bus.IO, irq *io.IRQ) *CPU {
 	c := &CPU{
 		Bus:  bus,
 		IRQ:  irq,
