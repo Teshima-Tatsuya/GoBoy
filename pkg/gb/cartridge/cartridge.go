@@ -3,7 +3,6 @@ package cartridge
 import (
 	"fmt"
 
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/memory"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
 
@@ -56,9 +55,6 @@ type Cartridge struct {
 	// game supports SGB functions
 	SGBFlag bool
 	Type    byte
-	ROM     *memory.ROM
-	RAM     *memory.RAM
-	ROMData []byte
 	MBC     MBC
 	Mode    byte
 }
@@ -76,7 +72,6 @@ func New(romData []byte) *Cartridge {
 		CGBFlag:      cgbflag,
 		SGBFlag:      sgbflag,
 		Type:         getType(romData[0x0147]),
-		ROMData:      romData,
 		Mode:         0x00,
 	}
 
