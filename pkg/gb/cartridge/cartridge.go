@@ -58,7 +58,6 @@ type Cartridge struct {
 	Type    byte
 	ROM     *memory.ROM
 	RAM     *memory.RAM
-	RAMSize int
 	ROMData []byte
 	MBC     MBC
 	Mode    byte
@@ -77,7 +76,6 @@ func New(romData []byte) *Cartridge {
 		CGBFlag:      cgbflag,
 		SGBFlag:      sgbflag,
 		Type:         getType(romData[0x0147]),
-		RAMSize:      getRamSize(romData[0x0149]),
 		ROMData:      romData,
 		Mode:         0x00,
 	}
@@ -85,6 +83,8 @@ func New(romData []byte) *Cartridge {
 	switch c.Type {
 	case TYPE_NO_MBC:
 		c.MBC = NewMBC0(romData)
+	case TYPE_MBC1:
+		c.MBC = NewMBC1(romData, getRamSize(romData[0x0149]))
 	}
 
 	return c

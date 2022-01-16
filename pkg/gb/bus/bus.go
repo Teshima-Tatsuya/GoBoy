@@ -21,16 +21,16 @@ type Bus struct {
 	IRQ   *irq.IRQ
 }
 
-func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *memory.RAM, hmemory *memory.RAM, io *io.IO, irq *irq.IRQ) *Bus {
-	ememory := memory.NewRAM(wram.Size)
+func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *memory.RAM, hram *memory.RAM, io *io.IO, irq *irq.IRQ) *Bus {
+	eram := memory.NewRAM(0x2000)
 	oam := video.NewOAM()
 	return &Bus{
 		Cart:  cart,
 		VRAM:  vram,
 		WRAM:  wram,
 		WRAM2: wram2,
-		HRAM:  hmemory,
-		ERAM:  ememory,
+		HRAM:  hram,
+		ERAM:  eram,
 		OAM:   oam,
 		IO:    io,
 		IRQ:   irq,
@@ -44,6 +44,8 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 		return b.Cart.ReadByte(addr)
 	case addr >= 0x8000 && addr <= 0x9FFF:
 		return b.VRAM.Read(addr - 0x8000)
+	case addr >= 0xA000 && addr <= 0xBFFF:
+		return b.Cart.ReadByte(addr)
 	case addr >= 0xC000 && addr <= 0xCFFF:
 		return b.WRAM.Read(addr - 0xC000)
 	case addr >= 0xD000 && addr <= 0xDFFF:
@@ -78,6 +80,8 @@ func (b *Bus) WriteByte(addr types.Addr, value byte) {
 		b.Cart.WriteByte(addr, value)
 	case addr >= 0x8000 && addr <= 0x9FFF:
 		b.VRAM.Write(addr-0x8000, value)
+	case addr >= 0xA000 && addr <= 0xBFFF:
+		b.Cart.WriteByte(addr, value)
 	case addr >= 0xC000 && addr <= 0xCFFF:
 		b.WRAM.Write(addr-0xC000, value)
 	case addr >= 0xD000 && addr <= 0xDFFF:
