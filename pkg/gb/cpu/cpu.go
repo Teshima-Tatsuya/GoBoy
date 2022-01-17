@@ -1,10 +1,13 @@
 package cpu
 
 import (
+	"fmt"
+
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/bus"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/util"
+	"github.com/apex/log"
 )
 
 type CPU struct {
@@ -49,8 +52,8 @@ func (c *CPU) Step() int {
 		op = opCodes[opcode]
 	}
 
-	// log.Info(fmt.Sprintf("PC 0x%04X data 0x%02x%02x", c.Reg.PC-1, c.Bus.ReadByte(c.Reg.PC), c.Bus.ReadByte(c.Reg.PC+1)))
-	// log.Info(fmt.Sprintf(" %s", op.Mnemonic))
+	log.Info(fmt.Sprintf("PC 0x%04X data 0x%02x%02x", c.Reg.PC-1, c.Bus.ReadByte(c.Reg.PC), c.Bus.ReadByte(c.Reg.PC+1)))
+	log.Info(fmt.Sprintf(" %s", op.Mnemonic))
 	op.Handler(c, op.R1, op.R2)
 	return 0
 }

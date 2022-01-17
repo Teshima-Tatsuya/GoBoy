@@ -15,7 +15,7 @@ type GB struct {
 	WRAM *memory.RAM
 	HRAM *memory.RAM
 
-	Video *gpu.Video
+	Video *gpu.GPU
 	Timer *io.Timer
 }
 

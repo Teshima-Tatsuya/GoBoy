@@ -99,10 +99,10 @@ func (i *IRQ) Write(addr types.Addr, v byte) {
 
 func (i *IRQ) Read(addr types.Addr) byte {
 	switch addr {
-	case 0xFF:
-		return i.IF
-	case 0x0F:
+	case IEAddr:
 		return i.IE
+	case IFAddr:
+		return i.IF
 	default:
 		panic("Can't Write addr")
 	}
