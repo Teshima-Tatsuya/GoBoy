@@ -9,6 +9,7 @@ import (
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/bus"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/gpu"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/memory"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
@@ -16,7 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setup(file string) (*bus.Bus, *io.IRQ) {
+func setup(file string) *bus.Bus {
 	log.Printf("load file %s", file)
 	romData, err := ioutil.ReadFile(file)
 
@@ -30,16 +31,15 @@ func setup(file string) (*bus.Bus, *io.IRQ) {
 	wram := memory.NewRAM(0x2000)
 	wram2 := memory.NewRAM(0x2000)
 	hram := memory.NewRAM(0x0080)
-	io_ := io.New(0x0080)
-	irq := io.NewIRQ()
-	bus := bus.New(cart, vram, wram, wram2, hram, io_, irq)
+	io := io.NewIO(io.NewPad(), io.NewSerial(), io.NewTimer(), io.NewIRQ(), gpu.New(), 0x2000)
+	bus := bus.New(cart, vram, wram, wram2, hram, io)
 
-	return bus, irq
+	return bus
 }
 
 func testrom(t assert.TestingT, file string, passstr string) {
-	bus, irq := setup(file)
-	cpu := New(bus, irq)
+	bus := setup(file)
+	cpu := New(bus)
 
 	var str string
 
@@ -157,8 +157,8 @@ func TestTiming(t *testing.T) {
 
 func TestCPU_fetch(t *testing.T) {
 	file := "../../../test/blargg/cpu_instrs/individual/06-ld r,r.gb"
-	bus, irq := setup(file)
-	c := New(bus, irq)
+	bus := setup(file)
+	c := New(bus)
 	assert := assert.New(t)
 
 	want := byte(0x12)
@@ -171,8 +171,8 @@ func TestCPU_fetch(t *testing.T) {
 
 func TestCPU_fetch16(t *testing.T) {
 	file := "../../../test/blargg/cpu_instrs/individual/06-ld r,r.gb"
-	bus, irq := setup(file)
-	c := New(bus, irq)
+	bus := setup(file)
+	c := New(bus)
 	assert := assert.New(t)
 
 	lower := byte(0x12)
@@ -188,8 +188,8 @@ func TestCPU_fetch16(t *testing.T) {
 
 func TestCPU_pushpop(t *testing.T) {
 	file := "../../../test/blargg/cpu_instrs/individual/06-ld r,r.gb"
-	bus, irq := setup(file)
-	c := New(bus, irq)
+	bus := setup(file)
+	c := New(bus)
 	assert := assert.New(t)
 
 	want := byte(0x01)
@@ -206,8 +206,8 @@ func TestCPU_pushpop(t *testing.T) {
 
 func TestCPU_pushpopPC(t *testing.T) {
 	file := "../../../test/blargg/cpu_instrs/individual/06-ld r,r.gb"
-	bus, irq := setup(file)
-	c := New(bus, irq)
+	bus := setup(file)
+	c := New(bus)
 	assert := assert.New(t)
 
 	want := types.Addr(0x1234)

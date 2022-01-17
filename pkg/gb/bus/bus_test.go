@@ -17,9 +17,8 @@ func setup() *Bus {
 	wram := memory.NewRAM(0x2000)
 	wram2 := memory.NewRAM(0x2000)
 	hram := memory.NewRAM(0x0080)
-	irq := io.NewIRQ()
-	io := io.New(0x2000)
-	bus := New(cart, vram, wram, wram2, hram, io, irq)
+	io := io.NewIO(io.NewPad(), io.NewSerial(), io.NewTimer(), io.NewIRQ(), 0x2000)
+	bus := New(cart, vram, wram, wram2, hram, io)
 
 	return bus
 }

@@ -1,4 +1,4 @@
-package video
+package gpu
 
 import "github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 

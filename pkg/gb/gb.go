@@ -2,9 +2,9 @@ package gb
 
 import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/gpu"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/memory"
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/video"
 )
 
 type GB struct {
@@ -15,7 +15,7 @@ type GB struct {
 	WRAM *memory.RAM
 	HRAM *memory.RAM
 
-	Video *video.Video
+	Video *gpu.Video
 	Timer *io.Timer
 }
 

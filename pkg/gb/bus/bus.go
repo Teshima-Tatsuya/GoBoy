@@ -2,9 +2,9 @@ package bus
 
 import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/gpu"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/memory"
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/video"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
 
@@ -15,14 +15,13 @@ type Bus struct {
 	WRAM2 *memory.RAM
 	HRAM  *memory.RAM
 	ERAM  *memory.RAM
-	OAM   *video.OAM
+	OAM   *gpu.OAM
 	IO    *io.IO
-	IRQ   *io.IRQ
 }
 
-func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *memory.RAM, hram *memory.RAM, io *io.IO, irq *io.IRQ) *Bus {
+func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *memory.RAM, hram *memory.RAM, io *io.IO) *Bus {
 	eram := memory.NewRAM(0x2000)
-	oam := video.NewOAM()
+	oam := gpu.NewOAM()
 	return &Bus{
 		Cart:  cart,
 		VRAM:  vram,
@@ -32,7 +31,6 @@ func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *m
 		ERAM:  eram,
 		OAM:   oam,
 		IO:    io,
-		IRQ:   irq,
 	}
 }
 
@@ -52,14 +50,12 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 		return b.ERAM.Read(addr - 0xE000)
 	case addr >= 0xFE00 && addr <= 0xFE9F:
 		return b.OAM.Read(addr - 0xFE00)
-	case addr == 0xFF0F:
-		return b.IRQ.Read(addr - 0xFF00)
 	case addr >= 0xFF00 && addr <= 0xFF7F:
 		return b.IO.Read(addr - 0xFF00)
 	case addr >= 0xFF80 && addr <= 0xFFFE:
 		return b.HRAM.Read(addr - 0xFF80)
 	case addr == 0xFFFF:
-		return b.IRQ.Read(addr - 0xFF00)
+		return b.IO.Read(addr - 0xFF00)
 	default:
 		// panic(fmt.Sprintf("Non Supported Read Addr 0x%4d", addr))
 	}
@@ -88,14 +84,12 @@ func (b *Bus) WriteByte(addr types.Addr, value byte) {
 		b.ERAM.Write(addr-0xE000, value)
 	case addr >= 0xFE00 && addr <= 0xFE9F:
 		b.OAM.Write(addr-0xFE00, value)
-	case addr == 0xFF0F:
-		b.IRQ.Write(addr-0xFF00, value)
 	case addr >= 0xFF00 && addr <= 0xFF7F:
 		b.IO.Write(addr-0xFF00, value)
 	case addr >= 0xFF80 && addr <= 0xFFFE:
 		b.HRAM.Write(addr-0xFF80, value)
 	case addr == 0xFFFF:
-		b.IRQ.Write(addr-0xFF00, value)
+		b.IO.Write(addr-0xFF00, value)
 	default:
 		// panic(fmt.Sprintf("Addr:0x%4x is not implemented", addr))
 	}

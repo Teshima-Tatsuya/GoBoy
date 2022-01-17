@@ -1,4 +1,4 @@
-package video
+package gpu
 
 type VRAM struct {
 	// 0x8000-0x97FF

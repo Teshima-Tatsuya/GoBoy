@@ -88,9 +88,9 @@ func (i *IRQ) Disable() {
 
 func (i *IRQ) Write(addr types.Addr, v byte) {
 	switch addr {
-	case 0xFF:
+	case IEAddr:
 		i.IE = v
-	case 0x0F:
+	case IFAddr:
 		i.IF = v
 	default:
 		panic("Can't Write addr")

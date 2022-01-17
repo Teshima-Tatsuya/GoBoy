@@ -6,13 +6,6 @@ import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
 
-const (
-	DIV  types.Addr = 0x0004
-	TIMA            = 0x0005
-	TMA             = 0x0006
-	TAC             = 0x0007
-)
-
 type Timer struct {
 	counter int16
 	DIV     byte
@@ -33,13 +26,13 @@ func NewTimer() *Timer {
 
 func (t *Timer) Read(addr types.Addr) byte {
 	switch addr {
-	case DIV:
+	case DIVAddr:
 		return byte(t.DIV)
-	case TIMA:
+	case TIMAAddr:
 		return t.TIMA
-	case TMA:
+	case TMAAddr:
 		return t.TMA
-	case TAC:
+	case TACAddr:
 		return t.TAC
 	default:
 		panic(fmt.Sprintf("Non Supported addr 0x%04X", addr))
@@ -48,13 +41,13 @@ func (t *Timer) Read(addr types.Addr) byte {
 
 func (t *Timer) Write(addr types.Addr, v byte) byte {
 	switch addr {
-	case DIV:
+	case DIVAddr:
 		return byte(t.DIV)
-	case TIMA:
+	case TIMAAddr:
 		return t.TIMA
-	case TMA:
+	case TMAAddr:
 		return t.TMA
-	case TAC:
+	case TACAddr:
 		return t.TAC
 	default:
 		panic(fmt.Sprintf("Non Supported addr 0x%04X", addr))
