@@ -37,12 +37,8 @@ func NewIRQ() *IRQ {
 	}
 }
 
-func (i *IRQ) SetIF(v byte) {
-	i.Write(0xFF, v)
-}
-
-func (i *IRQ) SetIE(v byte) {
-	i.Write(0x0F, v)
+func (i *IRQ) Request(v byte) {
+	i.Write(IFAddr, v)
 }
 
 // if any irq is enable

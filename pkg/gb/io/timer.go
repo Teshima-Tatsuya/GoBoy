@@ -26,12 +26,13 @@ func (t *Timer) Tick(cycle int) bool {
 
 		if uint32(t.counter)%t.getFreq() == 0 {
 			t.TIMA++
+
+			if t.TIMA == 0 {
+				t.TIMA = t.TMA
+				r = true
+			}
 		}
 
-		if t.TIMA == 0 {
-			t.TIMA = t.TMA
-			r = true
-		}
 	}
 
 	return r
