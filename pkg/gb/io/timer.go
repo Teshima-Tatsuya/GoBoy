@@ -7,11 +7,34 @@ import (
 )
 
 type Timer struct {
-	counter int16
+	counter uint16
 	DIV     byte
 	TIMA    byte
 	TMA     byte
 	TAC     byte
+}
+
+func (t *Timer) Tick(cycle int) bool {
+	r := false
+	for i := 0; i < cycle; i++ {
+		t.counter += 4
+
+		// TODO double speed for GBC
+		if t.counter >= 16384 {
+			t.DIV++
+		}
+
+		if uint32(t.counter)%t.getFreq() == 0 {
+			t.TIMA++
+		}
+
+		if t.TIMA == 0 {
+			t.TIMA = t.TMA
+			r = true
+		}
+	}
+
+	return r
 }
 
 func NewTimer() *Timer {
@@ -24,10 +47,25 @@ func NewTimer() *Timer {
 	}
 }
 
+func (t *Timer) getFreq() uint32 {
+	switch t.TAC & 0x03 {
+	case 0x00:
+		return 4096
+	case 0x01:
+		return 262144
+	case 0x10:
+		return 65536
+	case 0x11:
+		return 16384
+	default:
+		panic("Illegal TAC")
+	}
+}
+
 func (t *Timer) Read(addr types.Addr) byte {
 	switch addr {
 	case DIVAddr:
-		return byte(t.DIV)
+		return t.DIV
 	case TIMAAddr:
 		return t.TIMA
 	case TMAAddr:
@@ -39,16 +77,17 @@ func (t *Timer) Read(addr types.Addr) byte {
 	}
 }
 
-func (t *Timer) Write(addr types.Addr, v byte) byte {
+func (t *Timer) Write(addr types.Addr, v byte) {
 	switch addr {
 	case DIVAddr:
-		return byte(t.DIV)
+		t.DIV = 0
+		t.counter = 0
 	case TIMAAddr:
-		return t.TIMA
+		t.TIMA = v
 	case TMAAddr:
-		return t.TMA
+		t.TMA = v
 	case TACAddr:
-		return t.TAC
+		t.TAC = v
 	default:
 		panic(fmt.Sprintf("Non Supported addr 0x%04X", addr))
 	}

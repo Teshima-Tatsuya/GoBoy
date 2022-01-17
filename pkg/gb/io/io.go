@@ -8,7 +8,7 @@ import (
 type IO struct {
 	pad    *Pad
 	serial *Serial
-	timer  *Timer
+	Timer  *Timer
 	IRQ    *IRQ
 	gpu    *gpu.GPU
 	buf    []byte
@@ -20,7 +20,7 @@ func NewIO(pad *Pad, serial *Serial, timer *Timer, irq *IRQ, gpu *gpu.GPU, size 
 	return &IO{
 		pad:    pad,
 		serial: serial,
-		timer:  timer,
+		Timer:  timer,
 		IRQ:    irq,
 		gpu:    gpu,
 		buf:    buf,
@@ -33,7 +33,7 @@ func (r *IO) Read(addr types.Addr) byte {
 	case addr == PadAddr:
 		return r.pad.Read(addr)
 	case DIVAddr <= addr && addr <= TACAddr:
-		return r.timer.Read(addr)
+		return r.Timer.Read(addr)
 	case addr == IFAddr:
 		return r.IRQ.Read(addr)
 	case SBAddr <= addr && addr <= SCAddr:
@@ -53,7 +53,7 @@ func (r *IO) Write(addr types.Addr, value byte) {
 	case SBAddr <= addr && addr <= SCAddr:
 		r.serial.Write(addr, value)
 	case DIVAddr <= addr && addr <= TACAddr:
-		r.timer.Write(addr, value)
+		r.Timer.Write(addr, value)
 	case addr == IFAddr:
 		r.IRQ.Write(addr, value)
 	case LCDCAddr <= addr && addr <= WXAddr:

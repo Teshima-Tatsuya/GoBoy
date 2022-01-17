@@ -56,7 +56,8 @@ func testrom(t assert.TestingT, file string, passstr string) {
 			strings.Contains(str, "Passed") {
 			break
 		}
-		cpu.Step()
+		cycle := cpu.Step()
+		cpu.Bus.IO.Timer.Tick(cycle)
 	}
 
 	assert.Equal(t, passstr, str)

@@ -55,7 +55,8 @@ func (c *CPU) Step() int {
 	log.Info(fmt.Sprintf("PC 0x%04X data 0x%02x%02x", c.Reg.PC-1, c.Bus.ReadByte(c.Reg.PC), c.Bus.ReadByte(c.Reg.PC+1)))
 	log.Info(fmt.Sprintf(" %s", op.Mnemonic))
 	op.Handler(c, op.R1, op.R2)
-	return 0
+
+	return int(op.Cycles)
 }
 
 func (c *CPU) fetch() byte {
