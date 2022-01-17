@@ -20,8 +20,12 @@ func (t *Timer) Tick(cycle int) bool {
 		t.counter += 4
 
 		// TODO double speed for GBC
-		if t.counter >= 16384 {
+		if t.counter%16384 == 0 {
 			t.DIV++
+		}
+
+		if !t.started() {
+			continue
 		}
 
 		if uint32(t.counter)%t.getFreq() == 0 {
@@ -92,4 +96,8 @@ func (t *Timer) Write(addr types.Addr, v byte) {
 	default:
 		panic(fmt.Sprintf("Non Supported addr 0x%04X", addr))
 	}
+}
+
+func (t *Timer) started() bool {
+	return t.TAC&0x04 == 0x04
 }
