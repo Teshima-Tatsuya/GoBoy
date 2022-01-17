@@ -28,7 +28,7 @@ func (t *Timer) Tick(cycle int) bool {
 			continue
 		}
 
-		if uint32(t.counter)%t.getFreq() == 0 {
+		if t.counter%t.getFreq() == 0 {
 			t.TIMA++
 
 			if t.TIMA == 0 {
@@ -52,16 +52,16 @@ func NewTimer() *Timer {
 	}
 }
 
-func (t *Timer) getFreq() uint32 {
+func (t *Timer) getFreq() uint16 {
 	switch t.TAC & 0x03 {
 	case 0x00:
-		return 4096
+		return 1024
 	case 0x01:
-		return 262144
+		return 16
 	case 0x10:
-		return 65536
+		return 64
 	case 0x11:
-		return 16384
+		return 256
 	default:
 		panic("Illegal TAC")
 	}
