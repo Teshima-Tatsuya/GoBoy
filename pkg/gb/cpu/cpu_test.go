@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/bus"
@@ -45,17 +44,13 @@ func testrom(t assert.TestingT, file string, passstr string) {
 
 	str = ""
 
-	for {
+	for i := 0; i < 40000000; i++ {
 		if cpu.Bus.ReadByte(0xff02) == byte(0x81) {
 			d := cpu.Bus.ReadByte(0xff01)
 			str += string(d)
 			cpu.Bus.WriteByte(0xff02, byte(0x00))
 		}
 
-		if strings.Contains(str, "Failed") ||
-			strings.Contains(str, "Passed") {
-			break
-		}
 		cycle := cpu.Step()
 		if cpu.Bus.IO.Timer.Tick(cycle) {
 			cpu.IRQ.Request(io.TimerFlag)
@@ -67,93 +62,22 @@ func testrom(t assert.TestingT, file string, passstr string) {
 
 func TestCPU_Blargg_cpu_instrs(t *testing.T) {
 	file := "../../../test/blargg/cpu_instrs/cpu_instrs.gb"
-	passstr := "cpu_instrs\n\n01:ok  02:ok  03:ok  04:ok  05:ok  06:ok  07:ok  08:ok  09:ok  10:ok  11:ok  \n\nPassed"
+	passstr := "cpu_instrs\n\n01:ok  02:ok  03:ok  04:ok  05:ok  06:ok  07:ok  08:ok  09:ok  10:ok  11:ok  \n\nPassed all tests\n"
 
 	testrom(t, file, passstr)
 
-}
-
-func Test01(t *testing.T) {
-	file := "../../../test/blargg/cpu_instrs/individual/01-special.gb"
-	passstr := "01-special\n\n\nPassed"
-
-	testrom(t, file, passstr)
-
-}
-
-func Test02(t *testing.T) {
-	file := "../../../test/blargg/cpu_instrs/individual/02-interrupts.gb"
-	passstr := "02-interrupts\n\n\nPassed"
-
-	testrom(t, file, passstr)
-}
-
-func Test03(t *testing.T) {
-	file := "../../../test/blargg/cpu_instrs/individual/03-op sp,hl.gb"
-	passstr := "03-op sp,hl\n\n\nPassed"
-
-	testrom(t, file, passstr)
-}
-
-func Test04(t *testing.T) {
-	file := "../../../test/blargg/cpu_instrs/individual/04-op r,imm.gb"
-	passstr := "04-op r,imm\n\n\nPassed"
-
-	testrom(t, file, passstr)
-}
-
-func Test05(t *testing.T) {
-	file := "../../../test/blargg/cpu_instrs/individual/05-op rp.gb"
-	passstr := "05-op rp\n\n\nPassed"
-
-	testrom(t, file, passstr)
-}
-
-func Test06(t *testing.T) {
-	file := "../../../test/blargg/cpu_instrs/individual/06-ld r,r.gb"
-	passstr := "06-ld r,r\n\n\nPassed"
-
-	testrom(t, file, passstr)
-}
-
-func Test07(t *testing.T) {
-	file := "../../../test/blargg/cpu_instrs/individual/07-jr,jp,call,ret,rst.gb"
-	passstr := "07-jr,jp,call,ret,rst\n\n\nPassed"
-
-	testrom(t, file, passstr)
-}
-
-func Test08(t *testing.T) {
-	file := "../../../test/blargg/cpu_instrs/individual/08-misc instrs.gb"
-	passstr := "08-misc instrs\n\n\nPassed"
-
-	testrom(t, file, passstr)
-}
-
-func Test09(t *testing.T) {
-	file := "../../../test/blargg/cpu_instrs/individual/09-op r,r.gb"
-	passstr := "09-op r,r\n\n\nPassed"
-
-	testrom(t, file, passstr)
-}
-
-func Test10(t *testing.T) {
-	file := "../../../test/blargg/cpu_instrs/individual/10-bit ops.gb"
-	passstr := "10-bit ops\n\n\nPassed"
-
-	testrom(t, file, passstr)
-}
-
-func Test11(t *testing.T) {
-	file := "../../../test/blargg/cpu_instrs/individual/11-op a,(hl).gb"
-	passstr := "11-op a,(hl)\n\n\nPassed"
-
-	testrom(t, file, passstr)
 }
 
 func TestTiming(t *testing.T) {
 	file := "../../../test/blargg/instr_timing/instr_timing.gb"
 	passstr := "instr_timing\n\n\nPassed"
+
+	testrom(t, file, passstr)
+}
+
+func TestMooneye_acceptance(t *testing.T) {
+	file := "../../../test/mooneye-gb/acceptance/bits/mem_oam.gb"
+	passstr := "pass"
 
 	testrom(t, file, passstr)
 }
