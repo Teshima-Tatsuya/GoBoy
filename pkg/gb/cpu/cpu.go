@@ -31,12 +31,13 @@ func (c *CPU) Step() {
 		if c.IRQ.Has() {
 			c.Halt = false
 		}
-
 		c.Bus.IO.Timer.Tick(1)
+		return
 	}
 
 	if c.interrupt() {
 		c.Bus.IO.Timer.Tick(1)
+		return
 	}
 	opcode := c.fetch()
 
