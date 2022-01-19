@@ -26,17 +26,17 @@ func New(bus *bus.Bus) *CPU {
 	return c
 }
 
-func (c *CPU) Step() int {
+func (c *CPU) Step() {
 	if c.Halt {
 		if c.IRQ.Has() {
 			c.Halt = false
 		}
 
-		return 1
+		c.Bus.IO.Timer.Tick(1)
 	}
 
 	if c.interrupt() {
-		return 1
+		c.Bus.IO.Timer.Tick(1)
 	}
 	opcode := c.fetch()
 
@@ -53,7 +53,7 @@ func (c *CPU) Step() int {
 	// log.Info(fmt.Sprintf(" %s", op.Mnemonic))
 	op.Handler(c, op.R1, op.R2)
 
-	return int(op.Cycles)
+	c.Bus.IO.Timer.Tick(int(op.Cycles))
 }
 
 func (c *CPU) fetch() byte {

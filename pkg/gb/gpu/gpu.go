@@ -24,48 +24,35 @@ const (
 	WXAddr              = 0x4B
 )
 
-type Color uint16
-
 type GPU struct {
-	LCDC    *LCDC
-	LCDS    *LCDS
-	SCY     byte
-	SCX     byte
-	LY      byte
-	LYC     byte
-	DMA     byte
-	BGP     byte
-	OBP0    byte
-	OBP1    byte
-	WX      byte
-	WY      byte
-	Palette [4]Color
+	LCDC *LCDC
+	LCDS *LCDS
+	SCY  byte
+	SCX  byte
+	LY   byte
+	LYC  byte
+	DMA  byte
+	BGP  byte
+	OBP0 byte
+	OBP1 byte
+	WX   byte
+	WY   byte
 }
 
 func New() *GPU {
-	palette := [4]Color{
-		// BGP
-		// @see https://gbdev.io/pandocs/Palettes.html#ff47---bgp-bg-palette-data-rw---non-cgb-mode-only
-		0x7fff, // -> 0b11111, 0b11111, 0b11111 (white)
-		0x56b5, // -> 0b10101, 0b10101, 0b10101 (light gray)
-		0x294a, // -> 0b01010, 0b01010, 0b01010 (dark gray)
-		0x0000, // -> 0b00000, 0b00000, 0b00000 (black)
-	}
-
 	return &GPU{
-		LCDC:    NewLCDC(0x00),
-		LCDS:    NewLCDS(0x00),
-		SCY:     0,
-		SCX:     0,
-		LY:      0,
-		LYC:     0,
-		DMA:     0,
-		BGP:     0,
-		OBP0:    0,
-		OBP1:    0,
-		WX:      0,
-		WY:      0,
-		Palette: palette,
+		LCDC: NewLCDC(0x00),
+		LCDS: NewLCDS(0x00),
+		SCY:  0,
+		SCX:  0,
+		LY:   0,
+		LYC:  0,
+		DMA:  0,
+		BGP:  0,
+		OBP0: 0,
+		OBP1: 0,
+		WX:   0,
+		WY:   0,
 	}
 }
 

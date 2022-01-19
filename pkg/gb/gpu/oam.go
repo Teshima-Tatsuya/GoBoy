@@ -5,17 +5,23 @@ import "github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 // Object Attribute Memory
 // FE00-FE9F
 type OAM struct {
-	// Sprite’s vertical position on the screen + 16
-	Y byte
-	// Sprite’s horizontal position on the screen + 8
-	X         byte
-	TileIndex byte
-	AttrFlags byte
-	Buf       [0xA0]byte
+	Objs [40]*Obj
+	Buf  [0xA0]byte
+}
+
+type Obj struct {
+	y, x, tile, addr byte
 }
 
 func NewOAM() *OAM {
-	return &OAM{}
+	var objs [40]*Obj
+
+	for i := 0; i < 40; i++ {
+		objs[i] = &Obj{}
+	}
+	return &OAM{
+		Objs: objs,
+	}
 }
 
 // WIP

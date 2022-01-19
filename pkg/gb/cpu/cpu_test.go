@@ -39,6 +39,7 @@ func setup(file string) *bus.Bus {
 func testrom(t assert.TestingT, file string, passstr string) {
 	bus := setup(file)
 	cpu := New(bus)
+	cpu.Bus.IO.Timer.SetRequestIRQ(cpu.IRQ.Request)
 
 	var str string
 
@@ -51,10 +52,7 @@ func testrom(t assert.TestingT, file string, passstr string) {
 			cpu.Bus.WriteByte(0xff02, byte(0x00))
 		}
 
-		cycle := cpu.Step()
-		if cpu.Bus.IO.Timer.Tick(cycle) {
-			cpu.IRQ.Request(io.TimerFlag)
-		}
+		cpu.Step()
 	}
 
 	assert.Equal(t, passstr, str)
@@ -68,6 +66,13 @@ func TestCPU_Blargg_cpu_instrs(t *testing.T) {
 
 }
 
+func TestCPU_Blargg_cpu_02(t *testing.T) {
+	file := "../../../test/blargg/cpu_instrs/individual/02-interrupts.gb"
+	passstr := "cpu_instrs\n\n01:ok  02:ok  03:ok  04:ok  05:ok  06:ok  07:ok  08:ok  09:ok  10:ok  11:ok  \n\nPassed all tests\n"
+
+	testrom(t, file, passstr)
+
+}
 func TestTiming(t *testing.T) {
 	file := "../../../test/blargg/instr_timing/instr_timing.gb"
 	passstr := "instr_timing\n\n\nPassed"

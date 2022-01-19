@@ -7,15 +7,29 @@ import (
 )
 
 type Timer struct {
-	counter uint16
-	DIV     byte
-	TIMA    byte
-	TMA     byte
-	TAC     byte
+	requestIRQ func(byte)
+	counter    uint16
+	DIV        byte
+	TIMA       byte
+	TMA        byte
+	TAC        byte
 }
 
-func (t *Timer) Tick(cycle int) bool {
-	r := false
+func NewTimer() *Timer {
+	return &Timer{
+		counter: 0,
+		DIV:     0x00,
+		TIMA:    0x00,
+		TMA:     0x00,
+		TAC:     0x00,
+	}
+}
+
+func (t *Timer) SetRequestIRQ(request func(byte)) {
+	t.requestIRQ = request
+}
+
+func (t *Timer) Tick(cycle int) {
 	for i := 0; i < cycle; i++ {
 		t.counter += 4
 
@@ -33,22 +47,10 @@ func (t *Timer) Tick(cycle int) bool {
 
 			if t.TIMA == 0 {
 				t.TIMA = t.TMA
-				r = true
+				t.requestIRQ(TimerFlag)
 			}
 		}
 
-	}
-
-	return r
-}
-
-func NewTimer() *Timer {
-	return &Timer{
-		counter: 0,
-		DIV:     0x00,
-		TIMA:    0x00,
-		TMA:     0x00,
-		TAC:     0x00,
 	}
 }
 
