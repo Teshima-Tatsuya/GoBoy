@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"math/rand"
 
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/interfaces/bus"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
 
@@ -25,39 +26,43 @@ const (
 )
 
 type GPU struct {
-	LCDC *LCDC
-	LCDS *LCDS
-	SCY  byte
-	SCX  byte
-	LY   byte
-	LYC  byte
-	DMA  byte
-	BGP  byte
-	OBP0 byte
-	OBP1 byte
-	WX   byte
-	WY   byte
+	bus       bus.IO
+	clock     uint
+	imageData [][]color.RGBA
+	LCDC      *LCDC
+	LCDS      *LCDS
+	Scroll    Scroll
+	DMA       byte
+	BGP       byte
+	OBP0      byte
+	OBP1      byte
 }
 
 func New() *GPU {
+	imageData := make([][]color.RGBA, SCREEN_WIDTH)
+
+	for i := 0; i < SCREEN_WIDTH; i++ {
+		imageData[i] = make([]color.RGBA, SCREEN_HEIGHT)
+	}
+
 	return &GPU{
-		LCDC: NewLCDC(0x00),
-		LCDS: NewLCDS(0x00),
-		SCY:  0,
-		SCX:  0,
-		LY:   0,
-		LYC:  0,
-		DMA:  0,
-		BGP:  0,
-		OBP0: 0,
-		OBP1: 0,
-		WX:   0,
-		WY:   0,
+		clock:     0,
+		imageData: imageData,
+		LCDC:      NewLCDC(0x00),
+		LCDS:      NewLCDS(0x00),
+		DMA:       0,
+		BGP:       0,
+		OBP0:      0,
+		OBP1:      0,
 	}
 }
 
+func (g *GPU) Step(cycles uint) {
+
+}
+
 func (g *GPU) Display() *image.RGBA {
-	i := image.NewRGBA(image.Rect(0, 0, 160, 144))
+	i := image.NewRGBA(image.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
 	for y := 0; y < 144; y++ {
 		for x := 0; x < 160; x++ {
 			//			p := g.Renderer.outputBuffer[y*160+x]
@@ -75,14 +80,8 @@ func (g *GPU) Read(addr types.Addr) byte {
 		return g.LCDC.Data
 	case LCDSAddr:
 		return g.LCDS.Data
-	case SCYAddr:
-		return g.SCY
-	case SCXAddr:
-		return g.SCX
-	case LYAddr:
-		return g.LY
-	case LYCAddr:
-		return g.LYC
+	case SCYAddr, SCXAddr, LYAddr, LYCAddr, WXAddr, WYAddr:
+		// return g.Scroll
 	case DMAAddr:
 		return g.DMA
 	case BGPAddr:
@@ -91,10 +90,6 @@ func (g *GPU) Read(addr types.Addr) byte {
 		return g.OBP0
 	case OBP1Addr:
 		return g.OBP1
-	case WXAddr:
-		return g.WX
-	case WYAddr:
-		return g.WY
 	}
 	return 0
 }
@@ -105,14 +100,7 @@ func (g *GPU) Write(addr types.Addr, value byte) {
 		g.LCDC.Data = value
 	case LCDSAddr:
 		g.LCDS.Data = value
-	case SCYAddr:
-		g.SCY = value
-	case SCXAddr:
-		g.SCX = value
-	case LYAddr:
-		g.LY = value
-	case LYCAddr:
-		g.LYC = value
+	case SCYAddr, SCXAddr, LYAddr, LYCAddr, WXAddr, WYAddr:
 	case DMAAddr:
 		g.DMA = value
 	case BGPAddr:
@@ -121,9 +109,5 @@ func (g *GPU) Write(addr types.Addr, value byte) {
 		g.OBP0 = value
 	case OBP1Addr:
 		g.OBP1 = value
-	case WXAddr:
-		g.WX = value
-	case WYAddr:
-		g.WY = value
 	}
 }

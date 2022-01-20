@@ -26,18 +26,18 @@ func New(bus *bus.Bus) *CPU {
 	return c
 }
 
-func (c *CPU) Step() {
+func (c *CPU) Step() uint {
 	if c.Halt {
 		if c.IRQ.Has() {
 			c.Halt = false
 		}
 		c.Bus.IO.Timer.Tick(1)
-		return
+		return 1
 	}
 
 	if c.interrupt() {
 		c.Bus.IO.Timer.Tick(1)
-		return
+		return 1
 	}
 	opcode := c.fetch()
 
@@ -55,6 +55,8 @@ func (c *CPU) Step() {
 	op.Handler(c, op.R1, op.R2)
 
 	c.Bus.IO.Timer.Tick(int(op.Cycles))
+
+	return uint(op.Cycles)
 }
 
 func (c *CPU) fetch() byte {

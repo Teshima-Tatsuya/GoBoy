@@ -21,3 +21,7 @@ func NewLCDS(data byte) *LCDS {
 func (l *LCDS) LYC() bool {
 	return util.Bit(l.Data, 6) == 1
 }
+
+func (l *LCDS) Mode() Mode {
+	return Mode(l.Data & 0x03)
+}

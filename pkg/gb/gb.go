@@ -48,5 +48,6 @@ func NewGB(romData []byte) *GB {
 }
 
 func (gb *GB) Step() {
-	gb.cpu.Step()
+	cycle := gb.cpu.Step()
+	gb.gpu.Step(cycle)
 }

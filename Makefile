@@ -11,9 +11,9 @@ clean:
 
 .PNONY: test
 
-test:
+test_blargg:
 	make build
-	$(BINDIR)/darwin-amd64/$(NAME) ./roms/hello.gb
+	$(BINDIR)/darwin-amd64/$(NAME) ./test/blargg/cpu_instrs/cpu_instrs.gb
 
 test_cpu:
 	go test ./pkg/gb/cpu

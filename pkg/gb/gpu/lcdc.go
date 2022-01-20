@@ -27,8 +27,8 @@ func (l *LCDC) LCDPPUEnable() bool {
 Window tile map area
  0=9800-9BFF, 1=9C00-9FFF
 */
-func (l *LCDC) WinTileMapArea() uint8 {
-	return util.Bit(l.Data, 6)
+func (l *LCDC) WinTileMapArea() WindowTypeMapArea {
+	return WindowTypeMapArea(util.Bit(l.Data, 6))
 }
 
 // Window enable
@@ -40,16 +40,16 @@ func (l *LCDC) WindowEnable() bool {
 BG and Window tile data area
  0=8800-97FF, 1=8000-8FFF
 */
-func (l *LCDC) BGWinTileDataArea() uint8 {
-	return util.Bit(l.Data, 4)
+func (l *LCDC) BGWinTileDataArea() BGWindowTileDataArea {
+	return BGWindowTileDataArea(util.Bit(l.Data, 4))
 }
 
 /*
 BG tile map area
  0=9800-9BFF, 1=9C00-9FFF
 */
-func (l *LCDC) BGTileMapArea() uint8 {
-	return util.Bit(l.Data, 3)
+func (l *LCDC) BGTileMapArea() BGTileMapArea {
+	return BGTileMapArea(util.Bit(l.Data, 3))
 }
 
 /*
