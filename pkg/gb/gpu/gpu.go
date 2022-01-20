@@ -26,16 +26,17 @@ const (
 )
 
 type GPU struct {
-	bus       bus.IO
-	clock     uint
-	imageData [][]color.RGBA
-	LCDC      *LCDC
-	LCDS      *LCDS
-	Scroll    Scroll
-	DMA       byte
-	BGP       byte
-	OBP0      byte
-	OBP1      byte
+	bus        bus.IO
+	requestIRQ func(byte)
+	clock      uint
+	imageData  [][]color.RGBA
+	LCDC       *LCDC
+	LCDS       *LCDS
+	Scroll     *Scroll
+	DMA        byte
+	BGP        byte
+	OBP0       byte
+	OBP1       byte
 }
 
 func New() *GPU {
@@ -50,6 +51,7 @@ func New() *GPU {
 		imageData: imageData,
 		LCDC:      NewLCDC(0x00),
 		LCDS:      NewLCDS(0x00),
+		Scroll:    NewScroll(),
 		DMA:       0,
 		BGP:       0,
 		OBP0:      0,
@@ -57,8 +59,26 @@ func New() *GPU {
 	}
 }
 
-func (g *GPU) Step(cycles uint) {
+func (g *GPU) Init(bus bus.IO, requestIRQ func(byte)) {
+	g.bus = bus
+	g.requestIRQ = requestIRQ
+}
 
+func (g *GPU) Step(cycles uint) {
+	g.clock += cycles
+
+	if g.clock >= CyclePerLine {
+		if g.Scroll.isVBlankStart() {
+			g.requestIRQ(1) // prepend cycle import...
+
+		} else if g.Scroll.isVBlankPeriod() {
+
+		} else if g.Scroll.isHBlankPeriod() {
+
+		}
+		g.Scroll.LY++
+		g.clock -= CyclePerLine
+	}
 }
 
 func (g *GPU) Display() *image.RGBA {

@@ -3,6 +3,7 @@ package gpu
 import "github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 
 const SPRITE_NUM = 40
+const CyclePerLine = 456
 const (
 	SCREEN_WIDTH  = 160
 	SCREEN_HEIGHT = 144

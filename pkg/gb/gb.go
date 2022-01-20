@@ -28,11 +28,13 @@ func NewGB(romData []byte) *GB {
 	wram := memory.NewRAM(0x2000)
 	wram2 := memory.NewRAM(0x2000)
 	hram := memory.NewRAM(0x0080)
-	io := io.NewIO(io.NewPad(), io.NewSerial(), io.NewTimer(), io.NewIRQ(), gpu.New(), 0x2000)
+	gpu := gpu.New()
+	io := io.NewIO(io.NewPad(), io.NewSerial(), io.NewTimer(), io.NewIRQ(), gpu, 0x2000)
 	bus := bus.New(cart, vram, wram, wram2, hram, io)
 
 	cpu := cpu.New(bus)
 	cpu.Bus.IO.Timer.SetRequestIRQ(cpu.IRQ.Request)
+	gpu.Init(bus, cpu.IRQ.Request)
 
 	gb := &GB{
 		Cartridge: cartridge.New(romData),
@@ -41,7 +43,7 @@ func NewGB(romData []byte) *GB {
 		hRAM:      memory.NewRAM(0x0080),
 
 		cpu: cpu,
-		gpu: gpu.New(),
+		gpu: gpu,
 	}
 
 	return gb
