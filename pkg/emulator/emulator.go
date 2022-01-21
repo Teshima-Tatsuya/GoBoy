@@ -37,9 +37,5 @@ func (e *Emulator) Update() error {
 func (e *Emulator) Draw(screen *ebiten.Image) {
 	imageData := e.GB.Display()
 
-	for y := 0; y < 144; y++ {
-		for x := 0; x < 160; x++ {
-			screen.Set(x, y, imageData[x][y])
-		}
-	}
+	screen.ReplacePixels(imageData.Pix)
 }

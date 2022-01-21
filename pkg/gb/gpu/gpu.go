@@ -3,7 +3,6 @@ package gpu
 import (
 	"image"
 	"image/color"
-	"math/rand"
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/interfaces/bus"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
@@ -93,10 +92,7 @@ func (g *GPU) Display() *image.RGBA {
 	i := image.NewRGBA(image.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
 	for y := 0; y < 144; y++ {
 		for x := 0; x < 160; x++ {
-			//			p := g.Renderer.outputBuffer[y*160+x]
-			//			red, green, blue := byte((p&0b11111)*8), byte(((p>>5)&0b11111)*8), byte(((p>>10)&0b11111)*8)
-
-			i.SetRGBA(x, y, color.RGBA{uint8(rand.Intn(255)), uint8(rand.Intn(255)), uint8(rand.Intn(255)), 0xff})
+			i.SetRGBA(x, y, g.imageData[x][y])
 		}
 	}
 	return i

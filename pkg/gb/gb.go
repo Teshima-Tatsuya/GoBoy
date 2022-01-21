@@ -1,7 +1,7 @@
 package gb
 
 import (
-	"image/color"
+	"image"
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/bus"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
@@ -21,6 +21,8 @@ type GB struct {
 
 	cpu *cpu.CPU
 	gpu *gpu.GPU
+
+	currentCycle uint
 }
 
 func NewGB(romData []byte) *GB {
@@ -44,18 +46,28 @@ func NewGB(romData []byte) *GB {
 		wRAM:      memory.NewRAM(0x2000),
 		hRAM:      memory.NewRAM(0x0080),
 
-		cpu: cpu,
-		gpu: gpu,
+		cpu:          cpu,
+		gpu:          gpu,
+		currentCycle: 0,
 	}
 
 	return gb
 }
 
 func (gb *GB) Step() {
-	cycle := gb.cpu.Step()
-	gb.gpu.Step(cycle)
+	for {
+		cycle := gb.cpu.Step()
+		gb.gpu.Step(cycle * 4)
+
+		gb.currentCycle += cycle * 4
+
+		if gb.currentCycle >= 70224 {
+			gb.currentCycle -= 70224
+			return
+		}
+	}
 }
 
-func (gb *GB) Display() [][]color.RGBA {
-	return gb.gpu.ImageData()
+func (gb *GB) Display() *image.RGBA {
+	return gb.gpu.Display()
 }
