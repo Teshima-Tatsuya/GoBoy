@@ -65,7 +65,6 @@ func New() *GPU {
 func (g *GPU) Init(bus bus.IO, requestIRQ func(byte)) {
 	g.bus = bus
 	g.requestIRQ = requestIRQ
-	g.loadTile()
 }
 
 // gpu main process
@@ -81,6 +80,7 @@ func (g *GPU) Step(cycles uint) {
 		} else if g.Scroll.isHBlankPeriod() {
 			// first build BG
 			// second build Window IF exists
+			g.drawBGLine()
 
 		}
 		g.Scroll.LY++
@@ -111,10 +111,33 @@ func (g *GPU) loadTile() {
 	// One tile occupies 16 bytes
 	for i := 0; i < tileNum; i++ {
 		for b := 0; b < 16; b++ {
-			bytes16[b] = g.bus.ReadByte(types.Addr(addr) + types.Addr(tileNum*16+b))
+			bytes16[b] = g.bus.ReadByte(types.Addr(addr) + types.Addr(i*16+b))
 		}
 		g.tiles[i] = *NewTile(bytes16[:])
 	}
+}
+
+// Step1: get tile id from tile map
+// Step2: get color form tile id
+// Step3: Store color to imageData
+func (g *GPU) drawBGLine() {
+	for x := 0; x < SCREEN_WIDTH; x++ {
+		g.getTileColor(x)
+		// c := g.getTileColor(x)
+		// fmt.Printf("%02X", c)
+	}
+}
+
+func (g *GPU) getTileColor(LX int) Color {
+	// https://gbdev.io/pandocs/pixel_fifo.html#get-tile
+	baseAddr := g.LCDC.BGTileMapArea()
+	y := (g.Scroll.LY + g.Scroll.SCY) & 255
+	x := (LX + int(g.Scroll.SCX)/8) & 0x1F
+
+	addr := types.Addr(baseAddr) + types.Addr(y) + types.Addr(x)
+	lower := g.bus.ReadAddr(addr)
+	upper := g.bus.ReadAddr(addr + 1)
+	return Color((upper >> 1) + lower)
 }
 
 func (g *GPU) Read(addr types.Addr) byte {

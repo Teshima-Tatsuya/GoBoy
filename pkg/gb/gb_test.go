@@ -29,7 +29,7 @@ func testrom(t assert.TestingT, file string, passstr string) {
 			gb.cpu.Bus.WriteByte(0xff02, byte(0x00))
 		}
 
-		gb.cpu.Step()
+		gb.Step()
 	}
 
 	assert.Equal(t, passstr, str)

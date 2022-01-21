@@ -28,7 +28,12 @@ Window tile map area
  0=9800-9BFF, 1=9C00-9FFF
 */
 func (l *LCDC) WinTileMapArea() WindowTypeMapArea {
-	return WindowTypeMapArea(util.Bit(l.Data, 6))
+	area := util.Bit(l.Data, 6)
+	if area == 0 {
+		return WindowTileMapArea0
+	}
+
+	return WindowTileMapArea1
 }
 
 // Window enable
@@ -41,7 +46,12 @@ BG and Window tile data area
  0=8800-97FF, 1=8000-8FFF
 */
 func (l *LCDC) BGWinTileDataArea() BGWindowTileDataArea {
-	return BGWindowTileDataArea(util.Bit(l.Data, 4))
+	area := util.Bit(l.Data, 4)
+	if area == 0 {
+		return BGWindowTileDataArea1
+	}
+
+	return BGWindowTileDataArea0
 }
 
 /*
@@ -49,7 +59,12 @@ BG tile map area
  0=9800-9BFF, 1=9C00-9FFF
 */
 func (l *LCDC) BGTileMapArea() BGTileMapArea {
-	return BGTileMapArea(util.Bit(l.Data, 3))
+	area := util.Bit(l.Data, 3)
+	if area == 0 {
+		return BGTileMapArea0
+	}
+
+	return BGTileMapArea1
 }
 
 /*
