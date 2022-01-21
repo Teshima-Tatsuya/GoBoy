@@ -30,7 +30,7 @@ func (e *Emulator) Layout(outsideWidth, outsideHeight int) (screenWidth, screenH
 }
 
 func (e *Emulator) Update() error {
-	// e.GB.Step()
+	e.GB.Step()
 	return nil
 }
 
