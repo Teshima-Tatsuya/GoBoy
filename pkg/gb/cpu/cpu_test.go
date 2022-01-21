@@ -30,9 +30,11 @@ func setup(file string) *bus.Bus {
 	wram := memory.NewRAM(0x2000)
 	wram2 := memory.NewRAM(0x2000)
 	hram := memory.NewRAM(0x0080)
-	io := io.NewIO(io.NewPad(), io.NewSerial(), io.NewTimer(), io.NewIRQ(), gpu.New(), 0x2000)
+	g := gpu.New()
+	io := io.NewIO(io.NewPad(), io.NewSerial(), io.NewTimer(), io.NewIRQ(), g, 0x2000)
 	bus := bus.New(cart, vram, wram, wram2, hram, io)
 
+	g.Init(bus, io.IRQ.Request)
 	return bus
 }
 

@@ -44,6 +44,8 @@ func NewTile(bytes16 []byte) *Tile {
 // build BG Tiles on current horizontal line accoding to LY Register
 func (t *Tile) buildBG(ly byte) []color.RGBA {
 	tiles := make([]color.RGBA, SCREEN_WIDTH)
+
+	// build tile row
 	for i := 0; i < SCREEN_WIDTH; i++ {
 
 	}

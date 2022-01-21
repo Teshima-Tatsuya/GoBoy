@@ -37,6 +37,7 @@ type GPU struct {
 	BGP        byte
 	OBP0       byte
 	OBP1       byte
+	tiles      []Tile
 }
 
 func New() *GPU {
@@ -46,7 +47,7 @@ func New() *GPU {
 		imageData[i] = make([]color.RGBA, SCREEN_HEIGHT)
 	}
 
-	return &GPU{
+	gpu := &GPU{
 		clock:     0,
 		imageData: imageData,
 		LCDC:      NewLCDC(0x00),
@@ -57,23 +58,29 @@ func New() *GPU {
 		OBP0:      0,
 		OBP1:      0,
 	}
+
+	return gpu
 }
 
 func (g *GPU) Init(bus bus.IO, requestIRQ func(byte)) {
 	g.bus = bus
 	g.requestIRQ = requestIRQ
+	g.loadTile()
 }
 
+// gpu main process
 func (g *GPU) Step(cycles uint) {
 	g.clock += cycles
 
 	if g.clock >= CyclePerLine {
 		if g.Scroll.isVBlankStart() {
-			g.requestIRQ(1) // prepend cycle import...
+			g.requestIRQ(1) // 1 is io.VBlankFlag, prepend cycle import...
 
 		} else if g.Scroll.isVBlankPeriod() {
 
 		} else if g.Scroll.isHBlankPeriod() {
+			// first build BG
+			// second build Window IF exists
 
 		}
 		g.Scroll.LY++
@@ -92,6 +99,22 @@ func (g *GPU) Display() *image.RGBA {
 		}
 	}
 	return i
+}
+
+func (g *GPU) loadTile() {
+	addr := g.LCDC.BGWinTileDataArea()
+	// todo CGBMode
+	tileNum := 384
+	g.tiles = make([]Tile, tileNum)
+	var bytes16 [16]byte
+
+	// One tile occupies 16 bytes
+	for i := 0; i < tileNum; i++ {
+		for b := 0; b < 16; b++ {
+			bytes16[b] = g.bus.ReadByte(types.Addr(addr) + types.Addr(tileNum*16+b))
+		}
+		g.tiles[i] = *NewTile(bytes16[:])
+	}
 }
 
 func (g *GPU) Read(addr types.Addr) byte {
