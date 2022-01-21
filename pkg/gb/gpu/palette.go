@@ -14,6 +14,6 @@ type Palette struct {
 	BGP byte
 }
 
-func GetPalette(idx int) color.RGBA {
+func GetPalette(idx Color) color.RGBA {
 	return palette[idx]
 }

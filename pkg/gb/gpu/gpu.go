@@ -78,6 +78,7 @@ func (g *GPU) Step(cycles uint) {
 		} else if g.Scroll.isVBlankPeriod() {
 
 		} else if g.Scroll.isHBlankPeriod() {
+			g.loadTile()
 			// first build BG
 			// second build Window IF exists
 			g.drawBGLine()
@@ -122,22 +123,31 @@ func (g *GPU) loadTile() {
 // Step3: Store color to imageData
 func (g *GPU) drawBGLine() {
 	for x := 0; x < SCREEN_WIDTH; x++ {
-		g.getTileColor(x)
-		// c := g.getTileColor(x)
-		// fmt.Printf("%02X", c)
+		g.imageData[x][g.Scroll.LY] = g.getTileColor(x)
 	}
 }
 
-func (g *GPU) getTileColor(LX int) Color {
+func (g *GPU) getTileColor(LX int) color.RGBA {
 	// https://gbdev.io/pandocs/pixel_fifo.html#get-tile
-	baseAddr := g.LCDC.BGTileMapArea()
-	y := (g.Scroll.LY + g.Scroll.SCY) & 255
-	x := (LX + int(g.Scroll.SCX)/8) & 0x1F
 
-	addr := types.Addr(baseAddr) + types.Addr(y) + types.Addr(x)
-	lower := g.bus.ReadAddr(addr)
-	upper := g.bus.ReadAddr(addr + 1)
-	return Color((upper >> 1) + lower)
+	// Step1. Find the number of tiles from top.
+	// yPos is current pixel from top(0-255)
+	yPos := (g.Scroll.LY + g.Scroll.SCY) & 255
+	// yTile is Tile corresponding at yPos
+	yTile := yPos / 8
+	// xPos is current pixel from left(0-31)
+	xPos := (LX + int(g.Scroll.SCX)) & 255
+	xTile := xPos / 8
+
+	baseAddr := g.LCDC.BGTileMapArea()
+	addr := types.Addr(baseAddr) + types.Addr(yTile)*32 + types.Addr(xTile)
+	tileIdx := g.bus.ReadByte(addr)
+
+	return GetPalette(g.tiles[tileIdx].Data[yPos%8][xPos%8])
+}
+
+func (g *GPU) ImageData() [][]color.RGBA {
+	return g.imageData
 }
 
 func (g *GPU) Read(addr types.Addr) byte {

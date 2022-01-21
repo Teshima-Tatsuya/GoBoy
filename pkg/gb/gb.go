@@ -1,6 +1,8 @@
 package gb
 
 import (
+	"image/color"
+
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/bus"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cpu"
@@ -52,4 +54,8 @@ func NewGB(romData []byte) *GB {
 func (gb *GB) Step() {
 	cycle := gb.cpu.Step()
 	gb.gpu.Step(cycle)
+}
+
+func (gb *GB) Display() [][]color.RGBA {
+	return gb.gpu.ImageData()
 }

@@ -4,7 +4,6 @@ import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb"
 	"github.com/apex/log"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type Emulator struct {
@@ -40,9 +39,11 @@ func (e *Emulator) Update() error {
 }
 
 func (e *Emulator) Draw(screen *ebiten.Image) {
-	ebitenutil.DebugPrint(screen, "hello, world")
-	if e.RomData[0xff02] == 0x81 {
-		log.Info(string(e.RomData[0xff01]))
-		e.RomData[0xff02] = 0x0
+	imageData := e.GB.Display()
+
+	for y := 0; y < 144; y++ {
+		for x := 0; x < 160; x++ {
+			screen.Set(x, y, imageData[y][x])
+		}
 	}
 }
