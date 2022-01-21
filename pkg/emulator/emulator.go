@@ -2,7 +2,6 @@ package emulator
 
 import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb"
-	"github.com/apex/log"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -31,10 +30,7 @@ func (e *Emulator) Layout(outsideWidth, outsideHeight int) (screenWidth, screenH
 }
 
 func (e *Emulator) Update() error {
-	if e.RomData[0xff02] == 0x81 {
-		log.Info(string(e.RomData[0xff01]))
-		e.RomData[0xff02] = 0x0
-	}
+	// e.GB.Step()
 	return nil
 }
 
@@ -43,7 +39,7 @@ func (e *Emulator) Draw(screen *ebiten.Image) {
 
 	for y := 0; y < 144; y++ {
 		for x := 0; x < 160; x++ {
-			screen.Set(x, y, imageData[y][x])
+			screen.Set(x, y, imageData[x][y])
 		}
 	}
 }
