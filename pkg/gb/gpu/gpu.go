@@ -82,20 +82,39 @@ func (g *GPU) Step(cycles uint) {
 			// second build Window IF exists
 			g.drawBGLine()
 
+		} else {
+			g.Scroll.LY = 0
+			g.loadTile()
+			g.drawBGLine()
+		}
+
+		if g.Scroll.LY == g.Scroll.SCY {
+			g.requestIRQ(2)
 		}
 		g.Scroll.LY++
 		g.clock -= CyclePerLine
 	}
 }
 
-func (g *GPU) Display() *image.RGBA {
+func (g *GPU) Display() (*image.RGBA, *image.RGBA) {
 	i := image.NewRGBA(image.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
+	itile := image.NewRGBA(image.Rect(0, 0, 8*16, 8*24))
 	for y := 0; y < 144; y++ {
 		for x := 0; x < 160; x++ {
 			i.SetRGBA(x, y, g.imageData[x][y])
 		}
 	}
-	return i
+
+	for y := 0; y < 24; y++ {
+		for x := 0; x < 16; x++ {
+			for col := 0; col < 8; col++ {
+				for row := 0; row < 8; row++ {
+					itile.SetRGBA(x*8+col, y*8+row, GetPalette(g.tiles[y*16+x].Data[col][row]))
+				}
+			}
+		}
+	}
+	return i, itile
 }
 
 func (g *GPU) loadTile() {
@@ -139,11 +158,11 @@ func (g *GPU) getTileColor(LX int) color.RGBA {
 	addr := types.Addr(baseAddr) + types.Addr(yTile)*32 + types.Addr(xTile)
 	tileIdx := g.bus.ReadByte(addr)
 
-	return GetPalette(g.tiles[tileIdx].Data[yPos%8][xPos%8])
+	return GetPalette(g.tiles[tileIdx].Data[xPos%8][yPos%8])
 }
 
-func (g *GPU) ImageData() [][]color.RGBA {
-	return g.imageData
+func (g *GPU) ImageData() ([][]color.RGBA, []Tile) {
+	return g.imageData, g.tiles
 }
 
 func (g *GPU) Read(addr types.Addr) byte {

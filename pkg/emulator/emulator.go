@@ -1,6 +1,9 @@
 package emulator
 
 import (
+	"image"
+	"math"
+
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -25,8 +28,7 @@ func New(romData []byte) *Emulator {
 }
 
 func (e *Emulator) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	// @see https://gbdev.io/pandocs/Rendering.html
-	return 160, 144
+	return 160 + (16 * 8), 192
 }
 
 func (e *Emulator) Update() error {
@@ -35,7 +37,28 @@ func (e *Emulator) Update() error {
 }
 
 func (e *Emulator) Draw(screen *ebiten.Image) {
-	imageData := e.GB.Display()
+	image, tiles := e.GB.Display()
 
-	screen.ReplacePixels(imageData.Pix)
+	screen.ReplacePixels(conbine(image, tiles))
+}
+
+func conbine(d1, d2 *image.RGBA) []byte {
+
+	s1 := d1.Rect.Size()
+	s2 := d2.Rect.Size()
+	yMax := math.Max(float64(s1.Y), float64(s2.Y))
+
+	data := image.NewRGBA(image.Rect(0, 0, s1.X+s2.X, int(yMax)))
+	for i := 0; i < s1.X; i++ {
+		for j := 0; j < s1.Y; j++ {
+			data.SetRGBA(i, j, d1.RGBAAt(i, j))
+		}
+	}
+	for i := 0; i < s2.X; i++ {
+		for j := 0; j < s2.Y; j++ {
+			data.SetRGBA(s1.X+i, j, d2.RGBAAt(i, j))
+		}
+	}
+
+	return data.Pix
 }

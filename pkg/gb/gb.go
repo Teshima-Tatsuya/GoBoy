@@ -68,6 +68,6 @@ func (gb *GB) Step() {
 	}
 }
 
-func (gb *GB) Display() *image.RGBA {
+func (gb *GB) Display() (*image.RGBA, *image.RGBA) {
 	return gb.gpu.Display()
 }

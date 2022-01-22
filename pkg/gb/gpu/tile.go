@@ -33,7 +33,7 @@ func NewTile(bytes16 []byte) *Tile {
 			ub := util.Bit(upper, bit)
 			c := Color((ub << 1) + lb)
 
-			data[i][7-bit] = c
+			data[7-bit][i] = c
 		}
 	}
 	return &Tile{
