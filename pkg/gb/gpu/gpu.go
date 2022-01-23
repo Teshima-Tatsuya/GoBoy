@@ -82,6 +82,10 @@ func (g *GPU) Step(cycles uint) {
 			// second build Window IF exists
 			g.drawBGLine()
 
+			if g.LCDC.WindowEnable() {
+				g.drawWinLine()
+			}
+
 		} else {
 			g.Scroll.LY = 0
 			g.loadTile()
@@ -142,6 +146,12 @@ func (g *GPU) drawBGLine() {
 	}
 }
 
+func (g *GPU) drawWinLine() {
+	for x := 0; x < SCREEN_WIDTH; x++ {
+		g.imageData[x][g.Scroll.LY] = g.getTileColor(x)
+	}
+}
+
 func (g *GPU) getTileColor(LX int) color.RGBA {
 	// https://gbdev.io/pandocs/pixel_fifo.html#get-tile
 
@@ -172,7 +182,7 @@ func (g *GPU) Read(addr types.Addr) byte {
 	case LCDSAddr:
 		return g.LCDS.Data
 	case SCYAddr, SCXAddr, LYAddr, LYCAddr, WXAddr, WYAddr:
-		// return g.Scroll
+		return g.Scroll.Read(addr)
 	case DMAAddr:
 		return g.DMA
 	case BGPAddr:
@@ -192,6 +202,7 @@ func (g *GPU) Write(addr types.Addr, value byte) {
 	case LCDSAddr:
 		g.LCDS.Data = value
 	case SCYAddr, SCXAddr, LYAddr, LYCAddr, WXAddr, WYAddr:
+		g.Scroll.Write(addr, value)
 	case DMAAddr:
 		g.DMA = value
 	case BGPAddr:

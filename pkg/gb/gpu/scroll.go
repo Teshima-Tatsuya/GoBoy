@@ -1,5 +1,7 @@
 package gpu
 
+import "github.com/Teshima-Tatsuya/GoBoy/pkg/types"
+
 type Scroll struct {
 	// FF42, FF43
 	SCY, SCX byte
@@ -45,4 +47,39 @@ func (s *Scroll) isHBlankPeriod() bool {
 
 func (s *Scroll) isVBlankStart() bool {
 	return s.LY == SCREEN_HEIGHT
+}
+
+func (s *Scroll) Read(addr types.Addr) byte {
+	switch addr {
+	case SCYAddr:
+		return s.SCY
+	case SCXAddr:
+		return s.SCX
+	case LYAddr:
+		return s.LY
+	case LYCAddr:
+		return s.LYC
+	case WXAddr:
+		return s.WX
+	case WYAddr:
+		return s.WY
+	}
+	return 0
+}
+
+func (s *Scroll) Write(addr types.Addr, value byte) {
+	switch addr {
+	case SCYAddr:
+		s.SCY = value
+	case SCXAddr:
+		s.SCX = value
+	case LYAddr:
+		s.LY = value
+	case LYCAddr:
+		s.LYC = value
+	case WXAddr:
+		s.WX = value
+	case WYAddr:
+		s.WY = value
+	}
 }

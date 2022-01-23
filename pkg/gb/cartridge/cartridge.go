@@ -74,6 +74,8 @@ func New(romData []byte) *Cartridge {
 		Type:         getType(romData[0x0147]),
 	}
 
+	fmt.Printf("CGBMode %t", cgbflag)
+
 	switch c.Type {
 	case TYPE_NO_MBC:
 		c.MBC = NewMBC0(romData)

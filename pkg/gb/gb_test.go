@@ -42,3 +42,11 @@ func TestCPU_Blargg_cpu_instrs(t *testing.T) {
 	testrom(t, file, passstr)
 
 }
+
+func TestGB_hello(t *testing.T) {
+	file := "../../test/helloworld/hello.gb"
+	passstr := "cpu_instrs\n\n01:ok  02:ok  03:ok  04:ok  05:ok  06:ok  07:ok  08:ok  09:ok  10:ok  11:ok  \n\nPassed all tests\n"
+
+	testrom(t, file, passstr)
+
+}
