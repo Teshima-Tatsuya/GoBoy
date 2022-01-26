@@ -3,6 +3,7 @@ package gb
 import (
 	"image"
 
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/apu"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/bus"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cpu"
@@ -21,6 +22,7 @@ type GB struct {
 
 	cpu *cpu.CPU
 	gpu *gpu.GPU
+	apu *apu.APU
 
 	currentCycle uint
 }
@@ -33,7 +35,8 @@ func NewGB(romData []byte) *GB {
 	wram2 := memory.NewRAM(0x2000)
 	hram := memory.NewRAM(0x0080)
 	gpu := gpu.New()
-	io := io.NewIO(io.NewPad(), io.NewSerial(), io.NewTimer(), io.NewIRQ(), gpu, 0x2000)
+	apu := apu.NewAPU()
+	io := io.NewIO(io.NewPad(), io.NewSerial(), io.NewTimer(), io.NewIRQ(), gpu, apu, 0x2000)
 	bus := bus.New(cart, vram, wram, wram2, hram, io)
 
 	cpu := cpu.New(bus)

@@ -12,6 +12,8 @@ const (
 	TMAAddr             = 0x06
 	TACAddr             = 0x07
 	IFAddr              = 0x0F
+	NR10Addr            = 0x10
+	NR52Addr            = 0x26
 	LCDCAddr            = 0x40
 	LCDSAddr            = 0x41
 	SCYAddr             = 0x42
@@ -24,5 +26,6 @@ const (
 	OBP1Addr            = 0x49
 	WYAddr              = 0x4A
 	WXAddr              = 0x4B
+	KEY1Addr            = 0x4D
 	IEAddr              = 0xFF
 )
