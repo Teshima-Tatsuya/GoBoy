@@ -21,7 +21,7 @@ Start:
 	ld	[rSTAT],a
 	ld	[rSCX],a
 	ld	[rSCY],a
-	ld	[rLYC],a
+	ld	[rLYC],a/Users/teshima/Desktop/面接対策_IBM.md
 	ld	[rIE],a
 
 	ld	hl,_RAM                         ; fill ram with a, a = 0 here

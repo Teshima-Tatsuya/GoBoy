@@ -1,6 +1,7 @@
 package cpu
 
 import (
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/debug"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/bus"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
@@ -51,7 +52,9 @@ func (c *CPU) Step() uint {
 	}
 
 	// log.Info(fmt.Sprintf("PC 0x%04X data 0x%02x%02x", c.Reg.PC-1, c.Bus.ReadByte(c.Reg.PC), c.Bus.ReadByte(c.Reg.PC+1)))
+	debug.Debug("PC 0x%04X data 0x%02x%02x\n", c.Reg.PC-1, c.Bus.ReadByte(c.Reg.PC), c.Bus.ReadByte(c.Reg.PC+1))
 	// log.Info(fmt.Sprintf(" %s", op.Mnemonic))
+	debug.Debug(" %s\n", op.Mnemonic)
 	op.Handler(c, op.R1, op.R2)
 
 	c.Bus.IO.Timer.Tick(int(op.Cycles))

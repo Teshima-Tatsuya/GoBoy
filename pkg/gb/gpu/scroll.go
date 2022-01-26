@@ -30,7 +30,7 @@ func NewScroll() *Scroll {
 }
 
 func (s *Scroll) isVBlankPeriod() bool {
-	if s.LY >= SCREEN_HEIGHT {
+	if SCREEN_HEIGHT <= s.LY && s.LY <= 153 {
 		return true
 	}
 
@@ -63,8 +63,9 @@ func (s *Scroll) Read(addr types.Addr) byte {
 		return s.WX
 	case WYAddr:
 		return s.WY
+	default:
+		panic("Scroll Read")
 	}
-	return 0
 }
 
 func (s *Scroll) Write(addr types.Addr, value byte) {
@@ -81,5 +82,7 @@ func (s *Scroll) Write(addr types.Addr, value byte) {
 		s.WX = value
 	case WYAddr:
 		s.WY = value
+	default:
+		panic("Scroll Write")
 	}
 }

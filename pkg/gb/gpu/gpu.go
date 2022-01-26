@@ -191,8 +191,9 @@ func (g *GPU) Read(addr types.Addr) byte {
 		return g.OBP0
 	case OBP1Addr:
 		return g.OBP1
+	default:
+		panic("GPU Read")
 	}
-	return 0
 }
 
 func (g *GPU) Write(addr types.Addr, value byte) {
@@ -211,5 +212,7 @@ func (g *GPU) Write(addr types.Addr, value byte) {
 		g.OBP0 = value
 	case OBP1Addr:
 		g.OBP1 = value
+	default:
+		panic("GPU Write")
 	}
 }

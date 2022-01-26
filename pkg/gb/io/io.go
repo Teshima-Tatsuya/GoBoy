@@ -42,8 +42,9 @@ func (r *IO) Read(addr types.Addr) byte {
 		return r.gpu.Read(addr)
 	case addr == IEAddr:
 		return r.IRQ.Read(addr)
+	default:
+		panic("Unsuported addr for IO Write")
 	}
-	return r.buf[addr]
 }
 
 func (r *IO) Write(addr types.Addr, value byte) {
@@ -60,6 +61,7 @@ func (r *IO) Write(addr types.Addr, value byte) {
 		r.gpu.Write(addr, value)
 	case addr == IEAddr:
 		r.IRQ.Write(addr, value)
+	default:
+		panic("Unsuported addr for IO Write")
 	}
-	r.buf[addr] = value
 }
