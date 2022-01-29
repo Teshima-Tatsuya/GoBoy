@@ -54,7 +54,9 @@ func (c *CPU) Step() uint {
 	// log.Info(fmt.Sprintf("PC 0x%04X data 0x%02x%02x", c.Reg.PC-1, c.Bus.ReadByte(c.Reg.PC), c.Bus.ReadByte(c.Reg.PC+1)))
 	debug.Debug("PC 0x%04X data 0x%02x%02x\n", c.Reg.PC-1, c.Bus.ReadByte(c.Reg.PC), c.Bus.ReadByte(c.Reg.PC+1))
 	// log.Info(fmt.Sprintf(" %s", op.Mnemonic))
-	debug.Debug(" %s\n", op.Mnemonic)
+	debug.Debug(" A:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X\n", c.Reg.R[0], c.Reg.R[1], c.Reg.R[2], c.Reg.R[3], c.Reg.R[4], c.Reg.R[5], c.Reg.R[6])
+	debug.Debug("   Flags Z:%t N:%t H:%t C:%t\n", c.Reg.isSet(flagZ), c.Reg.isSet(flagN), c.Reg.isSet(flagH), c.Reg.isSet(flagC))
+	debug.Debug(" %s\n\n", op.Mnemonic)
 	op.Handler(c, op.R1, op.R2)
 
 	c.Bus.IO.Timer.Tick(int(op.Cycles))
