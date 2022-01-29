@@ -29,8 +29,8 @@ func (t *Timer) SetRequestIRQ(request func(byte)) {
 	t.requestIRQ = request
 }
 
-func (t *Timer) Tick(cycle int) {
-	for i := 0; i < cycle; i++ {
+func (t *Timer) Tick(cycle uint) {
+	for i := uint(0); i < cycle; i++ {
 		t.counter += 4
 
 		// TODO double speed for GBC

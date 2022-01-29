@@ -32,12 +32,10 @@ func (c *CPU) Step() uint {
 		if c.IRQ.Has() {
 			c.Halt = false
 		}
-		c.Bus.IO.Timer.Tick(1)
 		return 1
 	}
 
 	if c.interrupt() {
-		c.Bus.IO.Timer.Tick(1)
 		return 1
 	}
 	opcode := c.fetch()
@@ -58,8 +56,6 @@ func (c *CPU) Step() uint {
 	debug.Debug("   Flags Z:%t N:%t H:%t C:%t\n", c.Reg.isSet(flagZ), c.Reg.isSet(flagN), c.Reg.isSet(flagH), c.Reg.isSet(flagC))
 	debug.Debug(" %s\n\n", op.Mnemonic)
 	op.Handler(c, op.R1, op.R2)
-
-	c.Bus.IO.Timer.Tick(int(op.Cycles))
 
 	return uint(op.Cycles)
 }

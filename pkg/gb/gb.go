@@ -24,6 +24,8 @@ type GB struct {
 	gpu *gpu.GPU
 	apu *apu.APU
 
+	timer *io.Timer
+
 	currentCycle uint
 }
 
@@ -36,7 +38,8 @@ func NewGB(romData []byte) *GB {
 	hram := memory.NewRAM(0x0080)
 	gpu := gpu.New()
 	apu := apu.NewAPU()
-	io := io.NewIO(io.NewPad(), io.NewSerial(), io.NewTimer(), io.NewIRQ(), gpu, apu, 0x2000)
+	timer := io.NewTimer()
+	io := io.NewIO(io.NewPad(), io.NewSerial(), timer, io.NewIRQ(), gpu, apu, 0x2000)
 	bus := bus.New(cart, vram, wram, wram2, hram, io)
 
 	cpu := cpu.New(bus)
@@ -49,8 +52,10 @@ func NewGB(romData []byte) *GB {
 		wRAM:      memory.NewRAM(0x2000),
 		hRAM:      memory.NewRAM(0x0080),
 
-		cpu:          cpu,
-		gpu:          gpu,
+		cpu:   cpu,
+		gpu:   gpu,
+		timer: timer,
+
 		currentCycle: 0,
 	}
 
@@ -63,6 +68,8 @@ func (gb *GB) Step() {
 		gb.gpu.Step(cycle * 4)
 
 		gb.currentCycle += cycle * 4
+
+		gb.timer.Tick(cycle)
 
 		if gb.currentCycle >= 70224 {
 			gb.currentCycle -= 70224
