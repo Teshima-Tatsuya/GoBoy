@@ -2102,7 +2102,7 @@ func TestOpCode_jpfa16(t *testing.T) {
 			op := opCodes[tt.args.opcode]
 			t.Run("when flag = 0", func(t *testing.T) {
 				c.Reg.PC = 0x0100
-				want := types.Addr(0x0100)
+				want := types.Addr(0x0102)
 				c.Bus.WriteByte(c.Reg.PC, 0x34)
 				c.Bus.WriteByte(c.Reg.PC+1, 0x12)
 
@@ -2159,7 +2159,7 @@ func TestOpCode_jpnfa16(t *testing.T) {
 			})
 			t.Run("when flag = 1", func(t *testing.T) {
 				c.Reg.PC = 0x0100
-				want := types.Addr(0x0100)
+				want := types.Addr(0x0102)
 				c.Bus.WriteByte(c.Reg.PC, 0x34)
 				c.Bus.WriteByte(c.Reg.PC+1, 0x12)
 
