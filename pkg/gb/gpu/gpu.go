@@ -4,7 +4,7 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/interfaces/bus"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/interfaces"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
 
@@ -25,7 +25,7 @@ const (
 )
 
 type GPU struct {
-	bus        bus.IO
+	bus        interfaces.Bus
 	requestIRQ func(byte)
 	clock      uint
 	imageData  [][]color.RGBA
@@ -61,7 +61,7 @@ func New() *GPU {
 	return gpu
 }
 
-func (g *GPU) Init(bus bus.IO, requestIRQ func(byte)) {
+func (g *GPU) Init(bus interfaces.Bus, requestIRQ func(byte)) {
 	g.bus = bus
 	g.requestIRQ = requestIRQ
 }
