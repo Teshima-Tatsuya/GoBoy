@@ -388,7 +388,7 @@ func TestOpCode_ldr16r16d(t *testing.T) {
 			t.Run("when half carry", func(t *testing.T) {
 				v2 := 0x1F20
 				d := byte(0xE1)
-				want := types.Addr(0x2001)
+				want := types.Addr(0x1F01)
 				c.Reg.setR16(tt.args.r2, types.Addr(v2))
 				c.Bus.WriteByte(c.Reg.PC, d)
 				op.Handler(c, op.R1, op.R2)
@@ -396,13 +396,13 @@ func TestOpCode_ldr16r16d(t *testing.T) {
 				assert.Equal(t, want, c.Reg.R16(tt.args.r1))
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
-				assert.Equal(t, true, c.Reg.isSet(flagH))
-				assert.Equal(t, false, c.Reg.isSet(flagC))
+				assert.Equal(t, false, c.Reg.isSet(flagH))
+				assert.Equal(t, true, c.Reg.isSet(flagC))
 			})
 			t.Run("when carry", func(t *testing.T) {
 				v2 := 0xFF20
 				d := byte(0xE1)
-				want := types.Addr(0x0001)
+				want := types.Addr(0xFF01)
 				c.Reg.setR16(tt.args.r2, types.Addr(v2))
 				c.Bus.WriteByte(c.Reg.PC, d)
 				op.Handler(c, op.R1, op.R2)
@@ -410,7 +410,7 @@ func TestOpCode_ldr16r16d(t *testing.T) {
 				assert.Equal(t, want, c.Reg.R16(tt.args.r1))
 				assert.Equal(t, false, c.Reg.isSet(flagZ))
 				assert.Equal(t, false, c.Reg.isSet(flagN))
-				assert.Equal(t, true, c.Reg.isSet(flagH))
+				assert.Equal(t, false, c.Reg.isSet(flagH))
 				assert.Equal(t, true, c.Reg.isSet(flagC))
 			})
 		})
