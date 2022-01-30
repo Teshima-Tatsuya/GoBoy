@@ -148,7 +148,7 @@ func (g *GPU) drawBGLine() {
 
 func (g *GPU) drawWinLine() {
 	for x := 0; x < SCREEN_WIDTH; x++ {
-		g.imageData[x][g.Scroll.LY] = g.getTileColor(x)
+		// g.imageData[x][g.Scroll.LY] = g.getTileColor(x)
 	}
 }
 
