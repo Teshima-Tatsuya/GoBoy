@@ -27,7 +27,7 @@ func (l *LCDC) LCDPPUEnable() bool {
 Window tile map area
  0=9800-9BFF, 1=9C00-9FFF
 */
-func (l *LCDC) WinTileMapArea() WindowTypeMapArea {
+func (l *LCDC) WinTileMapArea() WindowTileMapArea {
 	area := util.Bit(l.Data, 6)
 	if area == 0 {
 		return WindowTileMapArea0
@@ -48,10 +48,10 @@ BG and Window tile data area
 func (l *LCDC) BGWinTileDataArea() BGWindowTileDataArea {
 	area := util.Bit(l.Data, 4)
 	if area == 0 {
-		return BGWindowTileDataArea1
+		return BGWindowTileDataArea0
 	}
 
-	return BGWindowTileDataArea0
+	return BGWindowTileDataArea1
 }
 
 /*

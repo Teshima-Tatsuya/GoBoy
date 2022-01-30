@@ -18,10 +18,10 @@ const (
 	Mode_TransferringData
 )
 
-type WindowTypeMapArea types.Addr
+type WindowTileMapArea types.Addr
 
 const (
-	WindowTileMapArea0 WindowTypeMapArea = 0x9800
+	WindowTileMapArea0 WindowTileMapArea = 0x9800
 	WindowTileMapArea1                   = 0x9C00
 )
 
