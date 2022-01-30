@@ -113,7 +113,7 @@ func (g *GPU) Display() (*image.RGBA, *image.RGBA) {
 		for x := 0; x < 16; x++ {
 			for col := 0; col < 8; col++ {
 				for row := 0; row < 8; row++ {
-					itile.SetRGBA(x*8+col, y*8+row, GetPalette(g.tiles[y*16+x].Data[col][row]))
+					itile.SetRGBA(x*8+col, y*8+row, GetPalette(g.tiles[y*16+x].Data[row][col]))
 				}
 			}
 		}
@@ -168,7 +168,7 @@ func (g *GPU) getTileColor(LX int) color.RGBA {
 	addr := types.Addr(baseAddr) + types.Addr(yTile)*32 + types.Addr(xTile)
 	tileIdx := g.bus.ReadByte(addr)
 
-	return GetPalette(g.tiles[tileIdx].Data[xPos%8][yPos%8])
+	return GetPalette(g.tiles[tileIdx].Data[yPos%8][xPos%8])
 }
 
 func (g *GPU) ImageData() ([][]color.RGBA, []Tile) {
