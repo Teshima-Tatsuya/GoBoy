@@ -79,6 +79,8 @@ func New(romData []byte) *Cartridge {
 		c.MBC = NewMBC0(romData)
 	case TYPE_MBC1:
 		c.MBC = NewMBC1(romData, getRamSize(romData[0x0149]))
+	default:
+		panic(fmt.Sprintf("Non Supported Cartridge type %d", c.Type))
 	}
 
 	return c
