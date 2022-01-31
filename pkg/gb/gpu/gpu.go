@@ -8,22 +8,6 @@ import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
 
-// Offset is FF00
-const (
-	LCDCAddr types.Addr = 0x40
-	LCDSAddr            = 0x41
-	SCYAddr             = 0x42
-	SCXAddr             = 0x43
-	LYAddr              = 0x44
-	LYCAddr             = 0x45
-	DMAAddr             = 0x46
-	BGPAddr             = 0x47
-	OBP0Addr            = 0x48
-	OBP1Addr            = 0x49
-	WYAddr              = 0x4A
-	WXAddr              = 0x4B
-)
-
 type GPU struct {
 	bus        interfaces.Bus
 	requestIRQ func(byte)
@@ -32,6 +16,7 @@ type GPU struct {
 	LCDC       *LCDC
 	LCDS       *LCDS
 	Scroll     *Scroll
+	Palette    *Palette
 	DMA        byte
 	BGP        byte
 	OBP0       byte
@@ -52,6 +37,7 @@ func New() *GPU {
 		LCDC:      NewLCDC(0x00),
 		LCDS:      NewLCDS(0x00),
 		Scroll:    NewScroll(),
+		Palette:   NewPalette(),
 		DMA:       0,
 		BGP:       0,
 		OBP0:      0,
