@@ -20,6 +20,7 @@ type GPU struct {
 	palette    *Palette
 	DMA        byte
 	tiles      []Tile
+	dmaStarted bool
 }
 
 func New() *GPU {
@@ -173,6 +174,21 @@ func (g *GPU) ImageData() ([][]color.RGBA, []Tile) {
 	return g.imageData, g.tiles
 }
 
+// WIP
+func (g *GPU) TransferOAM() {
+	for i := 0; i < 0xA0; i++ {
+		addr := types.Addr(g.DMA) * 0x100
+		b := g.bus.ReadByte(addr + types.Addr(i))
+		g.bus.WriteByte(OAMSTARTAddr+types.Addr(i), b)
+	}
+
+	g.dmaStarted = false
+}
+
+func (g *GPU) IsDmaStarted() bool {
+	return g.dmaStarted
+}
+
 func (g *GPU) Read(addr types.Addr) byte {
 	switch addr {
 	case LCDCAddr:
@@ -200,6 +216,7 @@ func (g *GPU) Write(addr types.Addr, value byte) {
 	case SCYAddr, SCXAddr, LYAddr, LYCAddr, WXAddr, WYAddr:
 		g.Scroll.Write(addr, value)
 	case DMAAddr:
+		g.dmaStarted = true
 		g.DMA = value
 	case BGPAddr, OBP0Addr, OBP1Addr:
 		g.palette.Write(addr, value)

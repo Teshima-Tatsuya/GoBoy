@@ -69,7 +69,14 @@ func (gb *GB) Step() {
 	select {
 	case <-t.C:
 		for {
-			cycle := gb.cpu.Step()
+
+			var cycle uint
+			if gb.gpu.IsDmaStarted() {
+				gb.gpu.TransferOAM()
+				cycle = 162
+			} else {
+				cycle = gb.cpu.Step()
+			}
 			gb.gpu.Step(cycle * 4)
 
 			gb.currentCycle += cycle * 4

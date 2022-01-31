@@ -8,6 +8,7 @@ const (
 	SCREEN_WIDTH  = 160
 	SCREEN_HEIGHT = 144
 )
+const OAMSTARTAddr types.Addr = 0xFE00
 
 // Offset is FF00
 const (

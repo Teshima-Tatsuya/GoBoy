@@ -17,7 +17,7 @@ type Bus struct {
 	WRAM2 *memory.RAM
 	HRAM  *memory.RAM
 	ERAM  *memory.RAM
-	oam   *gpu.OAM
+	oam   *memory.RAM
 	apu   *apu.APU
 	gpu   *gpu.GPU
 	IO    *io.IO
@@ -25,7 +25,7 @@ type Bus struct {
 
 func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *memory.RAM, hram *memory.RAM, a *apu.APU, g *gpu.GPU, io *io.IO) *Bus {
 	eram := memory.NewRAM(0x2000)
-	oam := gpu.NewOAM()
+	oam := memory.NewRAM(0x00A0)
 	return &Bus{
 		Cart:  cart,
 		VRAM:  vram,
