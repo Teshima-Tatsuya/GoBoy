@@ -15,11 +15,12 @@ type Bus struct {
 	WRAM2 *memory.RAM
 	HRAM  *memory.RAM
 	ERAM  *memory.RAM
-	OAM   *gpu.OAM
+	oam   *gpu.OAM
+	gpu   *gpu.GPU
 	IO    *io.IO
 }
 
-func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *memory.RAM, hram *memory.RAM, io *io.IO) *Bus {
+func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *memory.RAM, hram *memory.RAM, g *gpu.GPU, io *io.IO) *Bus {
 	eram := memory.NewRAM(0x2000)
 	oam := gpu.NewOAM()
 	return &Bus{
@@ -29,7 +30,8 @@ func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *m
 		WRAM2: wram2,
 		HRAM:  hram,
 		ERAM:  eram,
-		OAM:   oam,
+		oam:   oam,
+		gpu:   g,
 		IO:    io,
 	}
 }
@@ -49,7 +51,9 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 	case addr >= 0xE000 && addr <= 0xFDFF:
 		return b.ERAM.Read(addr - 0xE000)
 	case addr >= 0xFE00 && addr <= 0xFE9F:
-		return b.OAM.Read(addr - 0xFE00)
+		return b.oam.Read(addr - 0xFE00)
+	case addr >= 0xFF40 && addr <= 0xFF7F:
+		return b.gpu.Read(addr - 0xFF00)
 	case addr >= 0xFF00 && addr <= 0xFF7F:
 		return b.IO.Read(addr - 0xFF00)
 	case addr >= 0xFF80 && addr <= 0xFFFE:
@@ -83,7 +87,9 @@ func (b *Bus) WriteByte(addr types.Addr, value byte) {
 	case addr >= 0xE000 && addr <= 0xFDFF:
 		b.ERAM.Write(addr-0xE000, value)
 	case addr >= 0xFE00 && addr <= 0xFE9F:
-		b.OAM.Write(addr-0xFE00, value)
+		b.gpu.Write(addr-0xFE00, value)
+	case addr >= 0xFF40 && addr <= 0xFF7F:
+		b.gpu.Write(addr-0xFF00, value)
 	case addr >= 0xFF00 && addr <= 0xFF7F:
 		b.IO.Write(addr-0xFF00, value)
 	case addr >= 0xFF80 && addr <= 0xFFFE:

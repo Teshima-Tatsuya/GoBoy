@@ -40,8 +40,8 @@ func NewGB(romData []byte) *GB {
 	apu := apu.NewAPU()
 	timer := io.NewTimer()
 	irq := io.NewIRQ()
-	io := io.NewIO(io.NewPad(), io.NewSerial(), timer, irq, gpu, apu, 0x2000)
-	bus := bus.New(cart, vram, wram, wram2, hram, io)
+	io := io.NewIO(io.NewPad(), io.NewSerial(), timer, irq, apu, 0x2000)
+	bus := bus.New(cart, vram, wram, wram2, hram, gpu, io)
 
 	cpu := cpu.New(bus, irq)
 	timer.SetRequestIRQ(cpu.IRQ.Request)
