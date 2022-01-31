@@ -4,6 +4,7 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/debug"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/interfaces"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
@@ -16,7 +17,7 @@ type GPU struct {
 	LCDC       *LCDC
 	LCDS       *LCDS
 	Scroll     *Scroll
-	Palette    *Palette
+	palette    *Palette
 	DMA        byte
 	BGP        byte
 	OBP0       byte
@@ -37,7 +38,7 @@ func New() *GPU {
 		LCDC:      NewLCDC(0x00),
 		LCDS:      NewLCDS(0x00),
 		Scroll:    NewScroll(),
-		Palette:   NewPalette(),
+		palette:   NewPalette(),
 		DMA:       0,
 		BGP:       0,
 		OBP0:      0,
@@ -99,7 +100,7 @@ func (g *GPU) Display() (*image.RGBA, *image.RGBA) {
 		for x := 0; x < 16; x++ {
 			for col := 0; col < 8; col++ {
 				for row := 0; row < 8; row++ {
-					itile.SetRGBA(x*8+col, y*8+row, GetPalette(g.tiles[y*16+x].Data[row][col]))
+					itile.SetRGBA(x*8+col, y*8+row, g.palette.GetPalette(g.tiles[y*16+x].Data[row][col]))
 				}
 			}
 		}
@@ -154,7 +155,7 @@ func (g *GPU) getTileColor(LX int) color.RGBA {
 	addr := types.Addr(baseAddr) + types.Addr(yTile)*32 + types.Addr(xTile)
 	tileIdx := g.bus.ReadByte(addr)
 
-	return GetPalette(g.tiles[tileIdx].Data[yPos%8][xPos%8])
+	return g.palette.GetPalette(g.tiles[tileIdx].Data[yPos%8][xPos%8])
 }
 
 func (g *GPU) ImageData() ([][]color.RGBA, []Tile) {
@@ -171,15 +172,12 @@ func (g *GPU) Read(addr types.Addr) byte {
 		return g.Scroll.Read(addr)
 	case DMAAddr:
 		return g.DMA
-	case BGPAddr:
-		return g.BGP
-	case OBP0Addr:
-		return g.OBP0
-	case OBP1Addr:
-		return g.OBP1
+	case BGPAddr, OBP0Addr, OBP1Addr:
+		return g.palette.Read(addr)
 	default:
-		panic("GPU Read")
+		debug.Fatal("GPU Read 0x%04X", addr)
 	}
+	return 0
 }
 
 func (g *GPU) Write(addr types.Addr, value byte) {
@@ -192,13 +190,9 @@ func (g *GPU) Write(addr types.Addr, value byte) {
 		g.Scroll.Write(addr, value)
 	case DMAAddr:
 		g.DMA = value
-	case BGPAddr:
-		g.BGP = value
-	case OBP0Addr:
-		g.OBP0 = value
-	case OBP1Addr:
-		g.OBP1 = value
+	case BGPAddr, OBP0Addr, OBP1Addr:
+		g.palette.Write(addr, value)
 	default:
-		panic("GPU Write")
+		debug.Fatal("GPU Write 0x%04X", addr)
 	}
 }

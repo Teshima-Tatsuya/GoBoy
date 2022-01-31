@@ -37,8 +37,13 @@ func NewPalette() *Palette {
 	return &Palette{}
 }
 
-func GetPalette(idx Color) color.RGBA {
-	return palette[idx]
+func (p *Palette) GetPalette(idx Color) color.RGBA {
+	// Bit 7-6 - Color for index 3
+	// Bit 5-4 - Color for index 2
+	// Bit 3-2 - Color for index 1
+	// Bit 1-0 - Color for index 0
+	c := (p.BGP >> (idx * 2)) & 0x03
+	return palette[c]
 }
 
 func (p *Palette) Read(addr types.Addr) byte {

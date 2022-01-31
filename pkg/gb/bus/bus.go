@@ -52,7 +52,7 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 		return b.ERAM.Read(addr - 0xE000)
 	case addr >= 0xFE00 && addr <= 0xFE9F:
 		return b.oam.Read(addr - 0xFE00)
-	case addr >= 0xFF40 && addr <= 0xFF7F:
+	case addr >= 0xFF40 && addr <= 0xFF4B:
 		return b.gpu.Read(addr - 0xFF00)
 	case addr >= 0xFF00 && addr <= 0xFF7F:
 		return b.IO.Read(addr - 0xFF00)
@@ -87,8 +87,8 @@ func (b *Bus) WriteByte(addr types.Addr, value byte) {
 	case addr >= 0xE000 && addr <= 0xFDFF:
 		b.ERAM.Write(addr-0xE000, value)
 	case addr >= 0xFE00 && addr <= 0xFE9F:
-		b.gpu.Write(addr-0xFE00, value)
-	case addr >= 0xFF40 && addr <= 0xFF7F:
+		b.oam.Write(addr-0xFE00, value)
+	case addr >= 0xFF40 && addr <= 0xFF4B:
 		b.gpu.Write(addr-0xFF00, value)
 	case addr >= 0xFF00 && addr <= 0xFF7F:
 		b.IO.Write(addr-0xFF00, value)
