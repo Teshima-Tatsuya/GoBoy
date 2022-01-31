@@ -2,7 +2,6 @@ package io
 
 import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/debug"
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/apu"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
 
@@ -11,11 +10,10 @@ type IO struct {
 	serial *Serial
 	Timer  *Timer
 	IRQ    *IRQ
-	apu    *apu.APU
 	buf    []byte
 }
 
-func NewIO(pad *Pad, serial *Serial, timer *Timer, irq *IRQ, apu *apu.APU, size int) *IO {
+func NewIO(pad *Pad, serial *Serial, timer *Timer, irq *IRQ, size int) *IO {
 	buf := make([]byte, size)
 
 	return &IO{
@@ -23,7 +21,6 @@ func NewIO(pad *Pad, serial *Serial, timer *Timer, irq *IRQ, apu *apu.APU, size 
 		serial: serial,
 		Timer:  timer,
 		IRQ:    irq,
-		apu:    apu,
 		buf:    buf,
 	}
 
@@ -39,8 +36,6 @@ func (r *IO) Read(addr types.Addr) byte {
 		return r.IRQ.Read(addr)
 	case SBAddr <= addr && addr <= SCAddr:
 		return r.serial.Read(addr)
-	case NR10Addr <= addr && addr <= NR52Addr:
-		return r.apu.Read(addr)
 	case addr == 0x4D:
 		return 0
 	case addr == IEAddr:
@@ -61,8 +56,6 @@ func (r *IO) Write(addr types.Addr, value byte) {
 		r.Timer.Write(addr, value)
 	case addr == IFAddr:
 		r.IRQ.Write(addr, value)
-	case NR10Addr <= addr && addr <= NR52Addr:
-		r.apu.Write(addr, value)
 	case addr == 0x4D:
 		// TODO
 	case addr == IEAddr:

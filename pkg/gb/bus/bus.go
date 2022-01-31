@@ -1,6 +1,7 @@
 package bus
 
 import (
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/apu"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/gpu"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
@@ -16,11 +17,12 @@ type Bus struct {
 	HRAM  *memory.RAM
 	ERAM  *memory.RAM
 	oam   *gpu.OAM
+	apu   *apu.APU
 	gpu   *gpu.GPU
 	IO    *io.IO
 }
 
-func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *memory.RAM, hram *memory.RAM, g *gpu.GPU, io *io.IO) *Bus {
+func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *memory.RAM, hram *memory.RAM, a *apu.APU, g *gpu.GPU, io *io.IO) *Bus {
 	eram := memory.NewRAM(0x2000)
 	oam := gpu.NewOAM()
 	return &Bus{
@@ -31,6 +33,7 @@ func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *m
 		HRAM:  hram,
 		ERAM:  eram,
 		oam:   oam,
+		apu:   a,
 		gpu:   g,
 		IO:    io,
 	}
@@ -52,6 +55,8 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 		return b.ERAM.Read(addr - 0xE000)
 	case addr >= 0xFE00 && addr <= 0xFE9F:
 		return b.oam.Read(addr - 0xFE00)
+	case addr >= 0xFF10 && addr <= 0xFF3F:
+		return b.apu.Read(addr - 0xFF00)
 	case addr >= 0xFF40 && addr <= 0xFF4B:
 		return b.gpu.Read(addr - 0xFF00)
 	case addr >= 0xFF00 && addr <= 0xFF7F:
@@ -88,6 +93,8 @@ func (b *Bus) WriteByte(addr types.Addr, value byte) {
 		b.ERAM.Write(addr-0xE000, value)
 	case addr >= 0xFE00 && addr <= 0xFE9F:
 		b.oam.Write(addr-0xFE00, value)
+	case addr >= 0xFF10 && addr <= 0xFF3F:
+		b.apu.Write(addr-0xFF00, value)
 	case addr >= 0xFF40 && addr <= 0xFF4B:
 		b.gpu.Write(addr-0xFF00, value)
 	case addr >= 0xFF00 && addr <= 0xFF7F:
