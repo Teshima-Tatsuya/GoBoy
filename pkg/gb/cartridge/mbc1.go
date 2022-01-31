@@ -3,6 +3,7 @@ package cartridge
 import (
 	"fmt"
 
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/debug"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/memory"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
@@ -35,7 +36,7 @@ func NewMBC1(romData []byte, ramSize int) *MBC1 {
 
 	if ramSize > 0 {
 		m.RAM = memory.NewRAM(ramSize)
-		m.ramBank = 1
+		m.ramBank = 0
 		m.ramEnable = false
 	}
 
@@ -52,6 +53,7 @@ func (m *MBC1) Read(addr types.Addr) byte {
 		return m.ROM.Read(uint32(m.romBank-1)*0x4000 + uint32(addr))
 	case 0xA000 <= addr && addr < 0xC000:
 		addr = types.Addr(uint16(addr) + uint16(m.ramBank)*0x2000 - 0xA000)
+		debug.Info("0x%04X", addr)
 		return m.RAM.Read(addr)
 	default:
 		msg := fmt.Sprintf("Non Supported addr 0x%4X for Read MBC1", addr)
@@ -76,6 +78,7 @@ func (m *MBC1) Write(addr types.Addr, value byte) {
 			m.SwitchHiROMBank(value)
 		} else if m.mode == RAMBankingModeAdvancedROMBankingMode {
 			// lower 2bit
+			debug.Info("Switch RAM Bank %d", value&0x03)
 			m.SwitchRAMBank(value & 0x03)
 		}
 	case 0x6000 <= addr && addr < 0x8000:
