@@ -1,6 +1,7 @@
 package bus
 
 import (
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/debug"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/apu"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/gpu"
@@ -66,7 +67,7 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 	case addr == 0xFFFF:
 		return b.IO.Read(addr - 0xFF00)
 	default:
-		// panic(fmt.Sprintf("Non Supported Read Addr 0x%4d", addr))
+		debug.Fatal("Non Supported Read Addr 0x%4d", addr)
 	}
 
 	return 0
@@ -104,6 +105,6 @@ func (b *Bus) WriteByte(addr types.Addr, value byte) {
 	case addr == 0xFFFF:
 		b.IO.Write(addr-0xFF00, value)
 	default:
-		// panic(fmt.Sprintf("Addr:0x%4x is not implemented", addr))
+		debug.Fatal("Addr:0x%4x is not implemented", addr)
 	}
 }

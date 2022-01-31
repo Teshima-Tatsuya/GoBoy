@@ -2,6 +2,7 @@ package gb
 
 import (
 	"image"
+	"time"
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/apu"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/bus"
@@ -64,17 +65,21 @@ func NewGB(romData []byte) *GB {
 }
 
 func (gb *GB) Step() {
-	for {
-		cycle := gb.cpu.Step()
-		gb.gpu.Step(cycle * 4)
+	t := time.NewTicker(16 * time.Millisecond)
+	select {
+	case <-t.C:
+		for {
+			cycle := gb.cpu.Step()
+			gb.gpu.Step(cycle * 4)
 
-		gb.currentCycle += cycle * 4
+			gb.currentCycle += cycle * 4
 
-		gb.timer.Tick(cycle)
+			gb.timer.Tick(cycle)
 
-		if gb.currentCycle >= 70224 {
-			gb.currentCycle -= 70224
-			return
+			if gb.currentCycle >= 70224 {
+				gb.currentCycle -= 70224
+				return
+			}
 		}
 	}
 }

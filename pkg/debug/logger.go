@@ -9,7 +9,11 @@ func Debug(s string, args ...interface{}) {
 		return
 	}
 
-	fmt.Printf("[DEBUG]"+s, args...)
+	fmt.Printf("[DEBUG]"+s+"\n", args...)
+}
+
+func Info(s string, args ...interface{}) {
+	fmt.Printf("[INFO]"+s+"\n", args...)
 }
 
 func Fatal(s string, args ...interface{}) {

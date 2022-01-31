@@ -1,8 +1,7 @@
 package cartridge
 
 import (
-	"fmt"
-
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/debug"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
 
@@ -80,7 +79,7 @@ func New(romData []byte) *Cartridge {
 	case TYPE_MBC1:
 		c.MBC = NewMBC1(romData, getRamSize(romData[0x0149]))
 	default:
-		panic(fmt.Sprintf("Non Supported Cartridge type %d", c.Type))
+		debug.Fatal("Non Supported Cartridge type %d", c.Type)
 	}
 
 	return c
@@ -99,9 +98,10 @@ func getRamSize(s byte) int {
 	case 0x05:
 		return RAM_64KB
 	default:
-		errMsg := fmt.Sprintf("Non Supported RAM Type 0x%02X", s)
-		panic(errMsg)
+		debug.Fatal("Non Supported RAM type %d", s)
 	}
+
+	return 0
 }
 
 func getType(t byte) byte {
@@ -123,9 +123,10 @@ func getType(t byte) byte {
 	case 0x22:
 		return TYPE_MBC7
 	default:
-		errMsg := fmt.Sprintf("Non Supported type 0x%02X", t)
-		panic(errMsg)
+		debug.Fatal("Non Supported type 0x%02X", t)
 	}
+
+	return 0
 }
 
 func validateCheckSum(romData []byte) bool {

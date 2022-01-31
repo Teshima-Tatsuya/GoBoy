@@ -19,9 +19,6 @@ type GPU struct {
 	Scroll     *Scroll
 	palette    *Palette
 	DMA        byte
-	BGP        byte
-	OBP0       byte
-	OBP1       byte
 	tiles      []Tile
 }
 
@@ -40,9 +37,6 @@ func New() *GPU {
 		Scroll:    NewScroll(),
 		palette:   NewPalette(),
 		DMA:       0,
-		BGP:       0,
-		OBP0:      0,
-		OBP1:      0,
 	}
 
 	return gpu
@@ -129,31 +123,48 @@ func (g *GPU) loadTile() {
 // Step3: Store color to imageData
 func (g *GPU) drawBGLine() {
 	for x := 0; x < SCREEN_WIDTH; x++ {
-		g.imageData[x][g.Scroll.LY] = g.getTileColor(x)
+		g.imageData[x][g.Scroll.LY] = g.getBGTileColor(x)
 	}
 }
 
 func (g *GPU) drawWinLine() {
 	for x := 0; x < SCREEN_WIDTH; x++ {
-		// g.imageData[x][g.Scroll.LY] = g.getTileColor(x)
+		// g.imageData[x][g.Scroll.LY] = g.getWinTileColor(x)
 	}
 }
 
-func (g *GPU) getTileColor(LX int) color.RGBA {
-	// https://gbdev.io/pandocs/pixel_fifo.html#get-tile
-
-	// Step1. Find the number of tiles from top.
+func (g *GPU) getBGTileColor(LX int) color.RGBA {
 	// yPos is current pixel from top(0-255)
 	yPos := (g.Scroll.LY + g.Scroll.SCY) & 255
+	xPos := (LX + int(g.Scroll.SCX)) & 255
+	baseAddr := g.LCDC.BGTileMapArea()
+
+	return g.getTileColor(xPos, int(yPos), types.Addr(baseAddr))
+}
+
+func (g *GPU) getWinTileColor(LX int) color.RGBA {
+	// yPos is current pixel from top(0-255)
+	yPos := g.Scroll.WY
+	xPos := g.Scroll.WX - 7
+	baseAddr := g.LCDC.WinTileMapArea()
+
+	return g.getTileColor(int(xPos), int(yPos), types.Addr(baseAddr))
+}
+
+func (g *GPU) getTileColor(xPos, yPos int, baseAddr types.Addr) color.RGBA {
+	// https://gbdev.io/pandocs/pixel_fifo.html#get-tile
+
 	// yTile is Tile corresponding at yPos
 	yTile := yPos / 8
 	// xPos is current pixel from left(0-31)
-	xPos := (LX + int(g.Scroll.SCX)) & 255
 	xTile := xPos / 8
 
-	baseAddr := g.LCDC.BGTileMapArea()
 	addr := types.Addr(baseAddr) + types.Addr(yTile)*32 + types.Addr(xTile)
 	tileIdx := g.bus.ReadByte(addr)
+
+	if g.LCDC.BGWinTileDataArea() == 0x8800 {
+		tileIdx += 128
+	}
 
 	return g.palette.GetPalette(g.tiles[tileIdx].Data[yPos%8][xPos%8])
 }
