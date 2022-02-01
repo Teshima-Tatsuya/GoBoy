@@ -1,7 +1,6 @@
 package io
 
 import (
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/debug"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
 
@@ -41,7 +40,7 @@ func (r *IO) Read(addr types.Addr) byte {
 	case addr == IEAddr:
 		return r.IRQ.Read(addr)
 	default:
-		debug.Fatal("Unsuported addr for IO Read 0x%04X", addr)
+		// debug.Fatal("Unsuported addr for IO Read 0x%04X", addr)
 	}
 	return 0
 }
@@ -61,6 +60,6 @@ func (r *IO) Write(addr types.Addr, value byte) {
 	case addr == IEAddr:
 		r.IRQ.Write(addr, value)
 	default:
-		debug.Fatal("Unsuported addr for IO Write 0x%04X", addr)
+		// debug.Fatal("Unsuported addr for IO Write 0x%04X", addr)
 	}
 }
