@@ -34,6 +34,7 @@ func NewMBC1(romData []byte, ramSize int) *MBC1 {
 		mode:    SimpleROMBankingMode,
 	}
 
+	debug.Info("Cartridge RAM Size = %d", ramSize)
 	if ramSize > 0 {
 		m.RAM = memory.NewRAM(ramSize)
 		m.ramBank = 0
@@ -84,8 +85,10 @@ func (m *MBC1) Write(addr types.Addr, value byte) {
 	case 0x6000 <= addr && addr < 0x8000:
 		m.mode = value
 	case 0xA000 <= addr && addr < 0xC000:
-		addr = types.Addr(uint16(addr) + uint16(m.ramBank)*0x2000 - 0xA000)
-		m.RAM.Write(addr, value)
+		if m.ramEnable {
+			addr = types.Addr(uint16(addr) + uint16(m.ramBank)*0x2000 - 0xA000)
+			m.RAM.Write(addr, value)
+		}
 	}
 }
 

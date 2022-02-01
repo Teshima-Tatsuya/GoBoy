@@ -49,7 +49,7 @@ func NewGB(romData []byte) *GB {
 	gpu.Init(bus, cpu.IRQ.Request)
 
 	gb := &GB{
-		Cartridge: cartridge.New(romData),
+		Cartridge: cart,
 		vRAM:      memory.NewRAM(0x2000),
 		wRAM:      memory.NewRAM(0x2000),
 		hRAM:      memory.NewRAM(0x0080),
@@ -65,28 +65,25 @@ func NewGB(romData []byte) *GB {
 }
 
 func (gb *GB) Step() {
-	t := time.NewTicker(16 * time.Millisecond)
-	select {
-	case <-t.C:
-		for {
+	time.Sleep(16 * time.Millisecond)
+	for {
 
-			var cycle uint
-			if gb.gpu.IsDmaStarted() {
-				gb.gpu.TransferOAM()
-				cycle = 162
-			} else {
-				cycle = gb.cpu.Step()
-			}
-			gb.gpu.Step(cycle * 4)
+		var cycle uint
+		if gb.gpu.IsDmaStarted() {
+			gb.gpu.TransferOAM()
+			cycle = 162
+		} else {
+			cycle = gb.cpu.Step()
+		}
+		gb.gpu.Step(cycle * 4)
 
-			gb.currentCycle += cycle * 4
+		gb.currentCycle += cycle * 4
 
-			gb.timer.Tick(cycle)
+		gb.timer.Tick(cycle)
 
-			if gb.currentCycle >= 70224 {
-				gb.currentCycle -= 70224
-				return
-			}
+		if gb.currentCycle >= 70224 {
+			gb.currentCycle -= 70224
+			return
 		}
 	}
 }

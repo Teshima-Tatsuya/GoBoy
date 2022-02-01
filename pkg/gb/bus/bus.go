@@ -56,6 +56,8 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 		return b.ERAM.Read(addr - 0xE000)
 	case addr >= 0xFE00 && addr <= 0xFE9F:
 		return b.oam.Read(addr - 0xFE00)
+	case addr >= 0xFEA0 && addr <= 0xFEFF:
+		return 0
 	case addr >= 0xFF10 && addr <= 0xFF3F:
 		return b.apu.Read(addr - 0xFF00)
 	case addr >= 0xFF40 && addr <= 0xFF4B:
@@ -94,6 +96,8 @@ func (b *Bus) WriteByte(addr types.Addr, value byte) {
 		b.ERAM.Write(addr-0xE000, value)
 	case addr >= 0xFE00 && addr <= 0xFE9F:
 		b.oam.Write(addr-0xFE00, value)
+	case addr >= 0xFEA0 && addr <= 0xFEFF:
+		// Nintendo says use of this area is prohibited.
 	case addr >= 0xFF10 && addr <= 0xFF3F:
 		b.apu.Write(addr-0xFF00, value)
 	case addr >= 0xFF40 && addr <= 0xFF4B:
