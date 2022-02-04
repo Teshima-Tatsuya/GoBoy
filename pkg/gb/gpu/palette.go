@@ -46,6 +46,21 @@ func (p *Palette) GetPalette(idx Color) color.RGBA {
 	return palette[c]
 }
 
+func (p *Palette) GetObjPalette(idx Color, obp uint) color.RGBA {
+	// Bit 7-6 - Color for index 3
+	// Bit 5-4 - Color for index 2
+	// Bit 3-2 - Color for index 1
+	// Bit 1-0 - Color for index 0
+	var c byte
+	if obp == 1 {
+		c = (p.OBP1 >> (idx * 2)) & 0x03
+	} else {
+		c = (p.OBP0 >> (idx * 2)) & 0x03
+	}
+
+	return palette[c]
+}
+
 func (p *Palette) Read(addr types.Addr) byte {
 	switch addr {
 	case BGPAddr:

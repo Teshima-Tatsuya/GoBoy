@@ -9,8 +9,8 @@ type Sprite struct {
 func NewSprite(bytes4 []byte) *Sprite {
 	s := &Sprite{}
 
-	s.y = bytes4[0]
-	s.x = bytes4[1]
+	s.y = bytes4[0] - 16
+	s.x = bytes4[1] - 8
 	s.tileIdx = bytes4[2]
 	s.attr = bytes4[3]
 

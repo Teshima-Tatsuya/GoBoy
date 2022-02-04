@@ -54,6 +54,7 @@ func (g *GPU) Step(cycles uint) {
 
 	if g.clock >= CyclePerLine {
 		if g.Scroll.isVBlankStart() {
+			g.drawSplite()
 			g.requestIRQ(1) // 1 is io.VBlankFlag, prepend cycle import...
 
 		} else if g.Scroll.isVBlankPeriod() {
@@ -132,6 +133,57 @@ func (g *GPU) drawWinLine() {
 	for x := 0; x < SCREEN_WIDTH; x++ {
 		// g.imageData[x][g.Scroll.LY] = g.getWinTileColor(x)
 	}
+}
+
+func (g *GPU) drawSplite() {
+	for i := 0; i < SPRITE_NUM; i++ {
+		bytes4 := [4]byte{}
+		for j := 0; j < 4; j++ {
+			addr := OAMSTARTAddr + types.Addr(i*4) + types.Addr(j)
+			bytes4[j] = g.bus.ReadByte(addr)
+		}
+
+		s := NewSprite(bytes4[:])
+
+		debug.Info("%s", s)
+
+		var objHeight int
+		if g.LCDC.OBJSize() == 1 {
+			objHeight = 16
+		} else {
+			objHeight = 8
+		}
+
+		for x := 0; x < 8; x++ {
+			for y := 0; y < objHeight; y++ {
+				xPos := int(s.x) + x
+				yPos := int(s.y) + y
+
+				// ignore out of screen
+				if (xPos < 0 || SCREEN_WIDTH < x) ||
+					(yPos < 0 || SCREEN_HEIGHT < yPos) {
+					continue
+				}
+
+				tile := g.tiles[s.tileIdx]
+
+				if s.YFlip() {
+					x = 7 - x
+				}
+				if s.XFlip() {
+					y = 7 - y
+				}
+
+				c := tile.Data[x][y]
+
+				if c != 0 {
+					p := g.palette.GetObjPalette(c, uint(s.MBGPalleteNo()))
+					g.imageData[xPos][yPos] = p
+				}
+			}
+		}
+	}
+
 }
 
 func (g *GPU) getBGTileColor(LX int) color.RGBA {
