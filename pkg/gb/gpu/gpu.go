@@ -168,10 +168,10 @@ func (g *GPU) drawSplite() {
 				tile := g.tiles[s.tileIdx]
 
 				if s.YFlip() {
-					x = 7 - x
+					y = 7 - y
 				}
 				if s.XFlip() {
-					y = 7 - y
+					x = 7 - x
 				}
 
 				c := tile.Data[x][y]
