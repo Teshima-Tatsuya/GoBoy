@@ -140,12 +140,11 @@ func (g *GPU) drawSplite() {
 		bytes4 := [4]byte{}
 		for j := 0; j < 4; j++ {
 			addr := OAMSTARTAddr + types.Addr(i*4) + types.Addr(j)
+			debug.Info("0x%04x", addr)
 			bytes4[j] = g.bus.ReadByte(addr)
 		}
 
 		s := NewSprite(bytes4[:])
-
-		debug.Info("%s", s)
 
 		var objHeight int
 		if g.LCDC.OBJSize() == 1 {
@@ -160,24 +159,28 @@ func (g *GPU) drawSplite() {
 				yPos := int(s.y) + y
 
 				// ignore out of screen
-				if (xPos < 0 || SCREEN_WIDTH < x) ||
-					(yPos < 0 || SCREEN_HEIGHT < yPos) {
+				if (xPos < 0 || SCREEN_WIDTH <= xPos) ||
+					(yPos < 0 || SCREEN_HEIGHT <= yPos) {
 					continue
 				}
 
+				debug.Info("xPos %d, yPos %d", xPos, yPos)
 				tile := g.tiles[s.tileIdx]
 
 				if s.YFlip() {
 					y = 7 - y
 				}
+				yPos = int(s.y) + y
 				if s.XFlip() {
 					x = 7 - x
 				}
+				xPos = int(s.x) + x
 
 				c := tile.Data[x][y]
 
 				if c != 0 {
 					p := g.palette.GetObjPalette(c, uint(s.MBGPalleteNo()))
+					debug.Info("xPos %d, yPos %d", xPos, yPos)
 					g.imageData[xPos][yPos] = p
 				}
 			}
