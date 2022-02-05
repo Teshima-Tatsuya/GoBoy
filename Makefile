@@ -13,13 +13,12 @@ clean:
 	@-rm -rf ./$(BINDIR)
 
 .PNONY: test
-
-test_blargg:
+test:
 	make build
 	$(BINDIR)/darwin-amd64/$(NAME) ./test/blargg/cpu_instrs/cpu_instrs.gb
 
-test_cpu:
-	go test ./pkg/gb/cpu
+test_roms:
+	go test ./pkg/gb
 
 test_register:
 	go test -run Register ./pkg/gb/cpu -cover -coverprofile=cover_register.out

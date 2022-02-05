@@ -1,52 +1,65 @@
 package gb
 
 import (
+	"image/jpeg"
 	"io/ioutil"
-	"log"
 	"os"
+	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/debug"
 )
 
-func testrom(t assert.TestingT, file string, passstr string) {
-	romData, err := ioutil.ReadFile(file)
-	if err != nil {
-		log.Fatal(err)
-		os.Exit(-1)
-	}
-
-	gb := NewGB(romData)
-
-	var str string
-
-	str = ""
-
-	for i := 0; i < 40000000; i++ {
-		if gb.cpu.Bus.ReadByte(0xff02) == byte(0x81) {
-			d := gb.cpu.Bus.ReadByte(0xff01)
-			str += string(d)
-			gb.cpu.Bus.WriteByte(0xff02, byte(0x00))
-		}
-
-		gb.Step()
-	}
-
-	assert.Equal(t, passstr, str)
+func setup(romData []byte) *GB {
+	return NewGB(romData)
 }
 
-func TestCPU_Blargg_cpu_instrs(t *testing.T) {
-	file := "../../test/blargg/cpu_instrs/cpu_instrs.gb"
-	passstr := "cpu_instrs\n\n01:ok  02:ok  03:ok  04:ok  05:ok  06:ok  07:ok  08:ok  09:ok  10:ok  11:ok  \n\nPassed all tests\n"
+func TestGB_testroms(t *testing.T) {
+	tests := []struct {
+		name  string
+		file  string
+		frame int
+	}{
+		{"blargg/cpu_instrs", "cpu_instrs.gb", 3200},
+		{"blargg/instr_timing", "instr_timing.gb", 100},
+		{"blargg/interrupt_time", "interrupt_time.gb", 100},
+		{"helloworld", "hello.gb", 100},
+		{"mooneye-gb/acceptance/bits", "mem_oam.gb", 100},
+		{"mooneye-gb/acceptance/bits", "reg_f.gb", 100},
+		{"mooneye-gb/acceptance/bits", "unused_hwio-GS.gb", 100},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			defer func() {
+				err := recover()
+				if err != nil {
+					debug.Info("%s", err)
+				}
+			}()
 
-	testrom(t, file, passstr)
+			testPath := "../../test/rom/"
+			outPath := "../../test/actual/"
+			romData, err := ioutil.ReadFile(testPath + tt.name + "/" + tt.file)
+			if err != nil {
+				panic(err)
+			}
+			gb := setup(romData)
 
-}
+			for i := 0; i < tt.frame; i++ {
+				gb.Step()
+			}
+			screen, _ := gb.Display()
 
-func TestGB_hello(t *testing.T) {
-	file := "../../test/helloworld/hello.gb"
-	passstr := "cpu_instrs\n\n01:ok  02:ok  03:ok  04:ok  05:ok  06:ok  07:ok  08:ok  09:ok  10:ok  11:ok  \n\nPassed all tests\n"
+			if err := os.MkdirAll(outPath+tt.name, 0777); err != nil {
+				panic(err)
+			}
 
-	testrom(t, file, passstr)
+			file, _ := os.Create(outPath + tt.name + "/" + strings.Replace(tt.file, ".gb", "", -1) + ".jpg")
+			defer file.Close()
 
+			if err := jpeg.Encode(file, screen, &jpeg.Options{100}); err != nil {
+				panic(err)
+			}
+		})
+	}
 }
