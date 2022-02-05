@@ -53,6 +53,7 @@ func (g *GPU) Step(cycles uint) {
 	g.clock += cycles
 
 	if g.clock >= CyclePerLine {
+		g.loadTile()
 		if g.Scroll.isVBlankStart() {
 			g.drawSplite()
 			g.requestIRQ(1) // 1 is io.VBlankFlag, prepend cycle import...
@@ -60,7 +61,6 @@ func (g *GPU) Step(cycles uint) {
 		} else if g.Scroll.isVBlankPeriod() {
 
 		} else if g.Scroll.isHBlankPeriod() {
-			g.loadTile()
 			// first build BG
 			// second build Window IF exists
 			g.drawBGLine()
@@ -71,7 +71,6 @@ func (g *GPU) Step(cycles uint) {
 
 		} else {
 			g.Scroll.LY = 0
-			g.loadTile()
 			g.drawBGLine()
 		}
 
@@ -105,7 +104,8 @@ func (g *GPU) Display() (*image.RGBA, *image.RGBA) {
 }
 
 func (g *GPU) loadTile() {
-	addr := g.LCDC.BGWinTileDataArea()
+	// addr := g.LCDC.BGWinTileDataArea()
+	addr := 0x8000
 	// todo CGBMode
 	tileNum := 384
 	g.tiles = make([]Tile, tileNum)
@@ -131,7 +131,7 @@ func (g *GPU) drawBGLine() {
 
 func (g *GPU) drawWinLine() {
 	for x := 0; x < SCREEN_WIDTH; x++ {
-		// g.imageData[x][g.Scroll.LY] = g.getWinTileColor(x)
+		g.imageData[x][g.Scroll.LY] = g.getWinTileColor(x)
 	}
 }
 
@@ -140,7 +140,7 @@ func (g *GPU) drawSplite() {
 		bytes4 := [4]byte{}
 		for j := 0; j < 4; j++ {
 			addr := OAMSTARTAddr + types.Addr(i*4) + types.Addr(j)
-			debug.Info("0x%04x", addr)
+			// debug.Info("0x%04x", addr)
 			bytes4[j] = g.bus.ReadByte(addr)
 		}
 
@@ -164,7 +164,6 @@ func (g *GPU) drawSplite() {
 					continue
 				}
 
-				debug.Info("xPos %d, yPos %d", xPos, yPos)
 				tile := g.tiles[s.tileIdx]
 
 				if s.YFlip() {
@@ -180,7 +179,6 @@ func (g *GPU) drawSplite() {
 
 				if c != 0 {
 					p := g.palette.GetObjPalette(c, uint(s.MBGPalleteNo()))
-					debug.Info("xPos %d, yPos %d", xPos, yPos)
 					g.imageData[xPos][yPos] = p
 				}
 			}

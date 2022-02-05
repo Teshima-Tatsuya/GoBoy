@@ -16,11 +16,6 @@ import (
 type GB struct {
 	Cartridge *cartridge.Cartridge
 
-	// memory
-	vRAM *memory.RAM
-	wRAM *memory.RAM
-	hRAM *memory.RAM
-
 	cpu *cpu.CPU
 	gpu *gpu.GPU
 	apu *apu.APU
@@ -49,15 +44,11 @@ func NewGB(romData []byte) *GB {
 	gpu.Init(bus, cpu.IRQ.Request)
 
 	gb := &GB{
-		Cartridge: cart,
-		vRAM:      memory.NewRAM(0x2000),
-		wRAM:      memory.NewRAM(0x2000),
-		hRAM:      memory.NewRAM(0x0080),
-
-		cpu:   cpu,
-		gpu:   gpu,
-		timer: timer,
-
+		Cartridge:    cart,
+		cpu:          cpu,
+		gpu:          gpu,
+		apu:          apu,
+		timer:        timer,
 		currentCycle: 0,
 	}
 
