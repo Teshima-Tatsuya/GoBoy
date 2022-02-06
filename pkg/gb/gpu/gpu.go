@@ -13,31 +13,24 @@ type GPU struct {
 	bus        interfaces.Bus
 	requestIRQ func(byte)
 	clock      uint
-	imageData  [][]color.RGBA
+	imageData  [SCREEN_WIDTH][SCREEN_HEIGHT]color.RGBA
 	LCDC       *LCDC
 	LCDS       *LCDS
 	Scroll     *Scroll
 	palette    *Palette
 	DMA        byte
-	tiles      [3][]Tile
+	tiles      [3][128]Tile
 	dmaStarted bool
 }
 
 func New() *GPU {
-	imageData := make([][]color.RGBA, SCREEN_WIDTH)
-
-	for i := 0; i < SCREEN_WIDTH; i++ {
-		imageData[i] = make([]color.RGBA, SCREEN_HEIGHT)
-	}
-
 	gpu := &GPU{
-		clock:     0,
-		imageData: imageData,
-		LCDC:      NewLCDC(0x00),
-		LCDS:      NewLCDS(0x00),
-		Scroll:    NewScroll(),
-		palette:   NewPalette(),
-		DMA:       0,
+		clock:   0,
+		LCDC:    NewLCDC(0x00),
+		LCDS:    NewLCDS(0x00),
+		Scroll:  NewScroll(),
+		palette: NewPalette(),
+		DMA:     0,
 	}
 
 	return gpu
@@ -121,9 +114,6 @@ func (g *GPU) loadTile() {
 	addr := 0x8000
 	// todo CGBMode
 	tileNum := 128
-	for i := 0; i < 3; i++ {
-		g.tiles[i] = make([]Tile, tileNum)
-	}
 	var bytes16 [16]byte
 
 	// One tile occupies 16 bytes
@@ -147,6 +137,13 @@ func (g *GPU) drawBGLine() {
 }
 
 func (g *GPU) drawWinLine() {
+	if (g.Scroll.WX < 0 || 167 <= g.Scroll.WX) ||
+		(g.Scroll.WY < 0 || 144 <= g.Scroll.WY) {
+		return
+	}
+	if g.Scroll.LY < g.Scroll.WY {
+		return
+	}
 	for x := 0; x < SCREEN_WIDTH; x++ {
 		g.imageData[x][g.Scroll.LY] = g.getWinTileColor(x)
 	}
@@ -216,7 +213,7 @@ func (g *GPU) getBGTileColor(LX int) color.RGBA {
 
 func (g *GPU) getWinTileColor(LX int) color.RGBA {
 	// yPos is current pixel from top(0-255)
-	yPos := g.Scroll.WY
+	yPos := g.Scroll.LY + g.Scroll.WY
 	xPos := g.Scroll.WX - 7
 	baseAddr := g.LCDC.WinTileMapArea()
 
@@ -255,7 +252,7 @@ func (g *GPU) getTileColor(xPos, yPos int, baseAddr types.Addr) color.RGBA {
 	return g.palette.GetPalette(g.tiles[block][tileIdx].Data[yPos%8][xPos%8])
 }
 
-func (g *GPU) ImageData() ([][]color.RGBA, [3][]Tile) {
+func (g *GPU) ImageData() ([SCREEN_WIDTH][SCREEN_HEIGHT]color.RGBA, [3][128]Tile) {
 	return g.imageData, g.tiles
 }
 
