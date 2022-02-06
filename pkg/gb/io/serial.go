@@ -23,7 +23,7 @@ func (s *Serial) Read(addr types.Addr) byte {
 	case addr == SBAddr:
 		return s.SB
 	case addr == SCAddr:
-		return s.SC
+		return s.SC | 0x7E
 	default:
 		msg := fmt.Sprintf("Sereal doesn't support addr 0x%02X", addr)
 		panic(msg)
@@ -35,7 +35,7 @@ func (s *Serial) Write(addr types.Addr, value byte) {
 	case addr == SBAddr:
 		s.SB = value
 	case addr == SCAddr:
-		s.SC = value
+		s.SC = value & 0x83
 	default:
 		msg := fmt.Sprintf("Sereal doesn't support addr 0x%02X", addr)
 		panic(msg)
