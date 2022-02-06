@@ -9,6 +9,7 @@ import (
 type Timer struct {
 	requestIRQ func(byte)
 	counter    uint16
+	divCounter uint16
 	DIV        byte
 	TIMA       byte
 	TMA        byte
@@ -17,11 +18,12 @@ type Timer struct {
 
 func NewTimer() *Timer {
 	return &Timer{
-		counter: 0,
-		DIV:     0x00,
-		TIMA:    0x00,
-		TMA:     0x00,
-		TAC:     0x00,
+		counter:    0,
+		divCounter: 0,
+		DIV:        0x00,
+		TIMA:       0x00,
+		TMA:        0x00,
+		TAC:        0x00,
 	}
 }
 
@@ -31,10 +33,10 @@ func (t *Timer) SetRequestIRQ(request func(byte)) {
 
 func (t *Timer) Tick(cycle uint) {
 	for i := uint(0); i < cycle; i++ {
-		t.counter += 4
+		t.divCounter += 4
 
 		// TODO double speed for GBC
-		if t.counter%16384 == 0 {
+		if t.divCounter%16384 == 0 {
 			t.DIV++
 		}
 
@@ -42,6 +44,7 @@ func (t *Timer) Tick(cycle uint) {
 			continue
 		}
 
+		t.counter += 4
 		if t.counter%t.getFreq() == 0 {
 			t.TIMA++
 

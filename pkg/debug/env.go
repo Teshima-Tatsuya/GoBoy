@@ -2,4 +2,4 @@
 
 package debug
 
-const DEBUG = false
+const DEBUG = true
