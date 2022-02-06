@@ -35,14 +35,12 @@ func (r *IO) Read(addr types.Addr) byte {
 		return r.IRQ.Read(addr)
 	case SBAddr <= addr && addr <= SCAddr:
 		return r.serial.Read(addr)
-	case addr == 0x4D:
-		return 0
 	case addr == IEAddr:
 		return r.IRQ.Read(addr)
 	default:
 		// debug.Fatal("Unsuported addr for IO Read 0x%04X", addr)
 	}
-	return 0
+	return 0xFF
 }
 
 func (r *IO) Write(addr types.Addr, value byte) {
@@ -55,8 +53,6 @@ func (r *IO) Write(addr types.Addr, value byte) {
 		r.Timer.Write(addr, value)
 	case addr == IFAddr:
 		r.IRQ.Write(addr, value)
-	case addr == 0x4D:
-		// TODO
 	case addr == IEAddr:
 		r.IRQ.Write(addr, value)
 	default:

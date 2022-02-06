@@ -90,9 +90,9 @@ func TestGB_test_mooneye(t *testing.T) {
 		file  string
 		frame int
 	}{
-		{"mooneye-gb/acceptance/bits", "mem_oam", 100},
-		{"mooneye-gb/acceptance/bits", "reg_f", 100},
-		{"mooneye-gb/acceptance/bits", "unused_hwio-GS", 100},
+		{"mooneye-gb/acceptance/bits", "mem_oam", 10},
+		{"mooneye-gb/acceptance/bits", "reg_f", 10},
+		{"mooneye-gb/acceptance/bits", "unused_hwio-GS", 10},
 		{"mooneye-gb/acceptance/instr", "daa", 100},
 		{"mooneye-gb/acceptance/interrupts", "ie_push", 100},
 		{"mooneye-gb/acceptance/oam_dma", "basic", 100},
@@ -185,7 +185,7 @@ func TestGB_test_temp(t *testing.T) {
 		file  string
 		frame int
 	}{
-		{"mooneye-gb/acceptance/bits", "unused_hwio-GS", 20},
+		{"mooneye-gb/acceptance/bits", "reg_f", 10},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

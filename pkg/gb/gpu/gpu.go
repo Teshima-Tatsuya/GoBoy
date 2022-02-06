@@ -276,7 +276,7 @@ func (g *GPU) Read(addr types.Addr) byte {
 	case LCDCAddr:
 		return g.LCDC.Data
 	case LCDSAddr:
-		return g.LCDS.Data
+		return g.LCDS.Data | 0x80
 	case SCYAddr, SCXAddr, LYAddr, LYCAddr, WXAddr, WYAddr:
 		return g.Scroll.Read(addr)
 	case DMAAddr:
@@ -294,7 +294,7 @@ func (g *GPU) Write(addr types.Addr, value byte) {
 	case LCDCAddr:
 		g.LCDC.Data = value
 	case LCDSAddr:
-		g.LCDS.Data = value
+		g.LCDS.Data = value & 0x7F
 	case SCYAddr, SCXAddr, LYAddr, LYCAddr, WXAddr, WYAddr:
 		g.Scroll.Write(addr, value)
 	case DMAAddr:

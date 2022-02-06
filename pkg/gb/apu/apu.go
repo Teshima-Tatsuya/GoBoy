@@ -33,7 +33,7 @@ func NewAPU() *APU {
 func (a *APU) Read(addr types.Addr) byte {
 	switch {
 	case addr == NR10Addr:
-		return a.NR10
+		return a.NR10 | 0x80
 	case addr == NR11Addr:
 		return a.NR11
 	case addr == NR12Addr:
@@ -51,34 +51,32 @@ func (a *APU) Read(addr types.Addr) byte {
 	case addr == NR24Addr:
 		return a.NR24
 	case addr == NR30Addr:
-		return a.NR30
+		return a.NR30 | 0x7F
 	case addr == NR31Addr:
 		return a.NR31
 	case addr == NR32Addr:
-		return a.NR32
+		return a.NR32 | 0x9F
 	case addr == NR33Addr:
 		return a.NR33
 	case addr == NR34Addr:
 		return a.NR34
 	case addr == NR41Addr:
-		return a.NR41
+		return a.NR41 | 0xC0
 	case addr == NR42Addr:
 		return a.NR42
 	case addr == NR43Addr:
 		return a.NR43
 	case addr == NR44Addr:
-		return a.NR44
+		return a.NR44 | 0x3F
 	case addr == NR50Addr:
 		return a.NR50
 	case addr == NR51Addr:
 		return a.NR51
 	case addr == NR52Addr:
-		return a.NR52
-	case 0x30 <= addr && addr <= 0x3F:
-		return 0
-	default:
-		panic("Unsupported addr for APU Read")
+		return a.NR52 | 0x70
 	}
+
+	return 0xFF
 }
 
 func (a *APU) Write(addr types.Addr, value byte) {
@@ -125,8 +123,5 @@ func (a *APU) Write(addr types.Addr, value byte) {
 		a.NR51 = value
 	case addr == NR52Addr:
 		a.NR52 = value
-	case 0x30 <= addr && addr <= 0x3F:
-	default:
-		panic("Unsupported addr for APU Read")
 	}
 }
