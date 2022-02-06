@@ -52,30 +52,44 @@ func (g *GPU) Init(bus interfaces.Bus, requestIRQ func(byte)) {
 func (g *GPU) Step(cycles uint) {
 	g.clock += cycles
 
+	if !g.LCDC.LCDPPUEnable() {
+		// return
+	}
+
 	if g.clock >= CyclePerLine {
-		g.loadTile()
 		if g.Scroll.isVBlankStart() {
-			g.drawSplite()
+			g.loadTile()
+			// g.drawSplite()
 			g.requestIRQ(1) // 1 is io.VBlankFlag, prepend cycle import...
+			if g.LCDS.Mode2() {
+				g.requestIRQ(2)
+			}
 
 		} else if g.Scroll.isVBlankPeriod() {
 
 		} else if g.Scroll.isHBlankPeriod() {
 			// first build BG
 			// second build Window IF exists
+			g.loadTile()
 			g.drawBGLine()
 
 			if g.LCDC.WindowEnable() {
-				g.drawWinLine()
+				// g.drawWinLine()
 			}
 
 		} else {
 			g.Scroll.LY = 0
+			g.loadTile()
 			g.drawBGLine()
 		}
 
 		if g.Scroll.LY == g.Scroll.SCY {
-			g.requestIRQ(2)
+			g.LCDS.Data |= 0x04
+			if g.LCDS.LYC() {
+				g.requestIRQ(2)
+			}
+		} else {
+			g.LCDS.Data &= 0xFB
 		}
 		g.Scroll.LY++
 		g.clock -= CyclePerLine
@@ -187,6 +201,18 @@ func (g *GPU) drawSplite() {
 
 }
 
+func (g *GPU) getBGTileColorOld(LX int) color.RGBA {
+	// yPos is current pixel from top(0-255)
+	yPos := ((uint(g.Scroll.LY) + uint(g.Scroll.SCY)) % 0x0100) / 8 * 32
+	xPos := (LX + int(g.Scroll.SCX)) / 8 % 32
+	baseAddr := g.LCDC.BGTileMapArea()
+
+	tileid := g.getTileId(yPos, uint(xPos), types.Addr(baseAddr))
+	c := g.getPaletteId(tileid, int(g.Scroll.SCX%8)+LX, uint((g.Scroll.LY+g.Scroll.SCY))%8)
+
+	return g.palette.GetPalette(c)
+}
+
 func (g *GPU) getBGTileColor(LX int) color.RGBA {
 	// yPos is current pixel from top(0-255)
 	yPos := (g.Scroll.LY + g.Scroll.SCY) & 255
@@ -194,6 +220,34 @@ func (g *GPU) getBGTileColor(LX int) color.RGBA {
 	baseAddr := g.LCDC.BGTileMapArea()
 
 	return g.getTileColor(xPos, int(yPos), types.Addr(baseAddr))
+}
+
+func (g *GPU) getTileId(yPos, xPos uint, offset types.Addr) int {
+	addr := types.Addr(yPos) + types.Addr(xPos) + offset
+	id := g.bus.ReadByte(addr)
+	return int(id)
+}
+
+func (g *GPU) getPaletteId(tileId, x int, y uint) Color {
+	x = x % 8
+
+	if g.LCDC.BGWinTileDataArea() == 0x8800 {
+		tileId += 128
+	}
+
+	baseAddr := types.Addr(g.LCDC.BGWinTileDataArea()) + types.Addr(tileId*0x10) + types.Addr(y*2)
+
+	l1 := g.bus.ReadByte(baseAddr)
+	l2 := g.bus.ReadByte(baseAddr + 1)
+	paletteID := byte(0)
+	if l1&(0x01<<(7-uint(x))) != 0 {
+		paletteID = 1
+	}
+	if l2&(0x01<<(7-uint(x))) != 0 {
+		paletteID += 2
+	}
+
+	return Color(paletteID)
 }
 
 func (g *GPU) getWinTileColor(LX int) color.RGBA {

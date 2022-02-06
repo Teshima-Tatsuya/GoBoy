@@ -4,8 +4,7 @@ import (
 	"testing"
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
-
-	"github.com/stretchr/testify/assert"
+	"github.com/tj/assert"
 )
 
 func TestUtil_Byte2Addr(t *testing.T) {

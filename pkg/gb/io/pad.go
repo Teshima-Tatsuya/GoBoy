@@ -1,21 +1,45 @@
 package io
 
-import "github.com/Teshima-Tatsuya/GoBoy/pkg/types"
+import (
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/util"
+)
 
 type Pad struct {
-	Data byte
+	p1    byte
+	state byte
 }
 
 func NewPad() *Pad {
 	return &Pad{
-		Data: 0x3F, // all buttuns are not pressed
+		p1:    0x3F, // all buttuns are not pressed
+		state: 0x00,
 	}
 }
 
 func (p *Pad) Read(addr types.Addr) byte {
-	return p.Data
+	if p.buttonPressed() {
+		return p.p1 & ^(p.state >> 4)
+	}
+
+	if p.directionPressed() {
+		return p.p1 & ^(p.state & 0x0F)
+	}
+
+	// all not pressed
+	return p.p1 | 0x0F
 }
 
 func (p *Pad) Write(addr types.Addr, value byte) {
-	p.Data = value
+	p.p1 = (p.p1 & 0xCF) | (value & 0x30)
+}
+
+// button is start, select, A, B
+func (p *Pad) buttonPressed() bool {
+	return util.Bit(p.p1, 5) == 0
+}
+
+// direction is up, down, left, right
+func (p *Pad) directionPressed() bool {
+	return util.Bit(p.p1, 4) == 0
 }
