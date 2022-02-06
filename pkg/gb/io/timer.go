@@ -81,7 +81,7 @@ func (t *Timer) Read(addr types.Addr) byte {
 	case TMAAddr:
 		return t.TMA
 	case TACAddr:
-		return t.TAC
+		return t.TAC | 0xF8
 	default:
 		panic(fmt.Sprintf("Non Supported addr 0x%04X", addr))
 	}
@@ -97,7 +97,7 @@ func (t *Timer) Write(addr types.Addr, v byte) {
 	case TMAAddr:
 		t.TMA = v
 	case TACAddr:
-		t.TAC = v
+		t.TAC = v & 0x07
 	default:
 		panic(fmt.Sprintf("Non Supported addr 0x%04X", addr))
 	}
