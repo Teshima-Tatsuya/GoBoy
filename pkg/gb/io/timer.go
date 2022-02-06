@@ -91,7 +91,7 @@ func (t *Timer) Write(addr types.Addr, v byte) {
 	switch addr {
 	case DIVAddr:
 		t.DIV = 0
-		t.counter = 0
+		t.divCounter = 0
 	case TIMAAddr:
 		t.TIMA = v
 	case TMAAddr:
