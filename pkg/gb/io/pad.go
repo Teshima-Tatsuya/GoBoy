@@ -19,18 +19,19 @@ func NewPad() *Pad {
 
 func (p *Pad) Read(addr types.Addr) byte {
 	if p.buttonPressed() {
-		return p.p1 & ^(p.state >> 4)
+		return p.p1 & ^(p.state&0x0F) | 0xC0
 	}
 
 	if p.directionPressed() {
-		return p.p1 & ^(p.state & 0x0F)
+		return p.p1 & ^(p.state>>4) | 0xC0
 	}
 
 	// all not pressed
-	return p.p1 | 0x0F
+	return p.p1 | 0xCF
 }
 
 func (p *Pad) Write(addr types.Addr, value byte) {
+	// because bit 3-0 is read only
 	p.p1 = (p.p1 & 0xCF) | (value & 0x30)
 }
 
