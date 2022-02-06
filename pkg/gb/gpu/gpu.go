@@ -19,7 +19,7 @@ type GPU struct {
 	Scroll     *Scroll
 	palette    *Palette
 	DMA        byte
-	tiles      []Tile
+	tiles      [3][]Tile
 	dmaStarted bool
 }
 
@@ -57,8 +57,8 @@ func (g *GPU) Step(cycles uint) {
 	}
 
 	if g.clock >= CyclePerLine {
+		g.loadTile()
 		if g.Scroll.isVBlankStart() {
-			g.loadTile()
 			// g.drawSplite()
 			g.requestIRQ(1) // 1 is io.VBlankFlag, prepend cycle import...
 			if g.LCDS.Mode2() {
@@ -70,7 +70,6 @@ func (g *GPU) Step(cycles uint) {
 		} else if g.Scroll.isHBlankPeriod() {
 			// first build BG
 			// second build Window IF exists
-			g.loadTile()
 			g.drawBGLine()
 
 			if g.LCDC.WindowEnable() {
@@ -79,7 +78,6 @@ func (g *GPU) Step(cycles uint) {
 
 		} else {
 			g.Scroll.LY = 0
-			g.loadTile()
 			g.drawBGLine()
 		}
 
@@ -105,11 +103,13 @@ func (g *GPU) Display() (*image.RGBA, *image.RGBA) {
 		}
 	}
 
-	for y := 0; y < 24; y++ {
-		for x := 0; x < 16; x++ {
-			for col := 0; col < 8; col++ {
-				for row := 0; row < 8; row++ {
-					itile.SetRGBA(x*8+col, y*8+row, g.palette.GetPalette(g.tiles[y*16+x].Data[row][col]))
+	for block := 0; block < 3; block++ {
+		for y := 0; y < 8; y++ {
+			for x := 0; x < 16; x++ {
+				for col := 0; col < 8; col++ {
+					for row := 0; row < 8; row++ {
+						itile.SetRGBA(x*8+col, block*8+y*8+row, g.palette.GetPalette(g.tiles[block][y*16+x].Data[row][col]))
+					}
 				}
 			}
 		}
@@ -118,19 +118,22 @@ func (g *GPU) Display() (*image.RGBA, *image.RGBA) {
 }
 
 func (g *GPU) loadTile() {
-	// addr := g.LCDC.BGWinTileDataArea()
 	addr := 0x8000
 	// todo CGBMode
-	tileNum := 384
-	g.tiles = make([]Tile, tileNum)
+	tileNum := 128
+	for i := 0; i < 3; i++ {
+		g.tiles[i] = make([]Tile, tileNum)
+	}
 	var bytes16 [16]byte
 
 	// One tile occupies 16 bytes
-	for i := 0; i < tileNum; i++ {
-		for b := 0; b < 16; b++ {
-			bytes16[b] = g.bus.ReadByte(types.Addr(addr) + types.Addr(i*16+b))
+	for block := 0; block < 3; block++ {
+		for i := 0; i < tileNum; i++ {
+			for b := 0; b < 16; b++ {
+				bytes16[b] = g.bus.ReadByte(types.Addr(addr) + types.Addr(i*16+b))
+			}
+			g.tiles[block][i] = *NewTile(bytes16[:])
 		}
-		g.tiles[i] = *NewTile(bytes16[:])
 	}
 }
 
@@ -189,7 +192,8 @@ func (g *GPU) drawSplite() {
 				}
 				xPos = int(s.x) + x
 
-				c := tile.Data[x][y]
+				// Sptite fixes block 0
+				c := tile[0].Data[x][y]
 
 				if c != 0 {
 					p := g.palette.GetObjPalette(c, uint(s.MBGPalleteNo()))
@@ -201,18 +205,6 @@ func (g *GPU) drawSplite() {
 
 }
 
-func (g *GPU) getBGTileColorOld(LX int) color.RGBA {
-	// yPos is current pixel from top(0-255)
-	yPos := ((uint(g.Scroll.LY) + uint(g.Scroll.SCY)) % 0x0100) / 8 * 32
-	xPos := (LX + int(g.Scroll.SCX)) / 8 % 32
-	baseAddr := g.LCDC.BGTileMapArea()
-
-	tileid := g.getTileId(yPos, uint(xPos), types.Addr(baseAddr))
-	c := g.getPaletteId(tileid, int(g.Scroll.SCX%8)+LX, uint((g.Scroll.LY+g.Scroll.SCY))%8)
-
-	return g.palette.GetPalette(c)
-}
-
 func (g *GPU) getBGTileColor(LX int) color.RGBA {
 	// yPos is current pixel from top(0-255)
 	yPos := (g.Scroll.LY + g.Scroll.SCY) & 255
@@ -220,34 +212,6 @@ func (g *GPU) getBGTileColor(LX int) color.RGBA {
 	baseAddr := g.LCDC.BGTileMapArea()
 
 	return g.getTileColor(xPos, int(yPos), types.Addr(baseAddr))
-}
-
-func (g *GPU) getTileId(yPos, xPos uint, offset types.Addr) int {
-	addr := types.Addr(yPos) + types.Addr(xPos) + offset
-	id := g.bus.ReadByte(addr)
-	return int(id)
-}
-
-func (g *GPU) getPaletteId(tileId, x int, y uint) Color {
-	x = x % 8
-
-	if g.LCDC.BGWinTileDataArea() == 0x8800 {
-		tileId += 128
-	}
-
-	baseAddr := types.Addr(g.LCDC.BGWinTileDataArea()) + types.Addr(tileId*0x10) + types.Addr(y*2)
-
-	l1 := g.bus.ReadByte(baseAddr)
-	l2 := g.bus.ReadByte(baseAddr + 1)
-	paletteID := byte(0)
-	if l1&(0x01<<(7-uint(x))) != 0 {
-		paletteID = 1
-	}
-	if l2&(0x01<<(7-uint(x))) != 0 {
-		paletteID += 2
-	}
-
-	return Color(paletteID)
 }
 
 func (g *GPU) getWinTileColor(LX int) color.RGBA {
@@ -268,16 +232,30 @@ func (g *GPU) getTileColor(xPos, yPos int, baseAddr types.Addr) color.RGBA {
 	xTile := xPos / 8
 
 	addr := types.Addr(baseAddr) + types.Addr(yTile)*32 + types.Addr(xTile)
-	tileIdx := g.bus.ReadByte(addr)
+	tileIdx := int(int8(g.bus.ReadByte(addr)))
 
+	var block int
+	block = 0
 	if g.LCDC.BGWinTileDataArea() == 0x8800 {
-		tileIdx += 128
+		if tileIdx < 0 {
+			block = 1
+			tileIdx += 128
+		} else {
+			block = 2
+		}
+	} else {
+		if tileIdx < 128 {
+			block = 0
+		} else {
+			block = 1
+			tileIdx -= 128
+		}
 	}
 
-	return g.palette.GetPalette(g.tiles[tileIdx].Data[yPos%8][xPos%8])
+	return g.palette.GetPalette(g.tiles[block][tileIdx].Data[yPos%8][xPos%8])
 }
 
-func (g *GPU) ImageData() ([][]color.RGBA, []Tile) {
+func (g *GPU) ImageData() ([][]color.RGBA, [3][]Tile) {
 	return g.imageData, g.tiles
 }
 
