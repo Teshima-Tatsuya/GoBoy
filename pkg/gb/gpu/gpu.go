@@ -108,7 +108,7 @@ func (g *GPU) Display() (*image.RGBA, *image.RGBA) {
 			for x := 0; x < 16; x++ {
 				for col := 0; col < 8; col++ {
 					for row := 0; row < 8; row++ {
-						itile.SetRGBA(x*8+col, block*8+y*8+row, g.palette.GetPalette(g.tiles[block][y*16+x].Data[row][col]))
+						itile.SetRGBA(x*8+col, block*64+y*8+row, g.palette.GetPalette(g.tiles[block][y*16+x].Data[row][col]))
 					}
 				}
 			}
@@ -130,7 +130,7 @@ func (g *GPU) loadTile() {
 	for block := 0; block < 3; block++ {
 		for i := 0; i < tileNum; i++ {
 			for b := 0; b < 16; b++ {
-				bytes16[b] = g.bus.ReadByte(types.Addr(addr) + types.Addr(i*16+b))
+				bytes16[b] = g.bus.ReadByte(types.Addr(addr) + types.Addr(block*128*16+i*16+b))
 			}
 			g.tiles[block][i] = *NewTile(bytes16[:])
 		}
