@@ -11,7 +11,5 @@ const (
 	TIMAAddr            = 0x05
 	TMAAddr             = 0x06
 	TACAddr             = 0x07
-	IFAddr              = 0x0F
 	KEY1Addr            = 0x4D
-	IEAddr              = 0xFF
 )

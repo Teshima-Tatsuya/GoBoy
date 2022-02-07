@@ -5,6 +5,7 @@ import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/apu"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/gpu"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/interrupt"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/memory"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
@@ -20,10 +21,11 @@ type Bus struct {
 	oam   *memory.RAM
 	apu   *apu.APU
 	gpu   *gpu.GPU
+	irq   *interrupt.IRQ
 	IO    *io.IO
 }
 
-func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *memory.RAM, hram *memory.RAM, a *apu.APU, g *gpu.GPU, io *io.IO) *Bus {
+func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *memory.RAM, hram *memory.RAM, a *apu.APU, g *gpu.GPU, irq *interrupt.IRQ, io *io.IO) *Bus {
 	eram := memory.NewRAM(0x2000)
 	oam := memory.NewRAM(0x00A0)
 	return &Bus{
@@ -36,6 +38,7 @@ func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *m
 		oam:   oam,
 		apu:   a,
 		gpu:   g,
+		irq:   irq,
 		IO:    io,
 	}
 }
@@ -58,6 +61,8 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 		return b.oam.Read(addr - 0xFE00)
 	case addr >= 0xFEA0 && addr <= 0xFEFF:
 		return 0
+	case addr == 0xFF0F || addr == 0xFFFF:
+		return b.irq.Read(addr - 0xFF00)
 	case addr >= 0xFF10 && addr <= 0xFF3F:
 		return b.apu.Read(addr - 0xFF00)
 	case addr >= 0xFF40 && addr <= 0xFF4B:
@@ -66,8 +71,6 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 		return b.IO.Read(addr - 0xFF00)
 	case addr >= 0xFF80 && addr <= 0xFFFE:
 		return b.HRAM.Read(addr - 0xFF80)
-	case addr == 0xFFFF:
-		return b.IO.Read(addr - 0xFF00)
 	default:
 		debug.Fatal("Non Supported Read Addr 0x%4d", addr)
 	}
@@ -98,6 +101,8 @@ func (b *Bus) WriteByte(addr types.Addr, value byte) {
 		b.oam.Write(addr-0xFE00, value)
 	case addr >= 0xFEA0 && addr <= 0xFEFF:
 		// Nintendo says use of this area is prohibited.
+	case addr == 0xFF0F || addr == 0xFFFF:
+		b.irq.Write(addr-0xFF00, value)
 	case addr >= 0xFF10 && addr <= 0xFF3F:
 		b.apu.Write(addr-0xFF00, value)
 	case addr >= 0xFF40 && addr <= 0xFF4B:

@@ -3,6 +3,7 @@ package io
 import (
 	"fmt"
 
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/interrupt"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
 
@@ -50,7 +51,7 @@ func (t *Timer) Tick(cycle uint) {
 
 			if t.TIMA == 0 {
 				t.TIMA = t.TMA
-				t.requestIRQ(TimerFlag)
+				t.requestIRQ(interrupt.TimerFlag)
 			}
 		}
 

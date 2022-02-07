@@ -9,6 +9,7 @@ import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cpu"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/gpu"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/interrupt"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/memory"
 )
@@ -35,13 +36,13 @@ func NewGB(romData []byte) *GB {
 	gpu := gpu.New()
 	apu := apu.NewAPU()
 	timer := io.NewTimer()
-	irq := io.NewIRQ()
-	io := io.NewIO(io.NewPad(), io.NewSerial(), timer, irq, 0x2000)
-	bus := bus.New(cart, vram, wram, wram2, hram, apu, gpu, io)
+	irq := interrupt.NewIRQ()
+	io := io.NewIO(io.NewPad(), io.NewSerial(), timer)
+	bus := bus.New(cart, vram, wram, wram2, hram, apu, gpu, irq, io)
 
 	cpu := cpu.New(bus, irq)
-	timer.SetRequestIRQ(cpu.IRQ.Request)
-	gpu.Init(bus, cpu.IRQ.Request)
+	timer.SetRequestIRQ(irq.Request)
+	gpu.Init(bus, irq.Request)
 
 	gb := &GB{
 		Cartridge:    cart,
