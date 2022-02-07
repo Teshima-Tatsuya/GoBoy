@@ -6,40 +6,46 @@ import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/gpu"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/interrupt"
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/memory"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/pad"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/serial"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/timer"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
 
 type Bus struct {
-	Cart  *cartridge.Cartridge
-	VRAM  *memory.RAM
-	WRAM  *memory.RAM
-	WRAM2 *memory.RAM
-	HRAM  *memory.RAM
-	ERAM  *memory.RAM
-	oam   *memory.RAM
-	apu   *apu.APU
-	gpu   *gpu.GPU
-	irq   *interrupt.IRQ
-	IO    *io.IO
+	Cart   *cartridge.Cartridge
+	VRAM   *memory.RAM
+	WRAM   *memory.RAM
+	WRAM2  *memory.RAM
+	HRAM   *memory.RAM
+	ERAM   *memory.RAM
+	oam    *memory.RAM
+	apu    *apu.APU
+	pad    *pad.Pad
+	timer  *timer.Timer
+	serial *serial.Serial
+	gpu    *gpu.GPU
+	irq    *interrupt.IRQ
 }
 
-func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *memory.RAM, hram *memory.RAM, a *apu.APU, g *gpu.GPU, irq *interrupt.IRQ, io *io.IO) *Bus {
+func New(cart *cartridge.Cartridge, vram *memory.RAM, wram *memory.RAM, wram2 *memory.RAM, hram *memory.RAM, a *apu.APU, g *gpu.GPU, irq *interrupt.IRQ, pad *pad.Pad, timer *timer.Timer, serial *serial.Serial) *Bus {
 	eram := memory.NewRAM(0x2000)
 	oam := memory.NewRAM(0x00A0)
 	return &Bus{
-		Cart:  cart,
-		VRAM:  vram,
-		WRAM:  wram,
-		WRAM2: wram2,
-		HRAM:  hram,
-		ERAM:  eram,
-		oam:   oam,
-		apu:   a,
-		gpu:   g,
-		irq:   irq,
-		IO:    io,
+		Cart:   cart,
+		VRAM:   vram,
+		WRAM:   wram,
+		WRAM2:  wram2,
+		HRAM:   hram,
+		ERAM:   eram,
+		oam:    oam,
+		apu:    a,
+		gpu:    g,
+		irq:    irq,
+		pad:    pad,
+		timer:  timer,
+		serial: serial,
 	}
 }
 
@@ -61,28 +67,31 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 		return b.oam.Read(addr - 0xFE00)
 	case addr >= 0xFEA0 && addr <= 0xFEFF:
 		return 0
+	case addr == 0xFF00:
+		return b.pad.Read(addr - 0xFF00)
+	case addr == 0xFF01 || addr == 0xFF02:
+		return b.serial.Read(addr - 0xFF00)
+	case addr >= 0xFF04 && addr <= 0xFF07:
+		return b.timer.Read(addr - 0xFF00)
 	case addr == 0xFF0F || addr == 0xFFFF:
 		return b.irq.Read(addr - 0xFF00)
 	case addr >= 0xFF10 && addr <= 0xFF3F:
 		return b.apu.Read(addr - 0xFF00)
 	case addr >= 0xFF40 && addr <= 0xFF4B:
 		return b.gpu.Read(addr - 0xFF00)
-	case addr >= 0xFF00 && addr <= 0xFF7F:
-		return b.IO.Read(addr - 0xFF00)
 	case addr >= 0xFF80 && addr <= 0xFFFE:
 		return b.HRAM.Read(addr - 0xFF80)
 	default:
 		debug.Fatal("Non Supported Read Addr 0x%4d", addr)
 	}
 
-	return 0
+	return 0xFF
 }
 
 func (b *Bus) ReadAddr(addr types.Addr) types.Addr {
 	return 0x0000
 }
 
-// TODO: IF, IE
 func (b *Bus) WriteByte(addr types.Addr, value byte) {
 	switch {
 	case addr >= 0x0000 && addr <= 0x7FFF:
@@ -101,18 +110,20 @@ func (b *Bus) WriteByte(addr types.Addr, value byte) {
 		b.oam.Write(addr-0xFE00, value)
 	case addr >= 0xFEA0 && addr <= 0xFEFF:
 		// Nintendo says use of this area is prohibited.
+	case addr == 0xFF00:
+		b.pad.Write(addr-0xFF00, value)
+	case addr == 0xFF01 || addr == 0xFF02:
+		b.serial.Write(addr-0xFF00, value)
+	case addr >= 0xFF04 && addr <= 0xFF07:
+		b.timer.Write(addr-0xFF00, value)
 	case addr == 0xFF0F || addr == 0xFFFF:
 		b.irq.Write(addr-0xFF00, value)
 	case addr >= 0xFF10 && addr <= 0xFF3F:
 		b.apu.Write(addr-0xFF00, value)
 	case addr >= 0xFF40 && addr <= 0xFF4B:
 		b.gpu.Write(addr-0xFF00, value)
-	case addr >= 0xFF00 && addr <= 0xFF7F:
-		b.IO.Write(addr-0xFF00, value)
 	case addr >= 0xFF80 && addr <= 0xFFFE:
 		b.HRAM.Write(addr-0xFF80, value)
-	case addr == 0xFFFF:
-		b.IO.Write(addr-0xFF00, value)
 	default:
 		debug.Fatal("Addr:0x%4x is not implemented", addr)
 	}

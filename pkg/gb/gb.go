@@ -10,8 +10,10 @@ import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cpu"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/gpu"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/interrupt"
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/memory"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/pad"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/serial"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/timer"
 )
 
 type GB struct {
@@ -21,7 +23,7 @@ type GB struct {
 	gpu *gpu.GPU
 	apu *apu.APU
 
-	timer *io.Timer
+	timer *timer.Timer
 
 	currentCycle uint
 }
@@ -35,10 +37,11 @@ func NewGB(romData []byte) *GB {
 	hram := memory.NewRAM(0x0080)
 	gpu := gpu.New()
 	apu := apu.NewAPU()
-	timer := io.NewTimer()
+	timer := timer.NewTimer()
+	pad := pad.NewPad()
+	serial := serial.NewSerial()
 	irq := interrupt.NewIRQ()
-	io := io.NewIO(io.NewPad(), io.NewSerial(), timer)
-	bus := bus.New(cart, vram, wram, wram2, hram, apu, gpu, irq, io)
+	bus := bus.New(cart, vram, wram, wram2, hram, apu, gpu, irq, pad, timer, serial)
 
 	cpu := cpu.New(bus, irq)
 	timer.SetRequestIRQ(irq.Request)

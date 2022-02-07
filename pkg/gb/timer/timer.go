@@ -1,10 +1,17 @@
-package io
+package timer
 
 import (
 	"fmt"
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/interrupt"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
+)
+
+const (
+	DIVAddr  = 0x04
+	TIMAAddr = 0x05
+	TMAAddr  = 0x06
+	TACAddr  = 0x07
 )
 
 type Timer struct {

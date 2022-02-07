@@ -1,8 +1,12 @@
-package io
+package pad
 
 import (
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/util"
+)
+
+const (
+	PadAddr types.Addr = 0x00
 )
 
 type Pad struct {

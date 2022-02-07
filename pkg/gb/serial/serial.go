@@ -1,9 +1,14 @@
-package io
+package serial
 
 import (
 	"fmt"
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
+)
+
+const (
+	SBAddr = 0x01
+	SCAddr = 0x02
 )
 
 type Serial struct {
