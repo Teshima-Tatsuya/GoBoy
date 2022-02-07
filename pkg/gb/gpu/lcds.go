@@ -30,13 +30,13 @@ func (l *LCDS) Mode2() bool {
 }
 
 // Bit 4
-// OAM STAT Interrupt source
+// VBlank STAT Interrupt source
 func (l *LCDS) Mode1() bool {
 	return util.Bit(l.Data, 4) == 1
 }
 
 // Bit 3
-// OAM STAT Interrupt source
+// HBlank STAT Interrupt source
 func (l *LCDS) Mode0() bool {
 	return util.Bit(l.Data, 3) == 1
 }

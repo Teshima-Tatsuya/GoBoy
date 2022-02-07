@@ -5,6 +5,7 @@ import (
 	"image/color"
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/debug"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/interrupt"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/interfaces"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 )
@@ -53,14 +54,17 @@ func (g *GPU) Step(cycles uint) {
 		g.loadTile()
 		if g.Scroll.isVBlankStart() {
 			// g.drawSplite()
-			g.requestIRQ(1) // 1 is io.VBlankFlag, prepend cycle import...
-			if g.LCDS.Mode2() {
-				g.requestIRQ(2)
+			g.requestIRQ(interrupt.VBlankFlag) // 1 is io.VBlankFlag, prepend cycle import...
+			if g.LCDS.Mode1() {
+				g.requestIRQ(interrupt.LCD_STATFlag)
 			}
 
 		} else if g.Scroll.isVBlankPeriod() {
 
 		} else if g.Scroll.isHBlankPeriod() {
+			if g.LCDS.Mode0() {
+				g.requestIRQ(interrupt.LCD_STATFlag)
+			}
 			// first build BG
 			// second build Window IF exists
 			g.drawBGLine()
@@ -77,7 +81,7 @@ func (g *GPU) Step(cycles uint) {
 		if g.Scroll.LY == g.Scroll.SCY {
 			g.LCDS.Data |= 0x04
 			if g.LCDS.LYC() {
-				g.requestIRQ(2)
+				g.requestIRQ(interrupt.LCD_STATFlag)
 			}
 		} else {
 			g.LCDS.Data &= 0xFB

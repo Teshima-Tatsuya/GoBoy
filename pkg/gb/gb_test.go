@@ -185,17 +185,10 @@ func TestGB_test_temp(t *testing.T) {
 		file  string
 		frame int
 	}{
-		{"mooneye-gb/acceptance/bits", "reg_f", 10},
+		{"mooneye-gb/acceptance/ppu", "intr_2_0_timing", 2000},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			defer func() {
-				err := recover()
-				if err != nil {
-					debug.Info("%s", err)
-				}
-			}()
-
 			test(tt.name, tt.file, tt.frame)
 		})
 	}
