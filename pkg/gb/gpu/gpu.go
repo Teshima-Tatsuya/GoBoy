@@ -47,7 +47,7 @@ func (g *GPU) Step(cycles uint) {
 	g.clock += cycles
 
 	if !g.LCDC.LCDPPUEnable() {
-		// return
+		return
 	}
 
 	if g.clock >= CyclePerLine {
@@ -70,7 +70,7 @@ func (g *GPU) Step(cycles uint) {
 			g.drawBGLine()
 
 			if g.LCDC.WindowEnable() {
-				// g.drawWinLine()
+				g.drawWinLine()
 			}
 
 		} else {
@@ -217,8 +217,8 @@ func (g *GPU) getBGTileColor(LX int) color.RGBA {
 
 func (g *GPU) getWinTileColor(LX int) color.RGBA {
 	// yPos is current pixel from top(0-255)
-	yPos := g.Scroll.LY + g.Scroll.WY
-	xPos := g.Scroll.WX - 7
+	yPos := g.Scroll.LY - g.Scroll.WY
+	xPos := LX - (int(g.Scroll.WX) - 7)
 	baseAddr := g.LCDC.WinTileMapArea()
 
 	return g.getTileColor(int(xPos), int(yPos), types.Addr(baseAddr))

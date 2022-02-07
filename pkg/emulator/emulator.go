@@ -1,6 +1,7 @@
 package emulator
 
 import (
+	"fmt"
 	"image"
 	"math"
 
@@ -33,6 +34,7 @@ func (e *Emulator) Layout(outsideWidth, outsideHeight int) (screenWidth, screenH
 
 func (e *Emulator) Update() error {
 	e.GB.Step()
+	ebiten.SetWindowTitle(fmt.Sprintf("%f", ebiten.CurrentTPS()))
 	return nil
 }
 
