@@ -44,7 +44,7 @@ func (t *Timer) Tick(cycle uint) {
 		t.divCounter += 4
 
 		// TODO double speed for GBC
-		if t.divCounter%16384 == 0 {
+		if t.divCounter%256 == 0 {
 			t.DIV++
 		}
 

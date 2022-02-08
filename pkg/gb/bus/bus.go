@@ -125,6 +125,6 @@ func (b *Bus) WriteByte(addr types.Addr, value byte) {
 	case addr >= 0xFF80 && addr <= 0xFFFE:
 		b.HRAM.Write(addr-0xFF80, value)
 	default:
-		debug.Fatal("Addr:0x%4x is not implemented", addr)
+		// debug.Fatal("Addr:0x%4x is not implemented", addr)
 	}
 }

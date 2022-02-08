@@ -46,14 +46,14 @@ type Register struct {
 
 func (r *Register) reset() {
 	r.R[A] = 0x01
-	r.R[B] = 0x00
+	r.R[B] = 0xFF
 	r.R[C] = 0x13
 	r.R[D] = 0x00
-	r.R[E] = 0xD8
-	r.R[H] = 0x01
-	r.R[L] = 0x4D
-	r.R[F] = 0xB0
-	r.PC = 0x0100 // Gameboy Start Addr
+	r.R[E] = 0xC1
+	r.R[H] = 0x84
+	r.R[L] = 0x03
+	r.R[F] = 0x00
+	r.PC = 0x0100
 	r.SP = 0xfffe
 }
 
