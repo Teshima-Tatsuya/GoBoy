@@ -69,10 +69,10 @@ func TestGB_test_blargg_timing(t *testing.T) {
 		file  string
 		frame int
 	}{
-		{"blargg/mem_timing", "mem_timing", 100},
-		{"blargg/mem_timing/individual", "01-read_timing", 100},
-		{"blargg/mem_timing/individual", "02-write_timing", 100},
-		{"blargg/mem_timing/individual", "03-modify_timing", 100},
+		{"blargg/mem_timing", "mem_timing", 2000},
+		{"blargg/mem_timing/individual", "01-read_timing", 2000},
+		{"blargg/mem_timing/individual", "02-write_timing", 2000},
+		{"blargg/mem_timing/individual", "03-modify_timing", 2000},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -237,7 +237,7 @@ func TestGB_test_temp(t *testing.T) {
 		file  string
 		frame int
 	}{
-		{"mooneye-gb/emulator-only/mbc1", "bits_bank1", 100},
+		{"mooneye-gb/acceptance", "boot_div-dmg0", 100},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
