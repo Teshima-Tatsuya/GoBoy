@@ -1,6 +1,7 @@
 package gb
 
 import (
+	"fmt"
 	"image/jpeg"
 	"io/ioutil"
 	"os"
@@ -21,6 +22,8 @@ func test(name, filename string, frame int) {
 		panic(err)
 	}
 	gb := setup(romData)
+
+	fmt.Printf("testing file is %s\n", filename)
 
 	for i := 0; i < frame; i++ {
 		gb.Step()

@@ -18,7 +18,7 @@ test:
 	$(BINDIR)/darwin-amd64/$(NAME) ./test/blargg/cpu_instrs/cpu_instrs.gb
 
 test_roms:
-	go test ./pkg/gb
+	go test -v ./pkg/gb
 
 test_register:
 	go test -run Register ./pkg/gb/cpu -cover -coverprofile=cover_register.out
