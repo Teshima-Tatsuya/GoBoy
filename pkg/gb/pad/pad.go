@@ -16,7 +16,7 @@ type Pad struct {
 
 func NewPad() *Pad {
 	return &Pad{
-		p1:    0x3F, // all buttuns are not pressed
+		p1:    0xCF, // all buttuns are not pressed
 		state: 0x00,
 	}
 }

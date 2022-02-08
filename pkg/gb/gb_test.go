@@ -237,7 +237,7 @@ func TestGB_test_temp(t *testing.T) {
 		file  string
 		frame int
 	}{
-		{"mooneye-gb/acceptance", "boot_regs-dmg0", 10},
+		{"mooneye-gb/acceptance", "boot_hwio-dmg0", 10},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

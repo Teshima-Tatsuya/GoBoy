@@ -28,7 +28,7 @@ func NewTimer() *Timer {
 	return &Timer{
 		counter:    0,
 		divCounter: 0,
-		DIV:        0x00,
+		DIV:        0x19,
 		TIMA:       0x00,
 		TMA:        0x00,
 		TAC:        0x00,

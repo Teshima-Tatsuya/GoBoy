@@ -1,7 +1,6 @@
 package bus
 
 import (
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/debug"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/apu"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/gpu"
@@ -82,7 +81,7 @@ func (b *Bus) ReadByte(addr types.Addr) byte {
 	case addr >= 0xFF80 && addr <= 0xFFFE:
 		return b.HRAM.Read(addr - 0xFF80)
 	default:
-		debug.Fatal("Non Supported Read Addr 0x%4d", addr)
+		// debug.Fatal("Non Supported Read Addr 0x%4d", addr)
 	}
 
 	return 0xFF
