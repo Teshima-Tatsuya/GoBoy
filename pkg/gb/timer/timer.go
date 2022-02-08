@@ -67,13 +67,13 @@ func (t *Timer) Tick(cycle uint) {
 
 func (t *Timer) getFreq() uint16 {
 	switch t.TAC & 0x03 {
-	case 0x00:
+	case 0:
 		return 1024
-	case 0x01:
+	case 1:
 		return 16
-	case 0x10:
+	case 2:
 		return 64
-	case 0x11:
+	case 3:
 		return 256
 	default:
 		panic("Illegal TAC")
