@@ -50,7 +50,6 @@ func (t *Timer) Tick(cycle uint) {
 			continue
 		}
 
-		t.counter += 4
 		if t.counter%t.getFreq() == 0 {
 			t.TIMA++
 
