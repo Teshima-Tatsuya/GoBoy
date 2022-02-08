@@ -50,7 +50,7 @@ func (t *Timer) Tick(cycle uint) {
 			continue
 		}
 
-		if t.counter%t.getFreq() == 0 {
+		if t.counter%(1<<(t.getFreq()+1)) == 0 {
 			t.TIMA++
 
 			if t.TIMA == 0 {
@@ -65,13 +65,13 @@ func (t *Timer) Tick(cycle uint) {
 func (t *Timer) getFreq() uint16 {
 	switch t.TAC & 0x03 {
 	case 0:
-		return 1024
+		return 9
 	case 1:
-		return 16
+		return 3
 	case 2:
-		return 64
+		return 5
 	case 3:
-		return 256
+		return 7
 	default:
 		panic("Illegal TAC")
 	}
@@ -96,6 +96,9 @@ func (t *Timer) Write(addr types.Addr, v byte) {
 	switch addr {
 	case DIVAddr:
 		t.DIV = 0
+		if t.counter>>t.getFreq()&0x01 == 1 {
+			t.TIMA++
+		}
 		t.counter = 0
 	case TIMAAddr:
 		t.TIMA = v
