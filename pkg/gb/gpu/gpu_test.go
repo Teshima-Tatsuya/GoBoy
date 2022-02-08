@@ -3,7 +3,7 @@ package gpu
 import (
 	"testing"
 
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/interrupt"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 	"github.com/Teshima-Tatsuya/GoBoy/test/mock"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +27,7 @@ func setupGPU1() *GPU {
 			}
 		}
 	}
-	g.Init(b, io.NewIRQ().Request)
+	g.Init(b, interrupt.NewIRQ().Request)
 
 	return g
 }
@@ -84,10 +84,19 @@ func TestGPU_loadTile(t *testing.T) {
 			g.loadTile()
 
 			for i := 0; i < 255; i++ {
-				if i%2 == 0 {
-					assert.Equal(t, colors1, g.tiles[i].Data)
+				if i <= 127 {
+					if i%2 == 0 {
+						assert.Equal(t, colors1, g.tiles[0][i].Data)
+					} else {
+						assert.Equal(t, colors2, g.tiles[0][i].Data)
+					}
 				} else {
-					assert.Equal(t, colors2, g.tiles[i].Data)
+					if i%2 == 0 {
+						assert.Equal(t, colors1, g.tiles[1][i].Data)
+					} else {
+						assert.Equal(t, colors2, g.tiles[1][i].Data)
+					}
+
 				}
 			}
 		})

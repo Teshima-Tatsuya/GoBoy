@@ -62,6 +62,25 @@ func TestGB_test_blargg(t *testing.T) {
 		})
 	}
 }
+
+func TestGB_test_blargg_timing(t *testing.T) {
+	tests := []struct {
+		name  string
+		file  string
+		frame int
+	}{
+		{"blargg/mem_timing", "mem_timing", 100},
+		{"blargg/mem_timing/individual", "01-read_timing", 100},
+		{"blargg/mem_timing/individual", "02-write_timing", 100},
+		{"blargg/mem_timing/individual", "03-modify_timing", 100},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			test(tt.name, tt.file, tt.frame)
+		})
+	}
+}
+
 func TestGB_test_hello(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -84,7 +103,7 @@ func TestGB_test_hello(t *testing.T) {
 	}
 }
 
-func TestGB_test_mooneye(t *testing.T) {
+func TestGB_test_mooneye_acceptance(t *testing.T) {
 	tests := []struct {
 		name  string
 		file  string
@@ -179,13 +198,46 @@ func TestGB_test_mooneye(t *testing.T) {
 	}
 }
 
+func TestGB_test_mooneye_emulatoronly(t *testing.T) {
+	tests := []struct {
+		name  string
+		file  string
+		frame int
+	}{
+		{"mooneye-gb/emulator-only/mbc1", "bits_bank1", 100},
+		{"mooneye-gb/emulator-only/mbc1", "bits_bank2", 20},
+		{"mooneye-gb/emulator-only/mbc1", "bits_mode", 20},
+		{"mooneye-gb/emulator-only/mbc1", "bits_ramg", 20},
+		{"mooneye-gb/emulator-only/mbc1", "multicart_rom_8Mb", 20},
+		{"mooneye-gb/emulator-only/mbc1", "ram_64kb", 20},
+		{"mooneye-gb/emulator-only/mbc1", "ram_256kb", 20},
+		{"mooneye-gb/emulator-only/mbc1", "ram_512kb", 20},
+		{"mooneye-gb/emulator-only/mbc1", "ram_1Mb", 20},
+		{"mooneye-gb/emulator-only/mbc1", "ram_2Mb", 20},
+		{"mooneye-gb/emulator-only/mbc1", "ram_4Mb", 20},
+		{"mooneye-gb/emulator-only/mbc1", "ram_8Mb", 20},
+		{"mooneye-gb/emulator-only/mbc1", "ram_16Mb", 20},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			defer func() {
+				err := recover()
+				if err != nil {
+					debug.Info("%s", err)
+				}
+			}()
+
+			test(tt.name, tt.file, tt.frame)
+		})
+	}
+}
 func TestGB_test_temp(t *testing.T) {
 	tests := []struct {
 		name  string
 		file  string
 		frame int
 	}{
-		{"mooneye-gb/acceptance/ppu", "intr_2_0_timing", 2000},
+		{"mooneye-gb/emulator-only/mbc1", "bits_bank1", 100},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -34,6 +34,7 @@ func NewMBC1(romData []byte, ramSize int) *MBC1 {
 		mode:    SimpleROMBankingMode,
 	}
 
+	debug.Info("Cartridge ROM Size = %d", len(m.ROM.Buf))
 	debug.Info("Cartridge RAM Size = %d", ramSize)
 	if ramSize > 0 {
 		m.RAM = memory.NewRAM(ramSize)
@@ -51,11 +52,14 @@ func (m *MBC1) Read(addr types.Addr) byte {
 	case addr < 0x4000:
 		return m.ROM.Read(uint32(addr))
 	case 0x4000 <= addr && addr < 0x8000:
-		return m.ROM.Read(uint32(m.romBank-1)*0x4000 + uint32(addr))
+		return m.ROM.Read(uint32(m.romBank)*0x4000 + uint32(addr) - 0x4000)
 	case 0xA000 <= addr && addr < 0xC000:
-		addr = types.Addr(uint16(addr) + uint16(m.ramBank)*0x2000 - 0xA000)
-		debug.Info("0x%04X", addr)
-		return m.RAM.Read(addr)
+		if m.ramEnable {
+			addr = types.Addr(uint16(addr) + uint16(m.ramBank)*0x2000 - 0xA000)
+			return m.RAM.Read(addr)
+		} else {
+			return 0x00
+		}
 	default:
 		msg := fmt.Sprintf("Non Supported addr 0x%4X for Read MBC1", addr)
 		panic(msg)
@@ -79,14 +83,13 @@ func (m *MBC1) Write(addr types.Addr, value byte) {
 			m.SwitchHiROMBank(value)
 		} else if m.mode == RAMBankingModeAdvancedROMBankingMode {
 			// lower 2bit
-			debug.Info("Switch RAM Bank %d", value&0x03)
 			m.SwitchRAMBank(value & 0x03)
 		}
 	case 0x6000 <= addr && addr < 0x8000:
 		m.mode = value
 	case 0xA000 <= addr && addr < 0xC000:
 		if m.ramEnable {
-			addr = types.Addr(uint16(addr) + uint16(m.ramBank)*0x2000 - 0xA000)
+			addr = addr + types.Addr(m.ramBank)*0x2000 - 0xA000
 			m.RAM.Write(addr, value)
 		}
 	}

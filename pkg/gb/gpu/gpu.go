@@ -53,7 +53,7 @@ func (g *GPU) Step(cycles uint) {
 	if g.clock >= CyclePerLine {
 		g.loadTile()
 		if g.Scroll.isVBlankStart() {
-			// g.drawSplite()
+			g.drawSplite()
 			g.requestIRQ(interrupt.VBlankFlag) // 1 is io.VBlankFlag, prepend cycle import...
 			if g.LCDS.Mode1() {
 				g.requestIRQ(interrupt.LCD_STATFlag)
@@ -158,18 +158,18 @@ func (g *GPU) drawSplite() {
 		bytes4 := [4]byte{}
 		for j := 0; j < 4; j++ {
 			addr := OAMSTARTAddr + types.Addr(i*4) + types.Addr(j)
-			// debug.Info("0x%04x", addr)
 			bytes4[j] = g.bus.ReadByte(addr)
 		}
 
 		s := NewSprite(bytes4[:])
 
 		var objHeight int
-		if g.LCDC.OBJSize() == 1 {
-			objHeight = 16
-		} else {
-			objHeight = 8
-		}
+		objHeight = 8
+		// if g.LCDC.OBJSize() == 1 {
+		// 	objHeight = 16
+		// } else {
+		// 	objHeight = 8
+		// }
 
 		for x := 0; x < 8; x++ {
 			for y := 0; y < objHeight; y++ {
@@ -182,7 +182,17 @@ func (g *GPU) drawSplite() {
 					continue
 				}
 
-				tile := g.tiles[s.tileIdx]
+				var block int
+				var tileIdx int
+				if s.tileIdx >= 128 {
+					block = 1
+					tileIdx = int(s.tileIdx) - 128
+				} else {
+					block = 0
+					tileIdx = int(s.tileIdx)
+				}
+
+				tile := g.tiles[block][tileIdx]
 
 				if s.YFlip() {
 					y = 7 - y
@@ -193,8 +203,7 @@ func (g *GPU) drawSplite() {
 				}
 				xPos = int(s.x) + x
 
-				// Sptite fixes block 0
-				c := tile[0].Data[x][y]
+				c := tile.Data[x][y]
 
 				if c != 0 {
 					p := g.palette.GetObjPalette(c, uint(s.MBGPalleteNo()))
