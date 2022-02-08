@@ -50,13 +50,13 @@ func (t *Timer) Tick(cycle uint) {
 			continue
 		}
 
+		if t.TIMA == 0 {
+			t.TIMA = t.TMA
+			t.requestIRQ(interrupt.TimerFlag)
+		}
 		if t.counter%(1<<(t.getFreq()+1)) == 0 {
 			t.TIMA++
 
-			if t.TIMA == 0 {
-				t.TIMA = t.TMA
-				t.requestIRQ(interrupt.TimerFlag)
-			}
 		}
 
 	}

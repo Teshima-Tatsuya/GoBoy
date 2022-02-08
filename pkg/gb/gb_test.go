@@ -250,7 +250,7 @@ func TestGB_test_temp(t *testing.T) {
 		file  string
 		frame int
 	}{
-		{"mooneye-gb/acceptance/timer", "tim00", 20},
+		{"mooneye-gb/acceptance/timer", "tima_reload", 20},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
