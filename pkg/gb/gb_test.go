@@ -191,19 +191,19 @@ func TestGB_test_mooneye_acceptance_timer(t *testing.T) {
 		file  string
 		frame int
 	}{
-		{"mooneye-gb/acceptance/timer", "div_write", 100},
+		{"mooneye-gb/acceptance/timer", "div_write", 50},
 		{"mooneye-gb/acceptance/timer", "rapid_toggle", 100},
-		{"mooneye-gb/acceptance/timer", "tim00_div_trigger", 100},
-		{"mooneye-gb/acceptance/timer", "tim00", 100},
-		{"mooneye-gb/acceptance/timer", "tim01_div_trigger", 100},
-		{"mooneye-gb/acceptance/timer", "tim01", 100},
-		{"mooneye-gb/acceptance/timer", "tim10_div_trigger", 100},
-		{"mooneye-gb/acceptance/timer", "tim10", 100},
-		{"mooneye-gb/acceptance/timer", "tim11_div_trigger", 100},
-		{"mooneye-gb/acceptance/timer", "tim11", 100},
-		{"mooneye-gb/acceptance/timer", "tima_reload", 100},
-		{"mooneye-gb/acceptance/timer", "tima_write_reloading", 100},
-		{"mooneye-gb/acceptance/timer", "tma_write_reloading", 100},
+		{"mooneye-gb/acceptance/timer", "tim00_div_trigger", 10},
+		{"mooneye-gb/acceptance/timer", "tim00", 10},
+		{"mooneye-gb/acceptance/timer", "tim01_div_trigger", 10},
+		{"mooneye-gb/acceptance/timer", "tim01", 10},
+		{"mooneye-gb/acceptance/timer", "tim10_div_trigger", 10},
+		{"mooneye-gb/acceptance/timer", "tim10", 10},
+		{"mooneye-gb/acceptance/timer", "tim11_div_trigger", 10},
+		{"mooneye-gb/acceptance/timer", "tim11", 10},
+		{"mooneye-gb/acceptance/timer", "tima_reload", 10},
+		{"mooneye-gb/acceptance/timer", "tima_write_reloading", 10},
+		{"mooneye-gb/acceptance/timer", "tma_write_reloading", 10},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
