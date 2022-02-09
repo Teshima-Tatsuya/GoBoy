@@ -120,16 +120,6 @@ func TestGB_test_mooneye_acceptance(t *testing.T) {
 		{"mooneye-gb/acceptance/oam_dma", "basic", 100},
 		{"mooneye-gb/acceptance/oam_dma", "reg_read", 100},
 		{"mooneye-gb/acceptance/oam_dma", "sources-GS", 100},
-		{"mooneye-gb/acceptance/ppu", "hblank_ly_scx_timing-GS", 100},
-		{"mooneye-gb/acceptance/ppu", "intr_1_2_timing-GS", 100},
-		{"mooneye-gb/acceptance/ppu", "intr_2_0_timing", 100},
-		{"mooneye-gb/acceptance/ppu", "intr_2_mode0_timing_sprites", 100},
-		{"mooneye-gb/acceptance/ppu", "intr_2_mode0_timing", 100},
-		{"mooneye-gb/acceptance/ppu", "intr_2_mode3_timing", 100},
-		{"mooneye-gb/acceptance/ppu", "intr_2_oam_ok_timing", 100},
-		{"mooneye-gb/acceptance/ppu", "stat_irq_blocking", 100},
-		{"mooneye-gb/acceptance/ppu", "stat_lyc_onoff", 100},
-		{"mooneye-gb/acceptance/ppu", "vblank_stat_intr-GS", 100},
 		{"mooneye-gb/acceptance/serial", "boot_sclk_align-dmgABCmgb", 100},
 		{"mooneye-gb/acceptance", "add_sp_e_timing", 100},
 		{"mooneye-gb/acceptance", "boot_div-dmg0", 100},
@@ -188,6 +178,36 @@ func TestGB_test_mooneye_acceptance(t *testing.T) {
 	}
 }
 
+func TestGB_test_mooneye_acceptance_ppu(t *testing.T) {
+	tests := []struct {
+		name  string
+		file  string
+		frame int
+	}{
+		{"mooneye-gb/acceptance/ppu", "hblank_ly_scx_timing-GS", 100},
+		{"mooneye-gb/acceptance/ppu", "intr_1_2_timing-GS", 100},
+		{"mooneye-gb/acceptance/ppu", "intr_2_0_timing", 100},
+		{"mooneye-gb/acceptance/ppu", "intr_2_mode0_timing_sprites", 100},
+		{"mooneye-gb/acceptance/ppu", "intr_2_mode0_timing", 100},
+		{"mooneye-gb/acceptance/ppu", "intr_2_mode3_timing", 100},
+		{"mooneye-gb/acceptance/ppu", "intr_2_oam_ok_timing", 100},
+		{"mooneye-gb/acceptance/ppu", "stat_irq_blocking", 100},
+		{"mooneye-gb/acceptance/ppu", "stat_lyc_onoff", 100},
+		{"mooneye-gb/acceptance/ppu", "vblank_stat_intr-GS", 100},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			defer func() {
+				err := recover()
+				if err != nil {
+					debug.Info("%s", err)
+				}
+			}()
+
+			test(tt.name, tt.file, tt.frame)
+		})
+	}
+}
 func TestGB_test_mooneye_acceptance_timer(t *testing.T) {
 	tests := []struct {
 		name  string

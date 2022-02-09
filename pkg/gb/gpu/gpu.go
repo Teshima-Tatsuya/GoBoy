@@ -27,7 +27,7 @@ type GPU struct {
 func New() *GPU {
 	gpu := &GPU{
 		clock:   0,
-		LCDC:    NewLCDC(0x00),
+		LCDC:    NewLCDC(0x91),
 		LCDS:    NewLCDS(0x00),
 		Scroll:  NewScroll(),
 		palette: NewPalette(),
