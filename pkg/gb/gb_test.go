@@ -240,19 +240,19 @@ func TestGB_test_mooneye_emulatoronly(t *testing.T) {
 		file  string
 		frame int
 	}{
-		{"mooneye-gb/emulator-only/mbc1", "bits_bank1", 100},
-		{"mooneye-gb/emulator-only/mbc1", "bits_bank2", 20},
-		{"mooneye-gb/emulator-only/mbc1", "bits_mode", 20},
-		{"mooneye-gb/emulator-only/mbc1", "bits_ramg", 20},
-		{"mooneye-gb/emulator-only/mbc1", "multicart_rom_8Mb", 20},
-		{"mooneye-gb/emulator-only/mbc1", "ram_64kb", 20},
-		{"mooneye-gb/emulator-only/mbc1", "ram_256kb", 20},
-		{"mooneye-gb/emulator-only/mbc1", "ram_512kb", 20},
-		{"mooneye-gb/emulator-only/mbc1", "ram_1Mb", 20},
-		{"mooneye-gb/emulator-only/mbc1", "ram_2Mb", 20},
-		{"mooneye-gb/emulator-only/mbc1", "ram_4Mb", 20},
-		{"mooneye-gb/emulator-only/mbc1", "ram_8Mb", 20},
-		{"mooneye-gb/emulator-only/mbc1", "ram_16Mb", 20},
+		{"mooneye-gb/emulator-only/mbc1", "bits_bank1", 200},
+		{"mooneye-gb/emulator-only/mbc1", "bits_bank2", 300},
+		{"mooneye-gb/emulator-only/mbc1", "bits_mode", 200},
+		{"mooneye-gb/emulator-only/mbc1", "bits_ramg", 200},
+		{"mooneye-gb/emulator-only/mbc1", "multicart_rom_8Mb", 200},
+		{"mooneye-gb/emulator-only/mbc1", "ram_64kb", 200},
+		{"mooneye-gb/emulator-only/mbc1", "ram_256kb", 200},
+		{"mooneye-gb/emulator-only/mbc1", "rom_512kb", 200},
+		{"mooneye-gb/emulator-only/mbc1", "rom_1Mb", 200},
+		{"mooneye-gb/emulator-only/mbc1", "rom_2Mb", 200},
+		{"mooneye-gb/emulator-only/mbc1", "rom_4Mb", 200},
+		{"mooneye-gb/emulator-only/mbc1", "rom_8Mb", 200},
+		{"mooneye-gb/emulator-only/mbc1", "rom_16Mb", 200},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -273,7 +273,7 @@ func TestGB_test_temp(t *testing.T) {
 		file  string
 		frame int
 	}{
-		{"mooneye-gb/acceptance/timer", "tima_reload", 20},
+		{"mooneye-gb/acceptance/ppu", "intr_1_2_timing-GS", 20},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
