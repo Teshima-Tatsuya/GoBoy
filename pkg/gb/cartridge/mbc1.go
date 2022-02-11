@@ -58,7 +58,7 @@ func (m *MBC1) Read(addr types.Addr) byte {
 			addr = types.Addr(uint16(addr) + uint16(m.ramBank)*0x2000 - 0xA000)
 			return m.RAM.Read(addr)
 		} else {
-			return 0x00
+			return 0xFF
 		}
 	default:
 		msg := fmt.Sprintf("Non Supported addr 0x%4X for Read MBC1", addr)

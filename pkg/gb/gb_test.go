@@ -21,9 +21,8 @@ func test(name, filename string, frame int) {
 	if err != nil {
 		panic(err)
 	}
-	gb := setup(romData)
-
 	fmt.Printf("testing file is %s\n", filename)
+	gb := setup(romData)
 
 	for i := 0; i < frame; i++ {
 		gb.Step()
@@ -40,6 +39,7 @@ func test(name, filename string, frame int) {
 	if err := jpeg.Encode(file, screen, &jpeg.Options{100}); err != nil {
 		panic(err)
 	}
+	fmt.Println()
 }
 
 func TestGB_test_blargg(t *testing.T) {
@@ -243,7 +243,7 @@ func TestGB_test_mooneye_emulatoronly(t *testing.T) {
 		{"mooneye-gb/emulator-only/mbc1", "bits_bank1", 200},
 		{"mooneye-gb/emulator-only/mbc1", "bits_bank2", 300},
 		{"mooneye-gb/emulator-only/mbc1", "bits_mode", 200},
-		{"mooneye-gb/emulator-only/mbc1", "bits_ramg", 200},
+		{"mooneye-gb/emulator-only/mbc1", "bits_ramg", 300},
 		{"mooneye-gb/emulator-only/mbc1", "multicart_rom_8Mb", 200},
 		{"mooneye-gb/emulator-only/mbc1", "ram_64kb", 200},
 		{"mooneye-gb/emulator-only/mbc1", "ram_256kb", 200},
@@ -273,7 +273,7 @@ func TestGB_test_temp(t *testing.T) {
 		file  string
 		frame int
 	}{
-		{"mooneye-gb/acceptance/ppu", "intr_1_2_timing-GS", 20},
+		{"mooneye-gb/emulator-only/mbc1", "bits_ramg", 500},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
