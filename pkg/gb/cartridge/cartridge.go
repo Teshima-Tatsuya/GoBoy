@@ -38,6 +38,7 @@ const (
 // @see https://gbdev.io/pandocs/The_Cartridge_Header.html#0149---ram-size
 const (
 	NO_RAM    int = 0 // also UNUSED
+	RAM_2KB   int = 2 * 1024
 	RAM_8KB   int = 8 * 1024
 	RAM_32KB  int = 32 * 1024
 	RAM_128KB int = 128 * 1024
@@ -86,9 +87,12 @@ func New(romData []byte) *Cartridge {
 }
 
 func getRamSize(s byte) int {
+	debug.Info("RAM size type %d", s)
 	switch s {
-	case 0x00, 0x01:
+	case 0x00:
 		return NO_RAM
+	case 0x01:
+		return RAM_2KB
 	case 0x02:
 		return RAM_8KB
 	case 0x03:

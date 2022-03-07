@@ -4,6 +4,7 @@ import (
 	"image"
 	"time"
 
+	"github.com/Teshima-Tatsuya/GoBoy/pkg/emulator/joypad"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/apu"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/bus"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
@@ -22,6 +23,7 @@ type GB struct {
 	cpu *cpu.CPU
 	gpu *gpu.GPU
 	apu *apu.APU
+	pad *pad.Pad
 
 	timer *timer.Timer
 
@@ -52,6 +54,7 @@ func NewGB(romData []byte) *GB {
 		cpu:          cpu,
 		gpu:          gpu,
 		apu:          apu,
+		pad:          pad,
 		timer:        timer,
 		currentCycle: 0,
 	}
@@ -77,6 +80,11 @@ func (gb *GB) Step() {
 		gb.timer.Tick(cycle)
 
 		if gb.currentCycle >= 70224 {
+			var button pad.Button
+			button = joypad.Press()
+			gb.pad.Press(button)
+			button = joypad.Release()
+			gb.pad.Release(button)
 			gb.currentCycle -= 70224
 			return
 		}

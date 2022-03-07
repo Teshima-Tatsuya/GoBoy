@@ -49,7 +49,6 @@ func TestGB_test_blargg(t *testing.T) {
 		frame int
 	}{
 		{"blargg/cpu_instrs", "cpu_instrs", 3200},
-		{"blargg/instr_timing", "instr_timing", 100},
 		{"blargg/interrupt_time", "interrupt_time", 100},
 	}
 	for _, tt := range tests {
@@ -60,6 +59,22 @@ func TestGB_test_blargg(t *testing.T) {
 					debug.Info("%s", err)
 				}
 			}()
+
+			test(tt.name, tt.file, tt.frame)
+		})
+	}
+}
+
+func TestGB_test_blargg_instr_timing(t *testing.T) {
+	tests := []struct {
+		name  string
+		file  string
+		frame int
+	}{
+		{"blargg/instr_timing", "instr_timing", 100},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 
 			test(tt.name, tt.file, tt.frame)
 		})
@@ -273,7 +288,7 @@ func TestGB_test_temp(t *testing.T) {
 		file  string
 		frame int
 	}{
-		{"mooneye-gb/emulator-only/mbc1", "bits_ramg", 500},
+		{"blargg/mem_timing/individual", "01-read_timing", 4000},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

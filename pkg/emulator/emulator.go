@@ -29,7 +29,7 @@ func New(romData []byte) *Emulator {
 }
 
 func (e *Emulator) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 160 + (16 * 8), 192
+	return 160, 144
 }
 
 func (e *Emulator) Update() error {
@@ -39,9 +39,9 @@ func (e *Emulator) Update() error {
 }
 
 func (e *Emulator) Draw(screen *ebiten.Image) {
-	image, tiles := e.GB.Display()
+	image, _ := e.GB.Display()
 
-	screen.ReplacePixels(conbine(image, tiles))
+	screen.ReplacePixels(image.Pix)
 }
 
 func conbine(d1, d2 *image.RGBA) []byte {

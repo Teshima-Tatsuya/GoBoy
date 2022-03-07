@@ -5,7 +5,6 @@ import (
 
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/cartridge"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/gpu"
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/memory"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 	"github.com/stretchr/testify/assert"

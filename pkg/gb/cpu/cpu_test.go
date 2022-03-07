@@ -3,7 +3,6 @@ package cpu
 import (
 	"testing"
 
-	"github.com/Teshima-Tatsuya/GoBoy/pkg/gb/io"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/types"
 	"github.com/Teshima-Tatsuya/GoBoy/pkg/util"
 	"github.com/Teshima-Tatsuya/GoBoy/test/mock"
